@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include "../Utils/Token.h"
 
+#define MAX_LEXEME_LEN 256
+
 // update Lexical_FSM.c LexicalOutput_IsFinal function upon changes
 typedef enum {START, LOAD_ID, LOAD_INT_INT_PART, POINT, EXPONENT, SIGN, EXP_PART, LOAD_STRING, STRING_FINALIZE, ESC_SEQ, LIMIT_2, LIMIT_5, NORMAL_1, NORMAL_2,
     PLUS_FINALIZE, MUL_FINALIZE, DIV_STATE_INT_DIV_STATE, INT_DIV_FINALIZE, DEF_FINALIZE, COMMA_FINALIZE, LEN_FINALIZE, LEFT_FINALIZE, RIGHT_FINALIZE,
@@ -20,7 +22,7 @@ typedef enum {START, LOAD_ID, LOAD_INT_INT_PART, POINT, EXPONENT, SIGN, EXP_PART
 
 typedef struct {
     LexicalType state;
-    char lexem[256];
+    char lexeme[MAX_LEXEME_LEN];
     unsigned short pos;
 } LexicalOutput;
 

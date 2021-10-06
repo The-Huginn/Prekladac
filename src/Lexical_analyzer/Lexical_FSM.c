@@ -36,7 +36,9 @@ int LexicalOutput_IsFinal(LexicalOutput *output)
  */
 void LexicalOutput_AddChar(LexicalOutput *output, int data)
 {
-    output->lexem[++(output->pos)] = (char) data;
+    if (output->pos == MAX_LEXEME_LEN - 1)
+        return;
+    output->lexeme[++(output->pos)] = (char) data;
 }
 
 /**
@@ -45,7 +47,7 @@ void LexicalOutput_AddChar(LexicalOutput *output, int data)
  */
 char LexicalOutput_GetLast(LexicalOutput *output)
 {
-    return output->lexem[output->pos];
+    return output->lexeme[output->pos];
 }
 
 /**
@@ -53,7 +55,7 @@ char LexicalOutput_GetLast(LexicalOutput *output)
  */
 void LexicalOutput_NullLast(LexicalOutput *output)
 {
-    output->lexem[output->pos] = '\0';
+    output->lexeme[output->pos] = '\0';
 }
 
 LexicalOutput *getLexeme(FILE *file)
