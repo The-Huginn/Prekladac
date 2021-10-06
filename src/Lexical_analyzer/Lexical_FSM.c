@@ -335,3 +335,18 @@ LexicalOutput *getLexeme(FILE *file)
 
     return output;
 }
+
+char* getString(LexicalOutput* lexeme)
+{
+    return lexeme->lexeme;
+}
+
+void freeLexeme(LexicalOutput *lexeme)
+{
+    free(lexeme);
+}
+
+LexicalType getFinalState(LexicalOutput* lexeme)
+{
+    return lexeme->state;
+}

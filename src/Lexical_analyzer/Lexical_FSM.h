@@ -1,7 +1,7 @@
 /**
  * @file Lexical_FSM.h
  * @brief This file contains struct LexicalOutput and enum for every state of the FSM
- * contains one function for finding one valid lexeme
+ * contains one function for finding one valid lexeme and one for getting Lexeme length
  * @author Rastislav Budinsky
  */
 #ifndef LEXICAL_FSM_H
@@ -23,14 +23,34 @@ typedef enum {START, LOAD_ID, LOAD_INT_INT_PART, POINT, EXPONENT, SIGN, EXP_PART
 typedef struct {
     LexicalType state;
     char lexeme[MAX_LEXEME_LEN];
-    u_int16_t pos;
+    short pos;
 } LexicalOutput;
 
 /**
- * @brief finds first valid lexeme according to the defined FSM
- * @param file input file descriptor
+ * @brief finds first valid lexeme according to the defined FSM, later user should free after use
+ * @param input input stream file descriptor
  * @return pointer to newly created struct containing info about FSM output
  */
-LexicalOutput *getLexeme(FILE *file);
+LexicalOutput *getLexeme(FILE *input);
+
+/**
+ * @brief returns lexeme string, should end with '\0'
+ * @param lexeme pointer to the lexeme we want to get
+ * @return pointer to the beginning of string
+ */
+char* getString(LexicalOutput *lexeme);
+
+/**
+ * @brief should be called to destroy lexem struct
+ * @param lexeme pointer to the lexeme we want to destroy
+ */
+void freeLexeme(LexicalOutput *lexeme);
+
+/**
+ * @brief get final state of FSM
+ * @param lexeme pointer to the lexeme we want to know final state of
+ * @return enum value of final state
+ */
+LexicalType getFinalState(LexicalOutput *lexeme);
 
 #endif // !LEXICAL_FSM_H
