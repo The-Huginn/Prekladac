@@ -23,7 +23,7 @@ typedef enum {START, LOAD_ID, LOAD_INT_INT_PART, POINT, EXPONENT, SIGN, EXP_PART
 typedef struct {
     LexicalType state;
     char lexeme[MAX_LEXEME_LEN];
-    unsigned short pos;
+    u_int16_t pos;
 } LexicalOutput;
 
 /**
