@@ -1,5 +1,5 @@
 /**
- * @file Lexical_FSM.h
+ * @file LexicalFSM.h
  * @brief This file contains struct LexicalOutput and enum for every state of the FSM
  * contains one function for finding one valid lexeme and one for getting Lexeme length
  * @author Rastislav Budinsky

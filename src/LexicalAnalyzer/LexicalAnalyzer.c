@@ -1,12 +1,12 @@
 /**
- * @file Lexical_analyzer.c
+ * @file LexicalAnalyzer.c
  * @brief This file implements interface for communication with lexical analyzer
  * @author Rastislav Budinsky
  */
 #include <string.h>
 #include <stdlib.h>
-#include "Lexical_analyzer.h"
-#include "Lexical_FSM.h"
+#include "LexicalAnalyzer.h"
+#include "LexicalFSM.h"
 
 #define KEYWORDS_SUM 15
 char *keywords[] = {"do", "else", "end", "function", "global", "if", "integer", "local", "nil", "number", "require", "return", "string", "then", "while"};

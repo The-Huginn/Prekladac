@@ -1,13 +1,13 @@
 /**
- * @file Lexical_FSM.c
- * @brief Implements Lexical_FSM.h for finding one valid lexeme, contains functions
+ * @file LexicalFSM.c
+ * @brief Implements LexicalFSM.h for finding one valid lexeme, contains functions
  * for initialization of the struct from Lexical_FSM.h, adding char to this struct
  * and getting last char and others
  * @author Rastislav Budinsky
  */
 
 #include <stdlib.h>
-#include "Lexical_FSM.h"
+#include "LexicalFSM.h"
 
 /**
  * @brief Initializes LexicalOutput
@@ -84,25 +84,25 @@ LexicalOutput *getLexeme(FILE *file)
                 output->state = DIV_STATE_INT_DIV_STATE;
             else if (c == ':')
                 output->state = DEF_FINALIZE;
-            else if (',')
+            else if (c == ',')
                 output->state = COMMA_FINALIZE;
-            else if ('#')
+            else if (c == '#')
                 output->state = LEN_FINALIZE;
-            else if ('(')
+            else if (c == '(')
                 output->state = LEFT_FINALIZE;
-            else if (')')
+            else if (c == ')')
                 output->state = RIGHT_FINALIZE;
-            else if ('<')
+            else if (c == '<')
                 output->state = LESS_STATE_LEQ_STATE;
-            else if ('>')
+            else if (c == '>')
                 output->state = GRT_STATE_GEQ_STATE;
-            else if ('.')
+            else if (c == '.')
                 output->state = CONCAT_STATE;
-            else if ('=')
+            else if (c == '=')
                 output->state = ASS_STATE_EQ_STATE;
-            else if ('~')
+            else if (c == '~')
                 output->state = NEQ_STATE;
-            else if ('-')
+            else if (c == '-')
                 output->state = MINUS_EN_DASH;
             else if (c == ' ' || c == '\t' || '\n')
                 output->state = START;
@@ -284,7 +284,7 @@ LexicalOutput *getLexeme(FILE *file)
                 output->state = F_MINUS;
             break;
         case EM_DASH:
-            if ('[')
+            if (c == '[')
                 output->state = EXP_BLOCK;
             else if (c == '\n')
                 output->state = START;
@@ -300,7 +300,7 @@ LexicalOutput *getLexeme(FILE *file)
         case EXP_BLOCK:
             if (c == '[')
                 output->state = BLOCK_COM;
-            else if ('\n')
+            else if (c == '\n')
                 output->state = START;
             else
                 output->state = LINE_COM;

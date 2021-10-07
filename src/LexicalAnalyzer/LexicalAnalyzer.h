@@ -1,5 +1,5 @@
 /**
- * @file Lexical_analyzer.h
+ * @file LexicalAnalyzer.h
  * @brief This file implements interface for communication with the Lexical analyzer
  * @author Rastislav Budinsky
  */
