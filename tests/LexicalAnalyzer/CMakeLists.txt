@@ -25,7 +25,7 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 # Locate GTest
 if(CMAKE_COMPILER_IS_GNUCXX)
     find_package(GTest REQUIRED)
-    target_include_directories(${PROJECT_NAME} ${GTEST_INCLUDE_DIRS})
+    target_include_directories(${PROJECT_NAME} PUBLIC ${GTEST_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME} ${GTEST_LIBRARIES} libLexicalAnalyzer.a pthread)
 endif()
 
