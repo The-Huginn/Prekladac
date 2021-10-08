@@ -31,6 +31,9 @@ Token *getToken(FILE *input)
 {
     Token *token = (Token*) malloc(sizeof(Token));
 
+    if (token == NULL)  // TO DO error msg
+        return NULL;
+
     LexicalOutput *lexeme = getLexeme(input);
 
     if (getFinalState(lexeme) == ERROR_STATE)

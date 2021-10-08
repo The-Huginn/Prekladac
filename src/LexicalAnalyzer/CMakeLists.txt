@@ -17,9 +17,11 @@ set(LEXICAL_ANALYZER_FILES
 
 add_library(${PROJECT_NAME} STATIC ${LEXICAL_ANALYZER_FILES})
 
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
+
 if (MSVC)
     set_target_properties( ${PROJECT_NAME} PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 

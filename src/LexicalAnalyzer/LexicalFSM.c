@@ -58,6 +58,16 @@ void LexicalOutput_NullLast(LexicalOutput *output)
     output->lexeme[output->pos] = '\0';
 }
 
+/**
+ * @brief clears lexeme buffer
+ * @param output lexeme
+*/
+void LexicalOutput_ClearLexeme(LexicalOutput* output)
+{
+    output->pos = -1;
+    output->lexeme[0] = '\0';
+}
+
 LexicalOutput *getLexeme(FILE *file)
 {
     LexicalOutput *output = (LexicalOutput*) malloc(sizeof(LexicalOutput));
@@ -70,6 +80,8 @@ LexicalOutput *getLexeme(FILE *file)
         switch (output->state)
         {
         case START:
+            LexicalOutput_ClearLexeme(output);
+
             if (c == '_' || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))
                 output->state = LOAD_ID;
             else if (c >= '0' && c <= '9')
@@ -104,7 +116,7 @@ LexicalOutput *getLexeme(FILE *file)
                 output->state = NEQ_STATE;
             else if (c == '-')
                 output->state = MINUS_EN_DASH;
-            else if (c == ' ' || c == '\t' || '\n')
+            else if (c == ' ' || c == '\t' || c == '\n')
                 output->state = START;
             else
                 output->state = ERROR_STATE;
@@ -325,7 +337,7 @@ LexicalOutput *getLexeme(FILE *file)
         LexicalOutput_AddChar(output, c);
     }
 
-    // return last read char to the beginning of the file
+    // return last read char to the beginning of the stream
     if (ungetc(LexicalOutput_GetLast(output), file) == EOF)
     {
         // TO DO

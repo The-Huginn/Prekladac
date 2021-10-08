@@ -10,8 +10,17 @@ set(LEXICAL_ANALYZER_FILES
     LexicalAnalyzerTests.cpp
     )
 
+set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/build/bin/tests")
+
 
 add_executable(${PROJECT_NAME} ${LEXICAL_ANALYZER_FILES})
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/LexicalAnalyzer)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/Utils)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/build/bin/LexicalAnalyzer/${CMAKE_BUILD_TYPE})
+
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 
 # Locate GTest
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -22,15 +31,12 @@ endif()
 
 if (MSVC)
     target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/googletest-master/googletest/include)
-    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/LexicalAnalyzer)
-    target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/Utils)
     target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/googletest-master/lib/${CMAKE_BUILD_TYPE})
-    target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/build/bin/LexicalAnalyzer/${CMAKE_BUILD_TYPE})
     target_link_libraries(${PROJECT_NAME} gtest.lib gtest_main.lib LexicalAnalyzer.lib)
 
     add_dependencies(${PROJECT_NAME} LexicalAnalyzer)
 
     set_target_properties( ${PROJECT_NAME} PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/tests/${CMAKE_BUILD_TYPE})
+        VS_DEBUGGER_WORKING_DIRECTORY ${OUTPUT_DIR}/$(Configuration)
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()

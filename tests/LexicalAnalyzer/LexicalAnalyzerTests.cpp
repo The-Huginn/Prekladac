@@ -1,28 +1,33 @@
 // LexicalAnalyzerTests.cpp      
 
-#ifdef __cplusplus
-    extern "C" {
-#endif
-#include "../../src/LexicalAnalyzer/LexicalAnalyzer.h"
-#include "../../src/LexicalAnalyzer/LexicalFSM.h"
-
-#ifdef __cplusplus
-    }
-#endif
+extern "C" 
+{
+    #include "../../src/LexicalAnalyzer/LexicalAnalyzer.h"
+    #include "../../src/LexicalAnalyzer/LexicalFSM.h"
+}
 
 #include <gtest/gtest.h>
 #include <iostream>
 #include <string>
+#include <vector>
 #include <stdio.h>
 
-TEST(getLexemeTests, 1_introduction) {
-    FILE* input = fopen("../../../tests/files/getLexemeTests.txt", "r");
-    
-    LexicalOutput * lexem = getLexeme(input);
-    std::string lexem_string = getString(lexem);
-    std::cout << lexem_string << std::endl;
 
-    //ASSERT_EQ(lexem_string, )
+void TestLexeme(FILE* file, std::string req)
+{
+    LexicalOutput* lexeme = getLexeme(file);
+    ASSERT_EQ(getString(lexeme), req);
+    freeLexeme(lexeme);
+}
+
+
+TEST(getLexemeTests, 1_introduction) {
+    FILE* input = fopen("../../../../tests/files/getLexemeTests.txt", "r");
+    
+    std::vector<std::string> lexemes = { "require", "\"ifj21\"", "function", "main", "(", ")", "local", "a", ":", "integer", "local", "vysl", ":", "integer", "=", "0", "write", "(", "\"Zadejte cislo pro vypocet faktorialu\\n\"", ")", "a", "=", "readi", "(", ")", "if", "a", "==", "nil", "then", "write", "(", "\"a je nil\\n\"", ")", "return", "else", "end", "if", "a", "<", "0", "then", "write", "(", "\"Faktorial nelze spocitat\\n\"", ")", "else", "vysl", "=", "1", "while", "a", ">", "0", "do", "vysl", "=", "vysl", "*", "a", "a", "=", "a", "-", "1", "end", "write", "(", "\"Vysledek je: \"", ",", "vysl", ",", "\"\\n\"", ")", "end", "end", "main", "(", ")" };
+
+    for (std::string lexeme : lexemes)
+        TestLexeme(input, lexeme);
 
     fclose(input);
 }
