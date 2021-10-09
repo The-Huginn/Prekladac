@@ -14,11 +14,23 @@ typedef struct SymbolElement
 	char* key;
 	void* data;
 
-	struct SymbolElement* next;
+} Element;
 
-} SElement;
+/**
+ * @brief 
+ * @param key 
+ * @param type 
+ * @param isDefined 
+ * @param data 
+ * @return 
+*/
+Element* Element_Init(char* key, SymbolType type, int isDefined, void* data);
 
-
+/**
+ * @brief Frees all allocated memory
+ * @param element Element to be freed
+*/
+void Element_Free(Element* element);
 
 
 

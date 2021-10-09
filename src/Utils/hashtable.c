@@ -6,10 +6,8 @@ HTable* HashTable_Init(const int32_t size)
 {
 	HTable* table = malloc(sizeof(uint32_t) + size * sizeof(LList*));
 	if (table == NULL)
-	{
-		WARNING("Allocation failed!");
-		return NULL;
-	}
+		ERROR("Allocation failed!");
+
 	table->size = size;
 	memset(table->array, 0, size * sizeof(LList*));
 	return table;
@@ -27,6 +25,9 @@ uint32_t HashTable_Hash(const char* key)
 
 LList* HashTable_Find(HTable* table, const char* key)
 {
+	if (table == NULL)
+		ERROR("Invalid argument!");
+
 	uint32_t hash = HashTable_Hash(key) % table->size;
 	LList* list = table->array[hash];
 	while (list != NULL)

@@ -4,6 +4,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+
 #ifdef _DEBUG
 
 #define INFO(s, ...) \
@@ -25,7 +26,15 @@
 	char buffer[255]; \
 	sprintf(buffer, "ERROR [%s]: %s\n", __func__, s); \
 	fprintf(stderr, buffer, __VA_ARGS__); \
-	exit(1); \
+	return 0; \
+	} while (0)
+
+#define ERROR_VOID(s, ...) \
+	do { \
+	char buffer[255]; \
+	sprintf(buffer, "ERROR [%s]: %s\n", __func__, s); \
+	fprintf(stderr, buffer, __VA_ARGS__); \
+	return; \
 	} while (0)
 
 #else
