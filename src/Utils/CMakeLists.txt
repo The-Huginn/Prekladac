@@ -21,6 +21,7 @@ set(UTILITY_FILES
     dlist.h
     symbolelement.c
     symbolelement.h
+    logger.h
     )
 
 add_library(${PROJECT_NAME} STATIC ${UTILITY_FILES})

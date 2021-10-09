@@ -5,7 +5,7 @@
 
 typedef struct ListElement
 {
-	char* name;
+	char* key;
 	DLList dlist; // maybe pointer
 
 	struct ListElement* next;

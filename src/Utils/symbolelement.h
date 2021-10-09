@@ -11,7 +11,7 @@ typedef struct SymbolElement
 {
 	SymbolType type;
 	int isDefined;
-	char* name;
+	char* key;
 	void* data;
 
 	struct SymbolElement* next;
