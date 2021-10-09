@@ -15,8 +15,11 @@ typedef struct SymbolElement
 	void* data;
 
 	struct SymbolElement* next;
-	struct SymbolElement* prev;
 
-} Element;
+} SElement;
+
+
+
+
 
 #endif // !__SYMBOL_ELEMENT__

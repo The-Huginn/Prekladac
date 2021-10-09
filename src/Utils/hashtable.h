@@ -39,7 +39,7 @@ LList* HashTable_Find(HTable* table, const char* key);
  * @param key Hash key
  * @return Pointer to newly created list, or to already existing one
 */
-LList* HashTable_Add(HTable* table, const char* key);
+LList* HashTable_Insert(HTable* table, const char* key);
 
 /**
  * @brief Removes element with given key

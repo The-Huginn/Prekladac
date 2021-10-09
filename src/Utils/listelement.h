@@ -1,12 +1,12 @@
 #ifndef __LIST_ELEMENT__
 #define __LIST_ELEMENT__
 
-#include "dlist.h"
+#include "stack.h"
 
 typedef struct ListElement
 {
 	char* key;
-	DLList dlist; // maybe pointer
+	Stack dlist; // maybe pointer
 
 	struct ListElement* next;
 } LElement;

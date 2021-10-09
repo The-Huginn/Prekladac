@@ -17,8 +17,8 @@ set(UTILITY_FILES
     "list.h"
     "listelement.c"
     "listelement.h"
-    dlist.c
-    dlist.h
+    stack.c
+    stack.h
     symbolelement.c
     symbolelement.h
     logger.h
