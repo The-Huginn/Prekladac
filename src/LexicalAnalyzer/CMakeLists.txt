@@ -11,8 +11,6 @@ set(LEXICAL_ANALYZER_FILES
     LexicalAnalyzer.h
     LexicalFSM.c
     LexicalFSM.h
-    ../Utils/Token.c
-    ../Utils/Token.h
     )
 
 add_library(${PROJECT_NAME} STATIC ${LEXICAL_ANALYZER_FILES})
