@@ -35,6 +35,8 @@ LElement *LElement_Init(const char *key, Stack *data)
     element->key = new_key;
     element->data = data;
     element->next = NULL;
+
+    return element;
 }
 
 /**

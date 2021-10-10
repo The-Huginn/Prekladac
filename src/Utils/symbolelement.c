@@ -48,5 +48,5 @@ void Element_Define(Element *element)
 
 void *Element_GetData(Element *element)
 {
-	element->data;
+	return element->data;
 }
