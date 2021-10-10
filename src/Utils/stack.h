@@ -1,3 +1,9 @@
+/**
+ * @file stack.h
+ * @brief This file defines struct for Stack and interface for working with it.
+ * 	Stack was implemented via list structure
+ * @author Denis Pojezdal
+ */
 #ifndef __STACK__
 #define __STACK__
 
@@ -9,20 +15,6 @@ typedef struct StackElement
 	struct StackElement* next;
 
 } SElement;
-
-/**
- * @brief Initializes StackElement
- * @param data StackElement data 
- * @param next Next element
- * @return 
-*/
-SElement* SElement_Init(Element* data, SElement* next);
-
-/**
- * @brief Frees all allocated memory
- * @param sElement Element to be freed
-*/
-void SElement_Free(SElement* sElement);
 
 typedef struct Stack
 {

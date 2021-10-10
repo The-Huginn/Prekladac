@@ -1,3 +1,8 @@
+/**
+ * @file stack.c
+ * @brief This file contains implementetaion stack.h
+ * @author Denis Pojezdal
+ */
 #include"stack.h"
 #include"logger.h"
 
@@ -5,7 +10,7 @@
 
 SElement* SElement_Init(Element* data, SElement* next)
 {
-	SElement* sElement = malloc(sizeof(SElement));
+	SElement* sElement = (SElement*) malloc(sizeof(SElement));
 	if (sElement == NULL)
 		ERROR("Allocation failed!");
 
@@ -23,7 +28,7 @@ void SElement_Free(SElement* sElement)
 
 Stack* Stack_Init()
 {
-	Stack* stack = malloc(sizeof(Stack)); // not sure this works
+	Stack* stack = (Stack*) malloc(sizeof(Stack)); // not sure this works
 	if (stack == NULL)
 		ERROR("Allocation failed!");
 	return stack;
@@ -71,11 +76,7 @@ void Stack_Clear(Stack* stack)
 		ERROR_VOID("Invalid argument!");
 
 	while (stack->top != NULL)
-	{
-		SElement* temp = stack->top->next;
-		SElement_Free(stack->top);
-		stack->top = temp;
-	}
+		Stack_Pop(stack);
 
 	return;
 }
