@@ -13,6 +13,6 @@ add_subdirectory(src/Utils)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 add_custom_target(runLexicalAnalyzerTests
-    COMMAND ./build/tests/LexicalAnalyzerTests $(l) $(u)
+    COMMAND ./build/tests/${CMAKE_BUILD_TYPE}/LexicalAnalyzerTests $(l) $(u)
 )
 endif()

@@ -17,8 +17,8 @@ add_executable(${PROJECT_NAME} ${LEXICAL_ANALYZER_FILES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/LexicalAnalyzer)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/Utils)
-target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/build/bin/LexicalAnalyzer)
-target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/build/bin/Utils)
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/build/bin/LexicalAnalyzer/${CMAKE_BUILD_TYPE})
+target_link_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/build/bin/Utils/${CMAKE_BUILD_TYPE})
 
 # Locate GTest
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -27,7 +27,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     target_link_libraries(${PROJECT_NAME} ${GTEST_LIBRARIES} libLexicalAnalyzer.a libUtils.a pthread)
 
     set_target_properties( ${PROJECT_NAME} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}/$(Configuration))
+    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}/${CMAKE_BUILD_TYPE})
 endif()
 
 if (MSVC)

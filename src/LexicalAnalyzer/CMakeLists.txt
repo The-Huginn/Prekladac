@@ -8,7 +8,7 @@ SET(CMAKE_C_STANDARD 99)
 
 set(LEXICAL_ANALYZER_FILES
     LexicalAnalyzer.c
-    LexicalAnalyzer.h
+    LexicalAnalyzer.h   
     LexicalFSM.c
     LexicalFSM.h
     )
@@ -22,7 +22,7 @@ if (MSVC)
 
 else()
     set_target_properties( ${PROJECT_NAME} PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/${PROJECT_NAME}/$(Configuration))
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/${PROJECT_NAME}/${CMAKE_BUILD_TYPE})
 
 endif()
 
