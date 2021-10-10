@@ -9,16 +9,11 @@
 
 #include "symbolelement.h"
 
-typedef struct StackElement
-{
-	Element* data;
-	struct StackElement* next;
-
-} SElement;
+struct StackElement;
 
 typedef struct Stack
 {
-	SElement* top;
+	struct StackElement* top;
 } Stack;
 
 /**
@@ -26,6 +21,12 @@ typedef struct Stack
  * @return Initialized stack
 */
 Stack* Stack_Init();
+
+/**
+ * @brief Destroys the stack, should not be used afterwards. NULL is ignored
+ * @param stack the stack to be destroyed
+ */
+void Stack_Destroy(Stack *stack);
 
 /**
  * @brief Adds element at the stack top

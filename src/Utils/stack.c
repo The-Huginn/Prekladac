@@ -8,6 +8,13 @@
 
 #include<stdlib.h>
 
+typedef struct StackElement
+{
+	Element* data;
+	struct StackElement* next;
+
+} SElement;
+
 SElement* SElement_Init(Element* data, SElement* next)
 {
 	SElement* sElement = (SElement*) malloc(sizeof(SElement));
@@ -32,6 +39,15 @@ Stack* Stack_Init()
 	if (stack == NULL)
 		ERROR("Allocation failed!");
 	return stack;
+}
+
+void Stack_Destroy(Stack *stack)
+{
+	if (stack == NULL)
+		return;
+		
+	Stack_Clear(stack);
+	free(stack);
 }
 
 Element* Stack_Push(Stack* stack, Element* element)
