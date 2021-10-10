@@ -5,8 +5,6 @@
 #include<stdlib.h>
 
 
-#define DEBUG
-
 #ifdef DEBUG
 
 #define INFO(s, ...) \
