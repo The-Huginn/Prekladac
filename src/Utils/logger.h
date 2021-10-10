@@ -3,37 +3,28 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-
-
+#define _DEBUG
 #ifdef _DEBUG
 
 #define INFO(s, ...) \
 	do { \
-	char buffer[255]; \
-	sprintf(buffer, "INFO [%s]: %s\n", __func__, s); \
-	fprintf(stderr, buffer, __VA_ARGS__); \
+	fprintf(stderr, "INFO [%s]: " s "\n", __func__, ##__VA_ARGS__); \
 	} while (0) 
 
 #define WARNING(s, ...) \
 	do { \
-	char buffer[255]; \
-	sprintf(buffer, "WARNING [%s]: %s\n", __func__, s); \
-	fprintf(stderr, buffer, __VA_ARGS__); \
+	fprintf(stderr, "WARNING [%s]: " s "\n", __func__, ##__VA_ARGS__); \
 	} while (0) 
 
 #define ERROR(s, ...) \
 	do { \
-	char buffer[255]; \
-	sprintf(buffer, "ERROR [%s]: %s\n", __func__, s); \
-	fprintf(stderr, buffer, __VA_ARGS__); \
+	fprintf(stderr, "ERROR [%s]: " s "\n", __func__, ##__VA_ARGS__); \
 	return 0; \
 	} while (0)
 
 #define ERROR_VOID(s, ...) \
 	do { \
-	char buffer[255]; \
-	sprintf(buffer, "ERROR [%s]: %s\n", __func__, s); \
-	fprintf(stderr, buffer, __VA_ARGS__); \
+	fprintf(stderr, "ERROR [%s]: " s "\n", __func__, ##__VA_ARGS__); \
 	return; \
 	} while (0)
 

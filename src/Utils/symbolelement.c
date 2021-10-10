@@ -12,7 +12,7 @@ Element* Element_Init(char* key, SymbolType type, char isDefined, void* data)
 {
 	Element *element = (Element*) malloc(sizeof(Element));
 	if (element == NULL)
-		ERROR("Allocation failed!\n");
+		ERROR("Allocation failed!");
 
 	element->key = key;
 	element->type = type;

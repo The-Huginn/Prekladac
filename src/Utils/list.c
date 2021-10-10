@@ -26,11 +26,11 @@ LElement *LElement_Init(const char *key, Stack *data)
 {
     LElement *element = (LElement*) malloc(sizeof(LElement));
     if (element == NULL)
-        ERROR("Allocation failed!\n");
+        ERROR("Allocation failed!");
 
     char* new_key = strdup(key);
     if (new_key == NULL)
-        ERROR("Allocation failed!\n");
+        ERROR("Allocation failed!");
     
     element->key = new_key;
     element->data = data;
@@ -53,7 +53,7 @@ LList *List_Init()
     LList *list = (LList*) malloc(sizeof(LList));
 
     if (list == NULL)
-        ERROR("Allocation failed!\n");
+        ERROR("Allocation failed!");
 
 	list->begin = NULL;
 
@@ -63,7 +63,7 @@ LList *List_Init()
 void List_Destroy(LList *list)
 {
     if (list == NULL)
-        ERROR("Destroying uninitialized list!\n");
+        ERROR_VOID("Destroying uninitialized list!");
 
     while(list->begin != NULL)
     {
@@ -76,7 +76,7 @@ void List_Destroy(LList *list)
 Stack *List_GetStack(LList *list, const char *key)
 {
     if (list == NULL || key == NULL)
-        ERROR("Invalid argument!\n");
+        ERROR("Invalid argument!");
 
     LElement *tmp = list->begin;
 
@@ -92,13 +92,13 @@ Stack *List_GetStack(LList *list, const char *key)
     // we didnt find valid element
     Stack *stack = Stack_Init();
     if (stack == NULL)
-        ERROR("Allocation failed!\n");
+        ERROR("Allocation failed!");
 
     LElement *element = LElement_Init(key, stack);
     if (element == NULL)
-        ERROR("Allocation failed!\n");
+        ERROR("Allocation failed!");
     
     element->next = list->begin;
     list->begin = element;
-    return element;
+    return element->data;
 }

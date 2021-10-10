@@ -1,5 +1,5 @@
-#include"hashtable.h"
 #include<string.h>
+#include"hashtable.h"
 #include"logger.h"
 
 HTable* HashTable_Init(const int32_t size)
