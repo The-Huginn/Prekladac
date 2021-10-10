@@ -26,10 +26,12 @@ set(UTILITY_FILES
 
 add_library(${PROJECT_NAME} STATIC ${UTILITY_FILES})
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/${PROJECT_NAME})
-
 if (MSVC)
     set_target_properties( ${PROJECT_NAME} PROPERTIES
-        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin)
+
+else()
+    set_target_properties( ${PROJECT_NAME} PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/build/bin/$(Configuration))
 endif()
