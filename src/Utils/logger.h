@@ -39,9 +39,13 @@
 
 #else
 
-#define WARING(s, ...)
+#define WARNING(s, ...)
 
 #define ERROR(s, ...)
+
+#define ERROR_VOID(s, ...)
+
+#define INFO(s, ...)
 
 #endif // DEBUG
 
