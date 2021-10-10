@@ -22,7 +22,7 @@ Element* Element_Init(char* key, SymbolType type, char isDefined, void* data)
 	return element;
 }
 
-void Element_Free(Element* element)
+void Element_Destroy(Element* element)
 {
 	// TO DO free shit saved in structure pointed to by data
 	free(element->data);

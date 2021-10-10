@@ -27,9 +27,9 @@ SElement* SElement_Init(Element* data, SElement* next)
 	return sElement;
 }
 
-void SElement_Free(SElement* sElement)
+void SElement_Destroy(SElement* sElement)
 {
-	Element_Free(sElement->data);
+	Element_Destroy(sElement->data);
 	free(sElement);
 }
 
@@ -71,7 +71,7 @@ int Stack_Pop(Stack* stack)
 		ERROR("Stack is empty!");
 
 	SElement* temp = stack->top->next;
-	SElement_Free(stack->top);
+	SElement_Destroy(stack->top);
 	stack->top = temp;
 	return 1;
 }

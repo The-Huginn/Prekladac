@@ -5,7 +5,7 @@
 #include<stdlib.h>
 
 
-#ifdef DEBUG
+#ifdef _DEBUG
 
 #define INFO(s, ...) \
 	do { \
@@ -39,13 +39,20 @@
 
 #else
 
+#define INFO(s, ...)
+
 #define WARNING(s, ...)
 
-#define ERROR(s, ...)
+#define ERROR(s, ...) \
+	do { \
+	return 0; \
+	} while (0)
 
-#define ERROR_VOID(s, ...)
+#define ERROR_VOID(s, ...) \
+	do { \
+	return; \
+	} while (0)
 
-#define INFO(s, ...)
 
 #endif // DEBUG
 

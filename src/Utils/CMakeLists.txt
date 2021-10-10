@@ -15,8 +15,6 @@ set(UTILITY_FILES
     hashtable.h
     "list.c"
     "list.h"
-    "listelement.c"
-    "listelement.h"
     stack.c
     stack.h
     symbolelement.c

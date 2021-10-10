@@ -28,11 +28,9 @@ LElement *LElement_Init(const char *key, Stack *data)
     if (element == NULL)
         ERROR("Allocation failed!\n");
 
-    char* new_key = (char*) malloc(strlen(key));
+    char* new_key = strdup(key);
     if (new_key == NULL)
         ERROR("Allocation failed!\n");
-
-    strcpy(new_key, key);
     
     element->key = new_key;
     element->data = data;
@@ -43,9 +41,10 @@ LElement *LElement_Init(const char *key, Stack *data)
  * @brief destructor for list element, it's string key should not be accessed from another struct
  * @param element the list element to be destroyed
  */
-void LElement_Free(LElement *element)
+void LElement_Destroy(LElement *element)
 {
     free(element->key);
+    Stack_Destroy(element->data);
     free(element);
 }
 
@@ -69,8 +68,7 @@ void List_Destroy(LList *list)
     while(list->begin != NULL)
     {
         LElement *tmp = list->begin->next;
-        Stack_Destroy(list->begin->data);
-        LElement_Free(list->begin);
+        LElement_Destroy(list->begin);
         list->begin = tmp;
     }
 }
@@ -88,9 +86,7 @@ Stack *List_GetStack(LList *list, const char *key)
         if (strcmp(key, tmp->key) == 0)
             return tmp->data;
 
-        // break at last valid element
-        if (tmp->next == NULL)
-            break;
+        tmp = tmp->next;
     }
 
     // we didnt find valid element
@@ -102,8 +98,7 @@ Stack *List_GetStack(LList *list, const char *key)
     if (element == NULL)
         ERROR("Allocation failed!\n");
     
-    if (tmp == NULL)
-        list->begin = element;
-    
-    tmp->next = element;
+    element->next = list->begin;
+    list->begin = element;
+    return element;
 }
