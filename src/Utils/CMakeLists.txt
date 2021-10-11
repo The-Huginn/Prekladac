@@ -11,6 +11,10 @@ set(UTILITY_FILES
     Token.h
     symtable.c
     symtable.h
+    scope_stack.c
+    scope_stack.h
+    scope_list.c
+    scope_list.h
     hashtable.c
     hashtable.h
     "list.c"
