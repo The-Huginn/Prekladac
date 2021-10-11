@@ -21,6 +21,8 @@ SLElement *SLElement_Init(Element *element, SLElement *next)
 
     new_element->data = element;
     new_element->next = next;
+
+    return element;
 }
 
 void SLElement_Destroy(SLElement *element)
