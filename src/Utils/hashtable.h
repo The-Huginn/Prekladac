@@ -50,15 +50,9 @@ LList* HashTable_Insert(HTable* table, const char* key);
 int HashTable_Remove(HTable* table, const char* key);
 
 /**
- * @brief Clears all elements from hash table
- * @param table Hash table to be cleared
-*/
-void HashTable_Clear(HTable* table);
-
-/**
  * @brief Frees allocated memory of hash table
  * @param table Hash table to be freed
 */
-void HashTable_Free(HTable* table);
+void HashTable_Destroy(HTable* table);
 
 #endif // !__HASH_TABLE__

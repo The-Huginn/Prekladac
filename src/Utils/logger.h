@@ -3,8 +3,10 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#define _DEBUG
-#ifdef _DEBUG
+
+#define DEBUG
+
+#ifdef DEBUG
 
 #define INFO(s, ...) \
 	do { \

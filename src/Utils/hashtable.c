@@ -25,16 +25,51 @@ uint32_t HashTable_Hash(const char* key)
 
 LList* HashTable_Find(HTable* table, const char* key)
 {
-	if (table == NULL)
+	if (table == NULL || key == NULL)
 		ERROR("Invalid argument!");
 
 	uint32_t hash = HashTable_Hash(key) % table->size;
-	LList* list = table->array[hash];
-	while (list != NULL)
-	{
-		//if (strcmp(list->data, key) == 0)
-		//	return &(data->data);
-		//data = data->next;
-	}
-	return NULL;
+	
+	return table->array[hash];
+}
+
+LList* HashTable_Insert(HTable* table, const char* key)
+{
+	if (table == NULL || key == NULL)
+		ERROR("Invalid argument!");
+
+	uint32_t hash = HashTable_Hash(key) % table->size;
+
+	if (table->array[hash] == NULL)
+		table->array[hash] = List_Init();
+
+	return table->array[hash];
+}
+
+int HashTable_Remove(HTable* table, const char* key)
+{
+	if (table == NULL || key == NULL)
+		ERROR("Invalid argument!");
+
+	uint32_t hash = HashTable_Hash(key) % table->size;
+
+	if (table->array[hash] == NULL)
+		ERROR("List with given hash does not exists!");
+
+	List_Destroy(table->array[hash]);
+	return 1;
+}
+
+void HashTable_Destroy(HTable* table)
+{
+	if (table == NULL)
+		ERROR_VOID("Invalid argument!");
+
+	for (int i = 0; i < table->size; i++)
+		if (table->array[i] != NULL)
+			List_Destroy(table->array[i]);
+
+	free(table); // not sure this works 
+
+	return;
 }
