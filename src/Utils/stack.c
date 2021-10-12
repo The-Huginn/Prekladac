@@ -41,6 +41,9 @@ void SElement_Destroy(SElement* sElement, void (*DataDtor)(void*))
 
 Stack* Stack_Init(void (*DataDtor)(void*))
 {
+	if (DataDtor == NULL)
+		ERROR("Invalid parameter!");
+		
 	Stack* stack = (Stack*) malloc(sizeof(Stack)); // not sure this works
 	if (stack == NULL)
 		ERROR("Allocation failed!");
