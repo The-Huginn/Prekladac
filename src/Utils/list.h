@@ -50,7 +50,7 @@ void* List_AddFirst(LList* list, void* data);
  * @brief Removes first element of the list
  * @param list List
 */
-void ListRemoveFirst(LList* list);
+void List_RemoveFirst(LList* list);
 
 /**
  * @brief Finds first element for which Comp returns true
@@ -59,5 +59,18 @@ void ListRemoveFirst(LList* list);
  * @return Pointer to first match
  */
 void *List_GetData(LList *list, void* con);
+
+/**
+ * @param list struct to be checked
+ * @return true if list is empty otherwise false
+ */
+bool List_IsEmpty(LList *list);
+
+/**
+ * @brief returns the first element of the list
+ * @param list the list to get the first element of
+ * @return pointer to this element, if empty, then NULL
+ */
+void *List_GetFirst(LList *list);
 
 #endif // !__LIST__

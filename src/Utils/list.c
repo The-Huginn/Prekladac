@@ -49,7 +49,7 @@ void LElement_Destroy(LElement *element, void (*DataDtor)(void*))
 LList *List_Init(void (*DataDtor)(void*), bool (*Comp)(void*, void*))
 {
     if (Comp == NULL)
-        ERROR("Missing comparator function!");
+        WARNING("Missing comparator function!");
 
     LList *list = (LList*) malloc(sizeof(LList));
 
@@ -99,7 +99,7 @@ void* List_AddFirst(LList* list, void* data)
     return new_element;
 }
 
-void ListRemoveFirst(LList* list)
+void List_RemoveFirst(LList* list)
 {
     if (list == NULL)
         ERROR_VOID("Invalid argument!");
@@ -115,6 +115,9 @@ void *List_GetData(LList *list, void* con)
 {
     if (list == NULL)
         ERROR("Invalid argument!");
+    
+    if (list->Comp == NULL)
+        ERROR("Missing comparator function!");
 
     if (con == NULL)
         WARNING("Conparing to NULL!");
@@ -129,4 +132,14 @@ void *List_GetData(LList *list, void* con)
         tmp = tmp->next;
     }
     return NULL;
+}
+
+bool List_IsEmpty(LList *list)
+{
+    return list->begin == NULL ? true : false;
+}
+
+void *List_GetFirst(LList *list)
+{
+    return list->begin;
 }
