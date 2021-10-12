@@ -7,20 +7,15 @@
 #ifndef __SYMBOL_ELEMENT__
 #define __SYMBOL_ELEMENT__
 
+#include <stdbool.h>
+
 typedef enum SymbolType
 {
 	VARIABLE, FUNCTION // probably uncompleate
 
 } SymbolType;
 
-typedef struct SymbolElement
-{
-	SymbolType type;	//! type of Symbol Element for further casting and destructors
-	char isDefined;		//! bool value deciding whether Symbol was defined
-	char* key;			//! pointer to the string with key, currently is not allocated in SymbolElement
-	void* data;			//! pointer to the data, should be casted
-
-} Element;
+typedef struct SymbolElement Element;
 
 /**
  * @brief Allocates memory and initializes it according to arguments
@@ -30,7 +25,7 @@ typedef struct SymbolElement
  * @param data 
  * @return 
 */
-Element* Element_Init(char* key, SymbolType type, char isDefined, void* data);
+Element* Element_Init(const char* key, SymbolType type, bool isDefined, void* data);
 
 /**
  * @brief Frees all allocated memory
@@ -43,14 +38,14 @@ void Element_Destroy(Element* element);
  * @param element the Element we want to get info about
  * @return Pointer to the first char
  */
-char *Element_GetKey(Element *element);
+const char *Element_GetKey(Element *element);
 
 /**
  * @brief
  * @param element the Element we want to get info about
  * @return returns 1 upon defined Symbol Element, otherwise 0
  */
-char Element_IsDefined(Element *element);
+bool Element_IsDefined(Element *element);
 
 /**
  * @brief Set define to 1 regardless of previous state
@@ -64,5 +59,13 @@ void Element_Define(Element *element);
  * @return the pointer to the stored data
  */
 void *Element_GetData(Element *element);
+
+/**
+ * @brief checks, whether 2 elements point to the same data
+ * @param element1 the first element
+ * @param element2 the second element
+ * @return if both elements point to the same data
+ */
+bool Element_IsEqual(Element *element1, Element *element2);
 
 #endif // !__SYMBOL_ELEMENT__

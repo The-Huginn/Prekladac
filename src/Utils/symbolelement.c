@@ -8,7 +8,16 @@
 
 #include <stdlib.h>
 
-Element* Element_Init(char* key, SymbolType type, char isDefined, void* data)
+struct SymbolElement
+{
+	SymbolType type;	//! type of Symbol Element for further casting and destructors
+	bool isDefined;		//! bool value deciding whether Symbol was defined
+	const char* key;	//! pointer to the string with key, currently is not allocated in SymbolElement
+	void* data;			//! pointer to the data, should be casted
+
+};
+
+Element* Element_Init(const char* key, SymbolType type, bool isDefined, void* data)
 {
 	Element *element = (Element*) malloc(sizeof(Element));
 	if (element == NULL)
@@ -31,12 +40,12 @@ void Element_Destroy(Element* element)
 }
 
 
-char *Element_GetKey(Element *element)
+const char *Element_GetKey(Element *element)
 {
 	return element->key;
 }
 
-char Element_IsDefined(Element *element)
+bool Element_IsDefined(Element *element)
 {
 	return element->isDefined;
 }
@@ -49,4 +58,9 @@ void Element_Define(Element *element)
 void *Element_GetData(Element *element)
 {
 	return element->data;
+}
+
+bool Element_IsEqual(Element *element1, Element *element2)
+{
+	return element1->data == element2->data;
 }
