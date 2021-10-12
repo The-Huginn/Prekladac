@@ -7,6 +7,7 @@
 #ifndef __STACK__
 #define __STACK__
 
+#include <stdbool.h>
 #include "symbolelement.h"
 
 struct StackElement;
@@ -63,7 +64,7 @@ void Stack_Clear(Stack* stack);
  * @param stack Stack to be checked
  * @return 1 if empty 0 if not
 */
-int Stack_IsEmpty(Stack* stack);
+bool Stack_IsEmpty(Stack* stack);
 
 
 #endif // !__STACK__

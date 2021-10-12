@@ -35,14 +35,16 @@ void SElement_Destroy(SElement* sElement, void (*DataDtor)(void*))
 	if (sElement == NULL)
 		ERROR_VOID("Invalid argument!");
 
-	DataDtor(sElement->data);
+	if (DataDtor != NULL)
+		DataDtor(sElement->data);
+
 	free(sElement);
 }
 
 Stack* Stack_Init(void (*DataDtor)(void*))
 {
 	if (DataDtor == NULL)
-		ERROR("Invalid parameter!");
+		WARNING("Invalid parameter!");
 		
 	Stack* stack = (Stack*) malloc(sizeof(Stack)); // not sure this works
 	if (stack == NULL)
@@ -112,10 +114,10 @@ void Stack_Clear(Stack* stack)
 	return;
 }
 
-int Stack_IsEmpty(Stack* stack)
+bool Stack_IsEmpty(Stack* stack)
 {
 	if (stack == NULL)
 		ERROR("Invalid argument!");
 
-	return (stack->top == NULL) ? 1 : 0;
+	return (stack->top == NULL) ? true : false;
 }
