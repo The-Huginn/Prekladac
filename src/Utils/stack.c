@@ -10,16 +10,19 @@
 
 typedef struct StackElement
 {
-	Element* data;
+	void* data;
 	struct StackElement* next;
 
 } SElement;
 
-SElement* SElement_Init(Element* data, SElement* next)
+SElement* SElement_Init(void* data, SElement* next)
 {
 	SElement* sElement = (SElement*) malloc(sizeof(SElement));
 	if (sElement == NULL)
 		ERROR("Allocation failed!");
+
+	if (data == NULL)
+		WARNING("Data points to NULL!");
 
 	sElement->data = data;
 	sElement->next = next;
@@ -27,30 +30,37 @@ SElement* SElement_Init(Element* data, SElement* next)
 	return sElement;
 }
 
-void SElement_Destroy(SElement* sElement)
+void SElement_Destroy(SElement* sElement, void (*DataDtor)(void*))
 {
-	Element_Destroy(sElement->data);
+	if (sElement == NULL)
+		ERROR_VOID("Invalid argument!");
+
+	DataDtor(sElement->data);
 	free(sElement);
 }
 
-Stack* Stack_Init()
+Stack* Stack_Init(void (*DataDtor)(void*))
 {
 	Stack* stack = (Stack*) malloc(sizeof(Stack)); // not sure this works
 	if (stack == NULL)
 		ERROR("Allocation failed!");
+
+	stack->DataDtor = DataDtor;
+	stack->top = NULL;
+
 	return stack;
 }
 
 void Stack_Destroy(Stack *stack)
 {
 	if (stack == NULL)
-		return;
+		ERROR_VOID("Stack does not exist!");
 		
 	Stack_Clear(stack);
 	free(stack);
 }
 
-Element* Stack_Push(Stack* stack, Element* element)
+void* Stack_Push(Stack* stack, void* element)
 {
 	if (stack == NULL || element == NULL)
 		ERROR("Invalid argument!");
@@ -63,7 +73,7 @@ Element* Stack_Push(Stack* stack, Element* element)
 	return element;
 }
 
-int Stack_Pop(Stack* stack)
+void* Stack_Pop(Stack* stack)
 {
 	if (stack == NULL)
 		ERROR("Invalid argument!");
@@ -71,12 +81,14 @@ int Stack_Pop(Stack* stack)
 		ERROR("Stack is empty!");
 
 	SElement* temp = stack->top->next;
-	SElement_Destroy(stack->top);
+	void* ret = stack->top->data;
+
+	SElement_Destroy(stack->top, stack->DataDtor);
 	stack->top = temp;
-	return 1;
+	return ret;
 }
 
-Element* Stack_Top(Stack* stack)
+void* Stack_Top(Stack* stack)
 {
 	if (stack == NULL)
 		ERROR("Invalid argument!");

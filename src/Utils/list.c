@@ -11,8 +11,7 @@
 
 typedef struct ListElement
 {
-    char *key;
-    Stack *data;
+    void *data;
     struct ListElement *next;
 } LElement;
 
@@ -22,17 +21,12 @@ typedef struct ListElement
  * @param data pointer, where the stack is
  * @return newly created list element
  */
-LElement *LElement_Init(const char *key, Stack *data)
+LElement *LElement_Init(void *data)
 {
     LElement *element = (LElement*) malloc(sizeof(LElement));
     if (element == NULL)
         ERROR("Allocation failed!");
-
-    char* new_key = strdup(key);
-    if (new_key == NULL)
-        ERROR("Allocation failed!");
     
-    element->key = new_key;
     element->data = data;
     element->next = NULL;
 
@@ -43,20 +37,27 @@ LElement *LElement_Init(const char *key, Stack *data)
  * @brief destructor for list element, it's string key should not be accessed from another struct
  * @param element the list element to be destroyed
  */
-void LElement_Destroy(LElement *element)
+void LElement_Destroy(LElement *element, void (*DataDtor)(void*))
 {
-    free(element->key);
-    Stack_Destroy(element->data);
+    if (DataDtor == NULL)
+        WARNING("Data were not freed!");
+    else
+        DataDtor(element->data);
     free(element);
 }
 
-LList *List_Init()
+LList *List_Init(void (*DataDtor)(void*), bool (*Comp)(void*, void*))
 {
+    if (Comp == NULL)
+        ERROR("Missing comparator function!");
+
     LList *list = (LList*) malloc(sizeof(LList));
 
     if (list == NULL)
         ERROR("Allocation failed!");
 
+    list->DataDtor = DataDtor;
+    list->Comp = Comp;
 	list->begin = NULL;
 
     return list;
@@ -67,40 +68,65 @@ void List_Destroy(LList *list)
     if (list == NULL)
         ERROR_VOID("Destroying uninitialized list!");
 
-    while(list->begin != NULL)
-    {
-        LElement *tmp = list->begin->next;
-        LElement_Destroy(list->begin);
-        list->begin = tmp;
-    }
+    List_Clear(list);
+    free(list);
 }
 
-Stack *List_GetStack(LList *list, const char *key)
+void List_Clear(LList* list)
 {
-    if (list == NULL || key == NULL)
+    if (list == NULL)
+        ERROR_VOID("Invalid argument!");
+
+    while (list->begin != NULL)
+    {
+        LElement* tmp = list->begin->next;
+        LElement_Destroy(list->begin, list->DataDtor);
+        list->begin = tmp;
+    }
+    return;
+}
+
+void* List_AddFirst(LList* list, void* data)
+{
+    if (list == NULL || data == NULL)
         ERROR("Invalid argument!");
 
+    LElement* new_element = LElement_Init(data);
+
+    new_element->next = list->begin;
+    list->begin = new_element;
+
+    return new_element;
+}
+
+void ListRemoveFirst(LList* list)
+{
+    if (list == NULL)
+        ERROR_VOID("Invalid argument!");
+
+    LElement* temp = list->begin->next;
+    LElement_Destroy(list->begin, list->DataDtor);
+    list->begin = temp;
+
+    return;
+}
+
+void *List_GetData(LList *list, void* con)
+{
+    if (list == NULL)
+        ERROR("Invalid argument!");
+
+    if (con == NULL)
+        WARNING("Conparing to NULL!");
+        
     LElement *tmp = list->begin;
 
     while(tmp != NULL)
     {
-        // indentical
-        if (strcmp(key, tmp->key) == 0)
+        if (list->Comp(tmp->data, con))
             return tmp->data;
 
         tmp = tmp->next;
     }
-
-    // we didnt find valid element
-    Stack *stack = Stack_Init();
-    if (stack == NULL)
-        ERROR("Allocation failed!");
-
-    LElement *element = LElement_Init(key, stack);
-    if (element == NULL)
-        ERROR("Allocation failed!");
-    
-    element->next = list->begin;
-    list->begin = element;
-    return element->data;
+    return NULL;
 }

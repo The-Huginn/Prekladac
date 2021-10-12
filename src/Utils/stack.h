@@ -14,13 +14,15 @@ struct StackElement;
 typedef struct Stack
 {
 	struct StackElement* top;
+	void (*DataDtor)(void*);
 } Stack;
 
 /**
- * @brief Inits stack to NULL
+ * @brief Inits stack empty stack
+ * @param DataDtor Destructor function for data
  * @return Initialized stack
 */
-Stack* Stack_Init();
+Stack* Stack_Init(void (*DataDtor)(void*));
 
 /**
  * @brief Destroys the stack, should not be used afterwards. NULL is ignored
@@ -34,21 +36,21 @@ void Stack_Destroy(Stack *stack);
  * @param element Element to be added
  * @return Pointer to added element
 */
-Element* Stack_Push(Stack* stack, Element* element);
+void* Stack_Push(Stack* stack, void* element);
 
 /**
  * @brief Removes top element from stack
  * @param stack Stack to be removed from
  * @return 0 if failed
 */
-int Stack_Pop(Stack* stack);
+void* Stack_Pop(Stack* stack);
 
 /**
  * @brief Access top element 
  * @param stack Stack to be searched
  * @return Top element
 */
-Element* Stack_Top(Stack* stack);
+void* Stack_Top(Stack* stack);
 
 /**
  * @brief Clears all element from the stack

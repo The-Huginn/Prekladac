@@ -2,6 +2,17 @@
 #include"hashtable.h"
 #include"logger.h"
 
+bool DuplicateList_Comp(Stack* stack, char* key)
+{
+	if (stack == NULL)
+		ERROR("Invalid argument!");
+
+	if (stack->top == NULL)
+		return false;
+
+	return strcmp(((Element*)stack->top)->key, key) == 0;
+}
+
 HTable* HashTable_Init(const int32_t size)
 {
 	HTable* table = malloc(sizeof(uint32_t) + size * sizeof(LList*));
@@ -41,10 +52,11 @@ LList* HashTable_Insert(HTable* table, const char* key)
 	uint32_t hash = HashTable_Hash(key) % table->size;
 
 	if (table->array[hash] == NULL)
-		table->array[hash] = List_Init();
+		table->array[hash] = List_Init(Stack_Destroy, DuplicateList_Comp);
 
 	return table->array[hash];
 }
+
 
 int HashTable_Remove(HTable* table, const char* key)
 {
