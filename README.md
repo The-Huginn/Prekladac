@@ -39,4 +39,4 @@ to generate VS enviroment for Prekladac:
     
     $ cmake ..
 
-open Project.sln
+open Prekladac.sln
