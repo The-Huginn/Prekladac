@@ -50,7 +50,7 @@ void* List_AddFirst(LList* list, void* data);
  * @brief Removes first element of the list
  * @param list List
 */
-void ListRemoveFirst(LList* list);
+void List_RemoveFirst(LList* list);
 
 /**
  * @brief Finds first element for which Comp returns true

@@ -99,7 +99,7 @@ void* List_AddFirst(LList* list, void* data)
     return new_element;
 }
 
-void ListRemoveFirst(LList* list)
+void List_RemoveFirst(LList* list)
 {
     if (list == NULL)
         ERROR_VOID("Invalid argument!");
