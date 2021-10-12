@@ -1,4 +1,5 @@
 #include<string.h>
+#include <stdbool.h>
 #include"hashtable.h"
 #include"logger.h"
 
@@ -10,7 +11,7 @@ bool DuplicateList_Comp(Stack* stack, char* key)
 	if (stack->top == NULL)
 		return false;
 
-	return strcmp(((Element*)stack->top)->key, key) == 0;
+	return strcmp(Element_GetKey((Element*)stack->top), key) == 0;
 }
 
 HTable* HashTable_Init(const int32_t size)
@@ -52,7 +53,7 @@ LList* HashTable_Insert(HTable* table, const char* key)
 	uint32_t hash = HashTable_Hash(key) % table->size;
 
 	if (table->array[hash] == NULL)
-		table->array[hash] = List_Init(Stack_Destroy, DuplicateList_Comp);
+		table->array[hash] = List_Init((void ( * )(void*)) Stack_Destroy, (bool ( * )(void*, void*)) DuplicateList_Comp);
 
 	return table->array[hash];
 }
