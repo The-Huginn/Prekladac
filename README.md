@@ -31,12 +31,12 @@ to generate VS enviroment for Google Tests:
     
     $ cmake .
 
-open googletest-distribution.sln and switch to Release and compile
+open googletest-distribution.sln and compile for required configuration (ideally both)
 
-open command prompt and navigate to ../The-Huginn/Prekladac
+open command prompt and navigate to ../The-Huginn/Prekladac/build (if build is missing create it)
 
 to generate VS enviroment for Prekladac:
     
-    $ cmake .
+    $ cmake ..
 
-open Project.sln and switch to Release
+open Prekladac.sln
