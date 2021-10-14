@@ -265,6 +265,12 @@ void Symtable_ClearBuffer(Symtable *symtable)
     while (!List_IsEmpty(symtable->buffer))
     {
         LList *list = List_GetFirst(symtable->buffer);
-        (void) Symtable_ClearList(list, symtable);
+        List_RemoveFirst(symtable->buffer);
+
+        while (!List_IsEmpty(list))
+        {
+            Element_Destroy((Element*) List_GetFirst(list));
+            List_RemoveFirst(list);
+        }
     }
 }
