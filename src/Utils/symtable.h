@@ -12,7 +12,7 @@
 typedef struct SymbolTable Symtable;
 
 /**
- * @brief creates and initializes Symbol table
+ * @brief creates and initializes Symbol table, creates global scope
  * @return pointer to the Symbol table
  */
 Symtable *Symtable_Init();

@@ -121,7 +121,7 @@ TEST(StackTests, 3_Clear)
 
 TEST(ListTests, 1_Init)
 {
-    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (bool (*)(void*, void*))Vec2Vec3_Comp);
+    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (const bool (*)(void*, void*))Vec2Vec3_Comp);
 
     ASSERT_NE(vec2, nullptr);
     EXPECT_EQ(vec2->begin, nullptr);
@@ -131,7 +131,7 @@ TEST(ListTests, 1_Init)
 
 TEST(ListTests, 2_Add)
 {
-    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (bool (*)(void*, void*))Vec2Vec3_Comp);
+    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (const bool (*)(void*, void*))Vec2Vec3_Comp);
 
     List_AddFirst(vec2, Vec2_Init(3, 7));
 
@@ -161,7 +161,7 @@ TEST(ListTests, 2_Add)
 
 TEST(ListTests, 3_Clear)
 {
-    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (bool (*)(void*, void*))Vec2Vec3_Comp);
+    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (const bool (*)(void*, void*))Vec2Vec3_Comp);
 
     List_AddFirst(vec2, Vec2_Init(3, 7));
     List_AddFirst(vec2, Vec2_Init(5, 0));

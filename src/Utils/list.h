@@ -16,7 +16,7 @@ typedef struct LinkedList
 	struct ListElement *begin;
 	struct ListElement* active;
 	void (*DataDtor)(void*);
-	bool (*Comp)(void*, void*);
+	const bool (*Comp)(void*, const void*);
 } LList;
 
 /**
@@ -25,7 +25,7 @@ typedef struct LinkedList
  * @param Comp Comparator for conditional search
  * @return pointer to the new list, might return NULL
  */
-LList *List_Init(void (*DataDtor)(void*), bool (*Comp)(void*, void*));
+LList *List_Init(void (*DataDtor)(void*), const bool (*Comp)(void*, const void*));
 
 /**
  * @brief destruction function, to clear whole list and should not be used afterwards
@@ -59,7 +59,7 @@ void List_RemoveFirst(LList* list);
  * @param con Data to compare elements to
  * @return Pointer to first match
  */
-void *List_GetData(LList *list, void* con);
+void *List_GetData(LList *list, const void* con);
 
 /**
  * @param list struct to be checked

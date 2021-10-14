@@ -6,6 +6,9 @@
 #include "stack.h"
 #include "logger.h"
 
+// for testing purposes, definitions at the end of file
+#include "symtable_testonly.h"
+
 struct SymbolTable
 {
     HTable *table;
@@ -36,12 +39,19 @@ Symtable *Symtable_Init()
         goto hashtable;
     }
 
-    symtable->buffer = List_Init((void ( * ) (void*)) List_Destroy, (bool ( * ) (void*, void*)) NULL);
+    symtable->buffer = List_Init((void ( * ) (void*)) List_Destroy, (const bool ( * ) (void*, const void*)) NULL);
     if (symtable->buffer == NULL)
     {
         WARNING("Allocation failed! - Symbol Table");
         goto scopes;
     }
+
+    // create global scope
+    Symtable_AddScope(symtable);
+
+    // creating global scope failed
+    if (Stack_Top(symtable->scopes) == NULL)
+        goto scopes;
 
     // here is succesful return
     return symtable;
@@ -147,7 +157,7 @@ Element *Symtable_GetElementFromBuffer(Symtable *symtable, const char *id)
 {
     // need to iterate through the list and find the right Element
     List_SetFirstActive(symtable->buffer);
-    LList* list = List_GetActive(symtable->buffer);
+    LList* list = (LList*) List_GetActive(symtable->buffer);
     while (list != NULL)
     {
         if ((void*) List_GetData(list, id) != NULL)
@@ -166,7 +176,7 @@ Element *Symtable_GetElementFromBuffer(Symtable *symtable, const char *id)
 void Element_RemoveFromHashTable(Symtable *symtable, Element *element)
 {
     // finds list in which our Element is
-    LList *list = (LList*) HashTable_Find(symtable->table, (void*) Element_GetKey(element));
+    LList *list = (LList*) HashTable_Find(symtable->table, Element_GetKey(element));
     if (list == NULL)
     {
         INFO("Removing element from Hashtable, list not found");
@@ -205,7 +215,7 @@ void Symtable_AddScope(Symtable *symtable)
 {
     // defaultly we want to only remove the element from the Hashtable, not destroy it (for case of buffer)
     // in this list we want to only know, if element was or was not declared in this scope
-    LList *list = List_Init((void ( * ) (void*)) NULL, (bool ( * ) (void*, void*)) Element_CompareWithString);  
+    LList *list = List_Init((void ( * ) (void*)) NULL, (const bool ( * ) (void*, const void*)) Element_CompareWithString);  
     if (list == NULL)
         ERROR_VOID("Allocation failed");
     
@@ -219,7 +229,7 @@ void Symtable_AddScope(Symtable *symtable)
 */
 void Symtable_RemoveScope(Symtable *symtable, bool destroy)
 {
-    LList* list = Stack_Pop(symtable->scopes);
+    LList* list = (LList*) Stack_Pop(symtable->scopes);
     if (list == NULL)
         ERROR_VOID("Scope stack is empty!");
 
@@ -264,7 +274,7 @@ void Symtable_ClearBuffer(Symtable *symtable)
 {
     while (!List_IsEmpty(symtable->buffer))
     {
-        LList *list = List_GetFirst(symtable->buffer);
+        LList *list = (LList*) List_GetFirst(symtable->buffer);
         List_RemoveFirst(symtable->buffer);
 
         while (!List_IsEmpty(list))
@@ -273,4 +283,20 @@ void Symtable_ClearBuffer(Symtable *symtable)
             List_RemoveFirst(list);
         }
     }
+}
+
+
+HTable *Symtable_GetHashtable(Symtable *symtable)
+{
+    return symtable->table;
+}
+
+Stack *Symtable_GetScopeStack(Symtable *symtable)
+{
+    return symtable->scopes;
+}
+
+LList *Symtable_GetBufferList(Symtable *symtable)
+{
+    return symtable->buffer;
 }
