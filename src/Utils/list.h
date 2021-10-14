@@ -14,6 +14,7 @@ struct ListElement;
 typedef struct LinkedList
 {
 	struct ListElement *begin;
+	struct ListElement* active;
 	void (*DataDtor)(void*);
 	bool (*Comp)(void*, void*);
 } LList;
@@ -59,5 +60,24 @@ void List_RemoveFirst(LList* list);
  * @return Pointer to first match
  */
 void *List_GetData(LList *list, void* con);
+
+/**
+ * @param list struct to be checked
+ * @return true if list is empty otherwise false
+ */
+bool List_IsEmpty(LList *list);
+
+/**
+ * @brief returns the first element of the list
+ * @param list the list to get the first element of
+ * @return pointer to this element, if empty, then NULL
+ */
+void *List_GetFirst(LList *list);
+
+void List_SetFirstActive(LList* list);
+
+void List_SetNextActive(LList* list);
+
+void* List_GetActive(LList* list);
 
 #endif // !__LIST__
