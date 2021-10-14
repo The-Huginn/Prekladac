@@ -4,6 +4,7 @@ extern "C"
 {
     #include "../../src/Utils/list.h"
     #include "../../src/Utils/stack.h"
+    #include "../../src/Utils/symtable_testonly.h"
     #include "../../src/Utils/logger.h"
 }
 
@@ -59,19 +60,29 @@ bool Vec2Vec3_Comp(Vec2* vec2, Vec3* vec3)
     return (vec2->x == vec3->x) && (vec2->y == vec3->y) && (vec3->z == 0);
 }
 
+class StackTests : public ::testing::Test
+{
+    public:
+    Stack* vec2;
 
-TEST(StackTests, 1_Init) {
-    Stack* vec2 = Stack_Init((void (*)(void*))Vec2_Destroy);
-   
+    void SetUp() override
+    {
+        vec2 = Stack_Init((void (*)(void*))Vec2_Destroy);
+    }
+
+    void TearDown() override
+    {
+        Stack_Destroy(vec2);
+    }
+};
+
+
+TEST_F(StackTests, 1_Init) {
     ASSERT_NE(vec2, nullptr);
     EXPECT_EQ(Stack_Top(vec2), nullptr);
-    
-    Stack_Destroy(vec2);
 }
 
-TEST(StackTests, 2_PushPop){
-    Stack* vec2 = Stack_Init((void (*)(void*))Vec2_Destroy);
-    
+TEST_F(StackTests, 2_PushPop){
     Stack_Push(vec2, Vec2_Init(3, 7));
     Vec2* top = (Vec2*)Stack_Top(vec2);
     EXPECT_EQ(top->x, 3);
@@ -100,14 +111,10 @@ TEST(StackTests, 2_PushPop){
     Stack_Pop(vec2);
     top = (Vec2*)Stack_Top(vec2);
     EXPECT_EQ(top, nullptr);
-
-    Stack_Destroy(vec2);
 }
 
-TEST(StackTests, 3_Clear)
+TEST_F(StackTests, 3_Clear)
 {
-    Stack* vec2 = Stack_Init((void (*)(void*))Vec2_Destroy);
-
     Stack_Push(vec2, Vec2_Init(3, 7));
     Stack_Push(vec2, Vec2_Init(5, 0));
     Stack_Push(vec2, Vec2_Init(14, -9));
@@ -115,24 +122,32 @@ TEST(StackTests, 3_Clear)
     Stack_Clear(vec2);
     Vec2* top = (Vec2*)Stack_Top(vec2);
     EXPECT_EQ(top, nullptr);
-
-    Stack_Destroy(vec2);
 }
 
-TEST(ListTests, 1_Init)
+class ListTests : public ::testing::Test
 {
-    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (const bool (*)(void*, void*))Vec2Vec3_Comp);
+    public:
+    LList* vec2;
 
+    void SetUp() override
+    {
+        vec2 = List_Init((void (*)(void*))Vec2_Destroy, (const bool (*)(void*, const void*))Vec2Vec3_Comp);
+    }
+
+    void TearDown() override
+    {
+        List_Destroy(vec2);
+    }
+};
+
+TEST_F(ListTests, 1_Init)
+{
     ASSERT_NE(vec2, nullptr);
     EXPECT_EQ(vec2->begin, nullptr);
-
-    List_Destroy(vec2);
 }
 
-TEST(ListTests, 2_Add)
+TEST_F(ListTests, 2_Add)
 {
-    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (const bool (*)(void*, void*))Vec2Vec3_Comp);
-
     List_AddFirst(vec2, Vec2_Init(3, 7));
 
     Vec3* vec3 = Vec3_Init(3, 7, 0);
@@ -155,14 +170,10 @@ TEST(ListTests, 2_Add)
     List_RemoveFirst(vec2);
     search = (Vec2*)List_GetData(vec2, vec3);
     EXPECT_EQ(search, nullptr);
-
-    List_Destroy(vec2);
 }
 
-TEST(ListTests, 3_Clear)
+TEST_F(ListTests, 3_Clear)
 {
-    LList* vec2 = List_Init((void (*)(void*))Vec2_Destroy, (const bool (*)(void*, void*))Vec2Vec3_Comp);
-
     List_AddFirst(vec2, Vec2_Init(3, 7));
     List_AddFirst(vec2, Vec2_Init(5, 0));
     List_AddFirst(vec2, Vec2_Init(14, -9));
@@ -176,8 +187,75 @@ TEST(ListTests, 3_Clear)
 
     search = (Vec2*)List_GetData(vec2, vec3);
     EXPECT_EQ(search, nullptr);
+}
 
-    List_Destroy(vec2);
+typedef struct
+{
+    Symtable *symtable;
+    LList *buffer;
+    Stack *scopes;
+    HTable *table;
+} SymbolTable_t;
+
+SymbolTable_t *SymbolTable_Init()
+{
+    SymbolTable_t *symtable = (SymbolTable_t*) malloc(sizeof(SymbolTable_t));
+    if (symtable == NULL)
+        ERROR("Allocation failed!");
+
+    symtable->symtable = Symtable_Init();
+    symtable->buffer = NULL;
+    symtable->scopes = NULL;
+    symtable->table = NULL;
+
+    return symtable;
+}
+
+void SymbolTable_Destroy(SymbolTable_t *symtable)
+{
+    free(symtable);
+}
+
+void SymbolTable_Update(SymbolTable_t *symtable)
+{
+    symtable->buffer = Symtable_GetBufferList(symtable->symtable);
+    symtable->scopes = Symtable_GetScopeStack(symtable->symtable);
+    symtable->table = Symtable_GetHashtable(symtable->symtable);
+}
+
+class SymbolTableTests : public ::testing::Test
+{
+    public:
+    SymbolTable_t *symtable;
+
+    void SetUp() override
+    {
+        symtable = SymbolTable_Init();
+        SymbolTable_Update(symtable);
+    }
+
+    void TearDown() override
+    {
+        SymbolTable_Destroy(symtable);
+    }
+};
+
+TEST_F(SymbolTableTests, 1_Init)
+{
+    EXPECT_EQ(List_GetFirst(symtable->buffer), nullptr);
+    EXPECT_FALSE(symtable->table == nullptr);
+    EXPECT_FALSE(Stack_Top(symtable->scopes) == nullptr);
+}
+
+TEST_F(SymbolTableTests, 2_Add)
+{
+    Element *element = Symtable_CreateElement(symtable->symtable, "ID1", 10);
+
+    EXPECT_FALSE(element == nullptr);
+
+    Element *saved_element = Symtable_GetElement(symtable->symtable, "ID1");
+
+    EXPECT_EQ(element, saved_element);
 }
 
 
