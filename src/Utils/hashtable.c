@@ -3,15 +3,15 @@
 #include"hashtable.h"
 #include"logger.h"
 
-bool DuplicateList_Comp(Stack* stack, char* key)
+bool DuplicateList_Comp(Jesus* jesus, char* key)
 {
-	if (stack == NULL)
+	if (jesus == NULL)
 		ERROR("Invalid argument!");
 
-	if (stack->top == NULL)
+	if (Jesus_GetKey(jesus) == NULL)
 		return false;
 
-	return strcmp(Element_GetKey((Element*)stack->top), key) == 0;
+	return strcmp(Jesus_GetKey(jesus), key) == 0;
 }
 
 HTable* HashTable_Init(const int32_t size)
@@ -35,17 +35,7 @@ uint32_t HashTable_Hash(const char* key)
 	return hash;
 }
 
-LList* HashTable_Find(HTable* table, const char* key)
-{
-	if (table == NULL || key == NULL)
-		ERROR("Invalid argument!");
-
-	uint32_t hash = HashTable_Hash(key) % table->size;
-	
-	return table->array[hash];
-}
-
-LList* HashTable_Insert(HTable* table, const char* key)
+Jesus* HashTable_Find(HTable* table, const char* key)
 {
 	if (table == NULL || key == NULL)
 		ERROR("Invalid argument!");
@@ -53,9 +43,32 @@ LList* HashTable_Insert(HTable* table, const char* key)
 	uint32_t hash = HashTable_Hash(key) % table->size;
 
 	if (table->array[hash] == NULL)
-		table->array[hash] = List_Init((void ( * )(void*)) Stack_Destroy, (const bool ( * )(void*, const void*)) DuplicateList_Comp);
+		return NULL;
+	
+	return List_GetData(table->array[hash], key);
+}
 
-	return table->array[hash];
+Jesus* HashTable_Insert(HTable* table, const char* key)
+{
+	if (table == NULL || key == NULL)
+		ERROR("Invalid argument!");
+
+	uint32_t hash = HashTable_Hash(key) % table->size;
+
+	if (table->array[hash] == NULL)
+	{
+		table->array[hash] = List_Init((void ( * )(void*)) Jesus_Destroy, (const bool ( * )(void*, const void*)) DuplicateList_Comp);
+
+		Stack *stack = Stack_Init((void ( * ) (void*)) NULL);  // clearing of stack is done in custom way
+        if (stack == NULL)
+            return NULL;
+
+		Jesus *jesus = Jesus_Init(key, stack);
+
+		List_AddFirst(table->array[hash], jesus);
+	}
+
+	return List_GetData(table->array[hash], key);
 }
 
 

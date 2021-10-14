@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "list.h"
+#include "jesus.h"
 
 typedef struct HashTable
 {
@@ -31,7 +32,7 @@ uint32_t HashTable_Hash(const char* key); // declaration might be removed
  * @param key Hash key
  * @return Pointer to list with given hash value
 */
-LList* HashTable_Find(HTable* table, const char* key);
+Jesus* HashTable_Find(HTable* table, const char* key);
 
 /**
  * @brief Adds new element with given key
@@ -39,7 +40,7 @@ LList* HashTable_Find(HTable* table, const char* key);
  * @param key Hash key
  * @return Pointer to newly created list, or to already existing one
 */
-LList* HashTable_Insert(HTable* table, const char* key);
+Jesus* HashTable_Insert(HTable* table, const char* key);
 
 /**
  * @brief Removes element with given key

@@ -97,7 +97,7 @@ void* List_AddFirst(LList* list, void* data)
     new_element->next = list->begin;
     list->begin = new_element;
 
-    return new_element;
+    return new_element->data;
 }
 
 void List_RemoveFirst(LList* list)

@@ -2,6 +2,7 @@
 #include <string.h>
 #include "symtable.h"
 #include "hashtable.h"
+#include "jesus.h"
 #include "list.h"
 #include "stack.h"
 #include "logger.h"
@@ -91,14 +92,14 @@ Element *Symtable_GetElement(Symtable *symtable, const char *id)
     if (id == NULL)
         ERROR("Invalid parameter!");
 
-    LList* list = (LList*) HashTable_Find(symtable->table, id);
-    if (list == NULL)
+    Jesus* jesus = (Jesus*) HashTable_Find(symtable->table, id);
+    if (jesus == NULL)
     {
         INFO("Identifier not yet in the Symbol Table - list");
         return NULL;
     }
 
-    Stack* stack = (Stack*) List_GetData(list, (void*) id);
+    Stack* stack = (Stack*) Jesus_GetStack(jesus);
     if (stack == NULL)
     {
         INFO("Identifier not yet in the Symbol Table - stack");
@@ -113,29 +114,21 @@ Element *Symtable_CreateElement(Symtable *symtable, const char *id, int flags)
     if (id == NULL)
         ERROR("Invalid parameter!");
 
-    LList* list = (LList*) HashTable_Find(symtable->table, id);
+    Jesus* jesus = (Jesus*) HashTable_Find(symtable->table, id);
     // not yet in the hash table
-    if (list == NULL)
+    if (jesus == NULL)
     {
-        list = HashTable_Insert(symtable->table, id);
-        if (list == NULL)
+        jesus = HashTable_Insert(symtable->table, id);
+        if (jesus == NULL)
             return NULL;
     }
 
-    Stack* stack = (Stack*) List_GetData(list, (void*) id);
+    Stack* stack = Jesus_GetStack(jesus);
 
-    // not yet initialized, I should initialize it, via the pointer
     if (stack == NULL)
-    {
-        stack = Stack_Init((void ( * ) (void*)) NULL);  // clearing of stack is done in different functions
-        if (stack == NULL)
-            return NULL;
+        return NULL;
 
-        // add the stack to the list
-        List_AddFirst(list, (void*)stack);
-    }
-
-    Element *element = Element_Init(id, FUNCTION, false, NULL);
+    Element *element = Element_Init(Jesus_GetKey(jesus), FUNCTION, false, NULL);
     if (element == NULL)
         return NULL;
 
@@ -148,9 +141,12 @@ Element *Symtable_CreateElement(Symtable *symtable, const char *id, int flags)
     if (Stack_IsEmpty(symtable->scopes))
         ERROR("No scopes are defined!");
 
-    LList *scope_list = (LList*) Stack_Top(stack);
+    LList *scope_list = (LList*) Stack_Top(symtable->scopes);
 
-    return (Element*) List_AddFirst(scope_list, (void*) element);
+    if (List_AddFirst(scope_list, (void*) element) == NULL)
+        return NULL;
+        
+    return element;
 }
 
 Element *Symtable_GetElementFromBuffer(Symtable *symtable, const char *id)

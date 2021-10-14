@@ -44,7 +44,7 @@ void SElement_Destroy(SElement* sElement, void (*DataDtor)(void*))
 Stack* Stack_Init(void (*DataDtor)(void*))
 {
 	if (DataDtor == NULL)
-		WARNING("Invalid parameter!");
+		WARNING("Missing DataDtor!");
 		
 	Stack* stack = (Stack*) malloc(sizeof(Stack)); // not sure this works
 	if (stack == NULL)
