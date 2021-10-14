@@ -14,6 +14,7 @@ struct ListElement;
 typedef struct LinkedList
 {
 	struct ListElement *begin;
+	struct ListElement* active;
 	void (*DataDtor)(void*);
 	bool (*Comp)(void*, void*);
 } LList;
@@ -72,5 +73,11 @@ bool List_IsEmpty(LList *list);
  * @return pointer to this element, if empty, then NULL
  */
 void *List_GetFirst(LList *list);
+
+void List_SetFirstActive(LList* list);
+
+void List_SetNextActive(LList* list);
+
+void* List_GetActive(LList* list);
 
 #endif // !__LIST__

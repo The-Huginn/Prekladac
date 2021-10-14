@@ -62,5 +62,5 @@ void *Element_GetData(Element *element)
 
 bool Element_IsEqual(Element *element1, Element *element2)
 {
-	return element1->data == element2->data;
+	return element1 == element2;
 }

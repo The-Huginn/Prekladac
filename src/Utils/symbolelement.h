@@ -61,10 +61,10 @@ void Element_Define(Element *element);
 void *Element_GetData(Element *element);
 
 /**
- * @brief checks, whether 2 elements point to the same data
+ * @brief checks, whether 2 elements pointers are the same
  * @param element1 the first element
  * @param element2 the second element
- * @return if both elements point to the same data
+ * @return if both elements pointers are the same
  */
 bool Element_IsEqual(Element *element1, Element *element2);
 

@@ -11,7 +11,7 @@ struct SymbolTable
     HTable *table;
     Stack *scopes;
     LList *buffer;
-    int32_t table_size;
+    int32_t table_size; // size is already stored in HTable
 };
 
 Symtable *Symtable_Init()
@@ -146,16 +146,19 @@ Element *Symtable_CreateElement(Symtable *symtable, const char *id, int flags)
 Element *Symtable_GetElementFromBuffer(Symtable *symtable, const char *id)
 {
     // need to iterate through the list and find the right Element
-    // LList *list = List_GetFirst(symtable->buffer);
-    // while (list != NULL)
-    // {
-    //     if ((void*) List_GetData(list, id) != NULL)
-    //         return (Element*) List_GetData(list, id);
-    // }
-    return NULL;
-}
+    List_SetFirstActive(symtable->buffer);
+    LList* list = List_GetActive(symtable->buffer);
+    while (list != NULL)
+    {
+        if ((void*) List_GetData(list, id) != NULL)
+            return (Element*) List_GetData(list, id);
 
-/**
+        List_SetNextActive(symtable->buffer);
+    }      
+    return NULL;
+}          
+           
+/**        
  * @brief this function removes the element from the HashTable, meaning it removes it's pointer from the bottom stack
  * @param symtable the Symbol Table
  * @param element the Element to be removed from the stack
@@ -202,40 +205,44 @@ void Symtable_AddScope(Symtable *symtable)
 {
     // defaultly we want to only remove the element from the Hashtable, not destroy it (for case of buffer)
     // in this list we want to only know, if element was or was not declared in this scope
-    LList *list = List_Init((void ( * ) (void*)) Element_RemoveFromHashTable, (bool ( * ) (void*, void*)) Element_CompareWithString);
+    LList *list = List_Init((void ( * ) (void*)) NULL, (bool ( * ) (void*, void*)) Element_CompareWithString);  
     if (list == NULL)
         ERROR_VOID("Allocation failed");
     
     Stack_Push(symtable->scopes, (void*) list);
 }
 
-bool Symtable_ClearList(LList *list, Symtable *symtable)
+/**
+ * @brief Removes all elements from hash table and pops scopes stack
+ * @param symtable Pointer to symtable
+ * @param destroy If set to true, frees element and list memory
+*/
+void Symtable_RemoveScope(Symtable *symtable, bool destroy)
 {
+    LList* list = Stack_Pop(symtable->scopes);
     if (list == NULL)
-        ERROR("Received empty list?!");
+        ERROR_VOID("Scope stack is empty!");
 
-    while (!List_IsEmpty(list))
+    List_SetFirstActive(list);
+    Element* data = (Element*)List_GetActive(list);
+    while (data != NULL)
     {
-        Element *element = List_GetFirst(list);
-        if (element == NULL)
-            ERROR("Can not destroy NULL!");
-
-        // remove the element from the hashtable
-        List_RemoveFirst(list);
-
+        Element_RemoveFromHashTable(symtable, data);
         //destroy the element itself
-        Element_Destroy(element);
+        if (destroy)
+            Element_Destroy(data);
+
+        List_SetNextActive(list);
     }
 
-    // destroy list itself
-    List_Destroy(list);
+    if (destroy)
+        List_Destroy(list);
+    return;
 }
 
 void Symtable_PopScope(Symtable *symtable)
 {
-    LList *list = (LList*) Stack_Pop(symtable->scopes);
-
-    (void) Symtable_ClearList(list, symtable);
+    Symtable_RemoveScope(symtable, true);
 }
 
 bool Symtable_PopScopeToBuffer(Symtable *symtable)
@@ -243,10 +250,12 @@ bool Symtable_PopScopeToBuffer(Symtable *symtable)
     if (Stack_IsEmpty(symtable->scopes))
         ERROR("Working with empty scope stack!");
 
-    LList *list = (LList*) Stack_Pop(symtable->scopes);
+    LList *list = (LList*) Stack_Top(symtable->scopes);
     
     if (list == NULL)
         ERROR("Received empty list?!");
+
+    Symtable_RemoveScope(symtable, false);
 
     return List_AddFirst(symtable->buffer, list) == NULL ? false : true;
 }
