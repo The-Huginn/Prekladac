@@ -118,6 +118,8 @@ LexicalOutput *getLexeme(FILE *file)
                 output->state = MINUS_EN_DASH;
             else if (c == ' ' || c == '\t' || c == '\n')
                 output->state = START;
+            else if (c == EOF)
+                output->state = EOF_STATE;
             else
                 output->state = ERROR_STATE;
             break;
@@ -298,13 +300,13 @@ LexicalOutput *getLexeme(FILE *file)
         case EM_DASH:
             if (c == '[')
                 output->state = EXP_BLOCK;
-            else if (c == '\n')
+            else if (c == '\n' || c == EOF)
                 output->state = START;
             else
                 output->state = LINE_COM;
             break;
         case LINE_COM:
-            if (c == '\n')
+            if (c == '\n' || c == EOF)
                 output->state = START;
             else
                 output->state = LINE_COM;
@@ -312,7 +314,7 @@ LexicalOutput *getLexeme(FILE *file)
         case EXP_BLOCK:
             if (c == '[')
                 output->state = BLOCK_COM;
-            else if (c == '\n')
+            else if (c == '\n' || c == EOF)
                 output->state = START;
             else
                 output->state = LINE_COM;
@@ -337,10 +339,13 @@ LexicalOutput *getLexeme(FILE *file)
         LexicalOutput_AddChar(output, c);
     }
 
-    // return last read char to the beginning of the stream
-    if (ungetc(LexicalOutput_GetLast(output), file) == EOF)
+    if (LexicalOutput_GetLast(output) != EOF)
     {
-        // TO DO
+        // return last read char to the beginning of the stream
+        if (ungetc(LexicalOutput_GetLast(output), file) == EOF)
+        {
+            // TO DO
+        }
     }
 
     LexicalOutput_NullLast(output);
