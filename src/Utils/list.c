@@ -142,7 +142,15 @@ bool List_IsEmpty(LList *list)
 
 void *List_GetFirst(LList *list)
 {
-    return list->begin;
+    if (list == NULL)
+        ERROR("Invalid parameter!");
+
+    if (list->begin == NULL)
+    {
+        WARNING("Accesing empty element!");
+        return NULL;
+    }
+    return list->begin->data;
 }
 
 void List_SetFirstActive(LList* list)
@@ -172,7 +180,10 @@ void* List_GetActive(LList* list)
         ERROR("Invalid argument!");
 
     if (list->active == NULL)
-        ERROR("List is not active!");
+    {
+        WARNING("List is not active!");
+        return NULL;
+    }
 
     return list->active->data;
 }

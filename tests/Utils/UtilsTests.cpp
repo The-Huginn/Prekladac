@@ -213,6 +213,7 @@ SymbolTable_t *SymbolTable_Init()
 
 void SymbolTable_Destroy(SymbolTable_t *symtable)
 {
+    Symtable_Destroy(symtable->symtable);
     free(symtable);
 }
 
@@ -256,6 +257,19 @@ TEST_F(SymbolTableTests, 2_Add)
     Element *saved_element = Symtable_GetElement(symtable->symtable, "ID1");
 
     EXPECT_EQ(element, saved_element);
+}
+
+TEST_F(SymbolTableTests, 3_ScopeFunctions1)
+{
+    Symtable_AddScope(symtable->symtable);
+
+    Element *element = Symtable_CreateElement(symtable->symtable, "ID1", 10);
+
+    Symtable_PopScopeToBuffer(symtable->symtable);
+
+    EXPECT_FALSE(element == nullptr);
+    EXPECT_EQ(Symtable_GetElement(symtable->symtable, "ID1"), nullptr);
+    EXPECT_EQ(Symtable_GetElementFromBuffer(symtable->symtable, "ID1"), element);
 }
 
 

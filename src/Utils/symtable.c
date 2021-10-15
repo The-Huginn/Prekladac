@@ -33,7 +33,7 @@ Symtable *Symtable_Init()
         goto symtable;
     }
 
-    symtable->scopes = Stack_Init((void ( * ) (void*)) List_Destroy);
+    symtable->scopes = Stack_Init((void ( * ) (void*)) NULL);
     if (symtable->scopes == NULL)
     {
         WARNING("Allocation failed! - Symbol Table");
@@ -106,6 +106,9 @@ Element *Symtable_GetElement(Symtable *symtable, const char *id)
         return NULL;
     }
 
+    if (Stack_IsEmpty(stack))
+        return NULL;
+
     return (Element*) Stack_Top(stack);    
 }
 
@@ -160,6 +163,7 @@ Element *Symtable_GetElementFromBuffer(Symtable *symtable, const char *id)
             return (Element*) List_GetData(list, id);
 
         List_SetNextActive(symtable->buffer);
+        list = (LList*) List_GetActive(symtable->buffer);
     }      
     return NULL;
 }          
@@ -172,15 +176,15 @@ Element *Symtable_GetElementFromBuffer(Symtable *symtable, const char *id)
 void Element_RemoveFromHashTable(Symtable *symtable, Element *element)
 {
     // finds list in which our Element is
-    LList *list = (LList*) HashTable_Find(symtable->table, Element_GetKey(element));
-    if (list == NULL)
+    Jesus *jesus = (Jesus*) HashTable_Find(symtable->table, Element_GetKey(element));
+    if (jesus == NULL)
     {
-        INFO("Removing element from Hashtable, list not found");
+        INFO("Removing element from Hashtable, jesus not found");
         return;
     }
 
     // finds stack in which our Element is
-    Stack *stack = (Stack*) List_GetData(list, (void*) Element_GetKey(element));
+    Stack *stack = Jesus_GetStack(jesus);
     if (stack == NULL)
     {
         INFO("Removing element from Hashtable, stack not found");
@@ -192,7 +196,7 @@ void Element_RemoveFromHashTable(Symtable *symtable, Element *element)
     // should not remove element, that does not match
     if (!Element_IsEqual(top, element))
     {
-        INFO("Removing element from Hashtable, top element in stack does not match found element");
+        WARNING("Removing element from Hashtable, top element in stack does not match found element");
         return;
     }
 
@@ -229,6 +233,12 @@ void Symtable_RemoveScope(Symtable *symtable, bool destroy)
     if (list == NULL)
         ERROR_VOID("Scope stack is empty!");
 
+    if (List_IsEmpty(list))
+    {
+        WARNING("Clearing empty scope list!");
+        return;
+    }
+
     List_SetFirstActive(list);
     Element* data = (Element*)List_GetActive(list);
     while (data != NULL)
@@ -239,6 +249,7 @@ void Symtable_RemoveScope(Symtable *symtable, bool destroy)
             Element_Destroy(data);
 
         List_SetNextActive(list);
+        data = (Element*)List_GetActive(list);
     }
 
     if (destroy)
