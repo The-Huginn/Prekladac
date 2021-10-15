@@ -24,7 +24,7 @@ Symtable *Symtable_Init()
     if (symtable == NULL)
         ERROR("Allocation failed!");
     
-    symtable->table_size = 1000000007;
+    symtable->table_size = 1000007;
 
     symtable->table = HashTable_Init(symtable->table_size);
     if (symtable->table == NULL)
@@ -40,7 +40,7 @@ Symtable *Symtable_Init()
         goto hashtable;
     }
 
-    symtable->buffer = List_Init((void ( * ) (void*)) List_Destroy, (const bool ( * ) (void*, const void*)) NULL);
+    symtable->buffer = List_Init((void ( * ) (void*)) NULL, (const bool ( * ) (void*, const void*)) NULL);
     if (symtable->buffer == NULL)
     {
         WARNING("Allocation failed! - Symbol Table");

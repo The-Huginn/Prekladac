@@ -16,12 +16,21 @@ bool DuplicateList_Comp(Jesus* jesus, char* key)
 
 HTable* HashTable_Init(const int32_t size)
 {
-	HTable* table = malloc(sizeof(uint32_t) + size * sizeof(LList*));
+	HTable* table = (HTable*)malloc(sizeof(HTable));
 	if (table == NULL)
 		ERROR("Allocation failed!");
 
+	table->array = malloc(size * sizeof(LList*));
+	if (table->array == NULL)
+	{
+		free(table);
+		ERROR("Allocation failed!");
+	}
+
 	table->size = size;
+
 	memset(table->array, 0, size * sizeof(LList*));
+
 	return table;
 }
 
@@ -95,7 +104,8 @@ void HashTable_Destroy(HTable* table)
 		if (table->array[i] != NULL)
 			List_Destroy(table->array[i]);
 
-	free(table); // not sure this works 
+	free(table->array);
+	free(table);
 
 	return;
 }

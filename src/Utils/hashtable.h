@@ -9,7 +9,7 @@ typedef struct HashTable
 {
 	uint32_t size;
 
-	LList* array[];
+	LList** array;
 } HTable;
 
 /**
