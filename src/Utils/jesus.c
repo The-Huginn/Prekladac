@@ -35,6 +35,7 @@ Jesus *Jesus_Init(const char *id, Stack *stack)
 
 void Jesus_Destroy(Jesus *jesus)
 {
+    Stack_Destroy(jesus->stack);
     free(jesus->key);
     free(jesus);
 }

@@ -33,9 +33,10 @@ Element* Element_Init(const char* key, SymbolType type, bool isDefined, void* da
 
 void Element_Destroy(Element* element)
 {
-	// TO DO free shit saved in structure pointed to by data
-	free(element->data);
-	// TO DO maybe free the key value, but it might be shared amongs all elements of stack
+	if (element->data != NULL)
+		free(element->data);
+
+	free(element);
 	return;
 }
 

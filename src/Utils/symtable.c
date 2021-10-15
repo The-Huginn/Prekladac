@@ -236,6 +236,8 @@ void Symtable_RemoveScope(Symtable *symtable, bool destroy)
     if (List_IsEmpty(list))
     {
         WARNING("Clearing empty scope list!");
+        if (destroy)
+            List_Destroy(list);
         return;
     }
 
@@ -289,6 +291,7 @@ void Symtable_ClearBuffer(Symtable *symtable)
             Element_Destroy((Element*) List_GetFirst(list));
             List_RemoveFirst(list);
         }
+        List_Destroy(list);
     }
 }
 
