@@ -16,10 +16,9 @@ typedef struct ListElement
 } LElement;
 
 /**
- * @brief creates and initializes list element and copies string value
- * @param key pointer, where the original string is
- * @param data pointer, where the stack is
- * @return newly created list element
+ * @brief Creates and initializes list element
+ * @param data Pointer to data
+ * @return Newly created list element
  */
 LElement *LElement_Init(void *data)
 {
@@ -34,8 +33,8 @@ LElement *LElement_Init(void *data)
 }
 
 /**
- * @brief destructor for list element, it's string key should not be accessed from another struct
- * @param element the list element to be destroyed
+ * @brief Destructor for list element. Dtor of element is called
+ * @param element The list element to be destroyed
  */
 void LElement_Destroy(LElement *element, void (*DataDtor)(void*))
 {

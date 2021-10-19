@@ -11,27 +11,27 @@
 typedef struct Christ Jesus;
 
 /**
- * @brief creates and inits jesus struct, allocs new space for id
- * @param id char to be copied
- * @param stack pointer to the initialized stack
- * @return pointer to Jesus
+ * @brief Creates and inits jesus struct, allocs new space for id
+ * @param id Char to be copied
+ * @param stack Pointer to the initialized stack
+ * @return Pointer to Jesus
  */
 Jesus *Jesus_Init(const char* id, Stack* stack);
 
 /**
- * @param jesus pointer to the struct
- * @return pointer to the saved char*
+ * @param jesus Jesus
+ * @return Pointer to the saved char*
  */
 char *Jesus_GetKey(Jesus *jesus);
 
 /**
- * @param jesus pointer to the struct
- * @return pointer to the stack
+ * @param jesus Jesus
+ * @return Pointer to the stack
  */
 Stack *Jesus_GetStack(Jesus *jesus);
 
 /**
- * @param jesus pointer to the struct
+ * @param jesus Jesus
  */
 void Jesus_Destroy(Jesus *jesus);
 

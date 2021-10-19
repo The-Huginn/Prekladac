@@ -10,10 +10,10 @@
 
 struct SymbolElement
 {
-	SymbolType type;	//! type of Symbol Element for further casting and destructors
-	bool isDefined;		//! bool value deciding whether Symbol was defined
-	const char* key;	//! pointer to the string with key, currently is not allocated in SymbolElement
-	void* data;			//! pointer to the data, should be casted
+	SymbolType type;	//! Type of Symbol Element for further casting and destructors
+	bool isDefined;		//! Bool value deciding whether Symbol was defined
+	const char* key;	//! Pointer to the string with key, currently is not allocated in SymbolElement
+	void* data;			//! Pointer to the data, should be casted
 
 };
 

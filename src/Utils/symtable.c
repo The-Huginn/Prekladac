@@ -57,6 +57,8 @@ Symtable *Symtable_Init()
     // here is succesful return
     return symtable;
 
+
+    // freeing functions for partially successful allocs
     scopes:
     free(symtable->scopes);
 
@@ -71,14 +73,14 @@ Symtable *Symtable_Init()
 
 void Symtable_Destroy(Symtable *symtable)
 {
-    // clear all Elements from active stack
+    // clear Stack of Scopes
     while (!Stack_IsEmpty(symtable->scopes))
         Symtable_PopScope(symtable);
 
-    // clear all Elements from buffer
+    // clear all Scopes pushed to Buffer
     Symtable_ClearBuffer(symtable);
 
-    // now table, scopes and buffer should be cleared from Elements
+    // Free all structures
     HashTable_Destroy(symtable->table);
     Stack_Destroy(symtable->scopes);
     List_Destroy(symtable->buffer);
@@ -144,12 +146,10 @@ Element *Symtable_CreateElement(Symtable *symtable, const char *id, int flags)
     if (Stack_IsEmpty(symtable->scopes))
         ERROR("No scopes are defined!");
 
+    // current scope
     LList *scope_list = (LList*) Stack_Top(symtable->scopes);
 
-    if (List_AddFirst(scope_list, (void*) element) == NULL)
-        return NULL;
-        
-    return element;
+    return List_AddFirst(scope_list, (void*) element);
 }
 
 Element *Symtable_GetElementFromBuffer(Symtable *symtable, const char *id)
@@ -169,13 +169,13 @@ Element *Symtable_GetElementFromBuffer(Symtable *symtable, const char *id)
 }          
            
 /**        
- * @brief this function removes the element from the HashTable, meaning it removes it's pointer from the bottom stack
- * @param symtable the Symbol Table
- * @param element the Element to be removed from the stack
+ * @brief This function removes the element from the HashTable, meaning it removes it's pointer
+ * @param symtable Symbol Table
+ * @param element Element to be removed from the stack
  */
 void Element_RemoveFromHashTable(Symtable *symtable, Element *element)
 {
-    // finds list in which our Element is
+    // finds struct Jesus<char, stack> in which our Element is
     Jesus *jesus = (Jesus*) HashTable_Find(symtable->table, Element_GetKey(element));
     if (jesus == NULL)
     {
@@ -183,7 +183,6 @@ void Element_RemoveFromHashTable(Symtable *symtable, Element *element)
         return;
     }
 
-    // finds stack in which our Element is
     Stack *stack = Jesus_GetStack(jesus);
     if (stack == NULL)
     {
@@ -224,12 +223,13 @@ void Symtable_AddScope(Symtable *symtable)
 
 /**
  * @brief Removes all elements from hash table and pops scopes stack
- * @param symtable Pointer to symtable
- * @param destroy If set to true, frees element and list memory
+ * @param symtable Symbol table
+ * @param destroy If set to true, frees elements and list memory
 */
 void Symtable_RemoveScope(Symtable *symtable, bool destroy)
 {
-    LList* list = (LList*) Stack_Pop(symtable->scopes);
+    LList* list = (LList*) Stack_Top(symtable->scopes);
+    Stack_Pop(symtable->scopes);
     if (list == NULL)
         ERROR_VOID("Scope stack is empty!");
 
