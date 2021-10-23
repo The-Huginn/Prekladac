@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(LLTableGenerator)
 
-SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD 20)
 SET(CMAKE_C_STANDARD 99)
 
 
