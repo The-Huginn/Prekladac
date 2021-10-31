@@ -12,6 +12,13 @@ ostream& operator<<(ostream& os, const set<string>& set)
 	return os;
 }
 
+ostream& operator<<(ostream& os, const vector<string>& set)
+{
+	for (auto& data : set)
+		os << data << " ";
+	return os;
+}
+
 set<string> operator+(const set<string>& a, const set<string>& b)
 {
 	set<string> c(a);

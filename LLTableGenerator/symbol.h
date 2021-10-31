@@ -11,6 +11,7 @@ using namespace std;
 
 
 ostream& operator<<(ostream& os, const set<string>& set);
+ostream& operator<<(ostream& os, const vector<string>& set);
 set<string> operator+(const set<string>& a, const set<string>& b);
 
 /**
