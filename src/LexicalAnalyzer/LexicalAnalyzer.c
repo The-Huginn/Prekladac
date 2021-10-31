@@ -10,10 +10,13 @@
 #include <stdlib.h>
 #include "LexicalAnalyzer.h"
 #include "LexicalFSM.h"
+#include "../Utils/stack.h"
 
 char *keywords[] = {"and", "boolean", "do", "else", "elseif", "end", "false", "function", "global", "if", "integer", "local", "nil", "not", "number", "or", "require", "return", "string", "then", "true", "while"};
 
 #define KEYWORDS_SUM 22
+
+static Stack *stack = NULL;
 
 /**
  * @brief decides whether the lexeme is a keyword
@@ -33,6 +36,20 @@ int IsKeyWord(LexicalOutput *lexeme)
 
 Token *getToken(FILE *input)
 {
+    if (stack == NULL)
+    {
+        stack = Stack_Init((void (*)(void*)) NULL);
+        if (stack == NULL)
+            return NULL;
+    }
+
+    if (!Stack_IsEmpty(stack))
+    {
+        Token *token = Stack_Top(stack);
+        Stack_Pop(stack);
+        return token;
+    }
+
     Token *token = (Token*) malloc(sizeof(Token));
 
     if (token == NULL)  // TO DO error msg
@@ -59,7 +76,7 @@ Token *getToken(FILE *input)
         else
         {
             // needs to be redone, one enum has to be renamed
-            // token->type = F_ASS + getFinalState(lexeme) - F_ASS;
+            token->type = T_ASS + getFinalState(lexeme) - F_ASS;
 
             // need to send value
             if (getFinalState(lexeme) == F_ID ||
@@ -76,4 +93,27 @@ Token *getToken(FILE *input)
     freeLexeme(lexeme);
 
     return token;
+}
+
+void returnToken(Token *token)
+{
+    if (stack == NULL)
+        return;
+
+    Stack_Push(stack, token);
+}
+
+void LexicalDestroy()
+{
+    if (stack == NULL)
+        return;
+
+    while (!Stack_IsEmpty(stack))
+    {
+        Token *token = Stack_Top(stack);
+        // token free function
+        Stack_Pop(stack);
+    }
+
+    Stack_Destroy(stack);    
 }
