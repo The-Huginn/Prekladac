@@ -36,7 +36,7 @@ int LexicalOutput_IsFinal(LexicalOutput *output)
  */
 void LexicalOutput_AddChar(LexicalOutput *output, int data)
 {
-    if (output->pos == MAX_LEXEME_LEN - 1)
+    if (output->pos == MAX_LEXEME_LEN - 2)
         return;
     output->lexeme[++(output->pos)] = (char) data;
 }
