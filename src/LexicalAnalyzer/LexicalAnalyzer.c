@@ -8,23 +8,24 @@
 #include "LexicalAnalyzer.h"
 #include "LexicalFSM.h"
 
-#define KEYWORDS_SUM 15
-char *keywords[] = {"do", "else", "end", "function", "global", "if", "integer", "local", "nil", "number", "require", "return", "string", "then", "while"};
+char *keywords[] = {"and", "boolean", "do", "else", "elseif", "end", "false", "function", "global", "if", "integer", "local", "nil", "not", "number", "or", "require", "return", "string", "then", "true", "while"};
+
+#define KEYWORDS_SUM 22
 
 /**
  * @brief decides whether the lexeme is a keyword
  * @param lexeme pointer to the lexem struct we want to check
- * @return returns 1 upon keyword, else 0
+ * @return returns index of keyword in array, else -1
  */
 int IsKeyWord(LexicalOutput *lexeme)
 {
     for (int i = 0; i < KEYWORDS_SUM; i++)
     {
         if (strcmp(getString(lexeme), keywords[i]) == 0)
-            return 1;
+            return i;
     }
 
-    return 0;
+    return -1;
 }
 
 Token *getToken(FILE *input)
