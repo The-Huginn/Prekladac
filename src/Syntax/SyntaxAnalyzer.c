@@ -28,7 +28,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
         if (topToBottomStack == NULL)
             return;
 
-        Symbol *a = Symbol_Init(true, EOF_STATE);
+        Symbol *a = Symbol_Init(true, $);
         Stack_Push(topToBottomStack, a);
         // replace 10 with startin NON TERMINAL
         // a = Symbol_Init(false, 10);
@@ -38,7 +38,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
     static Token *token;
     Symbol *top = Stack_Top(topToBottomStack);
 
-    if (Symbol_IsTerminal(top) && (Terminal)Symbol_getValue(top) == EOF_STATE)
+    if (Symbol_IsTerminal(top) && (Terminal)Symbol_getValue(top) == $)
     {
         if (getType(token) == $)
             return 1;
