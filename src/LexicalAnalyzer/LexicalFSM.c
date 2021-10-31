@@ -137,7 +137,7 @@ LexicalOutput *getLexeme(FILE *file)
             else if (c == 'e' || c == 'E')
                 output->state = EXPONENT;
             else
-                output->state = F_INT;
+                output->state = F_INTEGER;
             break;
         case POINT:
             if (c >= '0' && c <= '9')
@@ -145,7 +145,7 @@ LexicalOutput *getLexeme(FILE *file)
             else if (c == 'e' || c == 'E')
                 output->state = EXPONENT;
             else
-                output->state = F_FLOAT;
+                output->state = F_NUMBER;
             break;
         case EXPONENT:
             if (c >= '0' && c <= '9')
@@ -165,7 +165,7 @@ LexicalOutput *getLexeme(FILE *file)
             if (c >= '0' && c <= '9')
                 output->state = EXP_PART;
             else
-                output->state = F_FLOAT;
+                output->state = F_NUMBER;
             break;
         case LOAD_STRING:
             if ((c > 31 && c <= 255) && c != '"' && c != 92) // ascii(\) = 92
