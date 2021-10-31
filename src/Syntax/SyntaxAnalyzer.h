@@ -1,0 +1,20 @@
+#ifndef __SYNTAX_ANALYZER_H__
+#define __SYNTAX_ANALYZER_H__
+/**
+ * @file SyntaxAnalyzer.h
+ * @brief This file declares interface for syntax analyzer to parse through the source code and generate assembly code
+ * @author Rastislav Budinsky
+ */
+
+#include <stdio.h>
+
+/**
+ * @brief checks source code and generates assembly code
+ * @param input source code stream
+ * @param output assembly output stream
+ * @param error_output stream for everything else
+ */
+void parseAndGenerate(FILE *input, FILE *output, FILE* error_output);
+
+
+#endif // !__SYNTAX_ANALYZER_H__
