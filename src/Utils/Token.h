@@ -16,4 +16,16 @@ typedef struct {
     void *attribute;
 } Token;
 
+/**
+ * @param token
+ * @return enum type of token
+ */
+Terminal getType(Token *token);
+
+/**
+ * @param token
+ * @return data of token
+ */
+void *getData(Token *token);
+
 #endif // !TOKEN_H
