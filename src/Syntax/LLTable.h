@@ -7,6 +7,7 @@
 #ifndef __LLTABLE_H__
 #define __LLTABLE_H__
 
+#include "LLTableSizes.h"
 #include <stdbool.h>
 
 typedef struct
@@ -21,7 +22,7 @@ typedef struct
     Symbol symbols[];
 }Rule;
 
-extern int LLTable[][]; //! 2D LLTable with pointers to the Rule
+extern int LLTable[LLTABLE_HEIGHT][LLTABLE_WIDTH]; //! 2D LLTable with pointers to the Rule
 
 extern Rule rules[];    //! array of Rules
 

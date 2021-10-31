@@ -24,9 +24,9 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
     static Stack *topToBottomStack = NULL;
     if (topToBottomStack == NULL)
     {
-        topToBottomStack = Stack_Init(Symbol_Destroy);
+        topToBottomStack = Stack_Init((void (*)(void*))Symbol_Destroy);
         if (topToBottomStack == NULL)
-            return;
+            return -1;
 
         Symbol *a = Symbol_Init(true, $);
         Stack_Push(topToBottomStack, a);

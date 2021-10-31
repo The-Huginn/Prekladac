@@ -8,6 +8,7 @@ SET(CMAKE_C_STANDARD 99)
 set(SYNTAX_FILES
     SyntaxAnalyzer.c
     SyntaxAnalyzer.h
+    LLTableSizes.h
     LLTable.c
     LLTable.h
     Terminal.h
