@@ -1,6 +1,9 @@
 /**
  * @file LexicalAnalyzer.c
  * @brief This file implements interface for communication with lexical analyzer
+ * @note keywords and terminal enum should be ordered
+ * magic constants: K_AND should be the first keyword terminal
+ *                  F_ASS should be the first final state
  * @author Rastislav Budinsky
  */
 #include <string.h>
@@ -36,25 +39,38 @@ Token *getToken(FILE *input)
         return NULL;
 
     LexicalOutput *lexeme = getLexeme(input);
+    if (lexeme == NULL)
+    {
+        free(token);
+        return NULL;
+    }
 
     if (getFinalState(lexeme) == ERROR_STATE)
-    {
         token->type = ERROR;
-    }
-    else if (getFinalState(lexeme) == F_ID)
+    else if (getFinalState(lexeme) == EOF_STATE)
+        token->type = END_OF_FILE;
+    else
     {
-        if (IsKeyWord(lexeme))
+        int keyword = IsKeyWord(lexeme);
+        if (keyword != -1)
         {
-            // TO DO
+            token->type = K_AND + keyword;
         }
         else
         {
-            // TO DO
+            // needs to be redone, one enum has to be renamed
+            // token->type = F_ASS + getFinalState(lexeme) - F_ASS;
+
+            // need to send value
+            if (getFinalState(lexeme) == F_ID ||
+                getFinalState(lexeme) == F_INTEGER ||
+                getFinalState(lexeme) == F_NUMBER ||
+                getFinalState(lexeme) == F_STRING)
+            {
+                // token->attribute = strdup(getString(lexeme));
+                // token->attribute = symtable.getElement(getString(lexeme));
+            }
         }
-    }
-    else
-    {
-        // TO DO
     }
 
     freeLexeme(lexeme);
