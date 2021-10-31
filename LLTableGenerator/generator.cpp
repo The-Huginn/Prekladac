@@ -8,6 +8,7 @@
 #include"nonterminal.h"
 #include"terminal.h"
 #include"rule.h"
+#include"fileoutput.h"
 
 using namespace std;
 
@@ -72,15 +73,13 @@ void Factorization()
 		{
 			if (category.size() > 1)
 			{
-				// category[0]->Print();
-				// category[1]->Print();
-				string nonterminal_name = category[0]->GetLeft() + "'";
+				string nonterminal_name = category[0]->GetLeft() + "_";
 				shared_ptr<NonTerminal> new_nonterminal = dynamic_pointer_cast<NonTerminal>(Symbol::AddSymbol(NonTerminal::Pair(nonterminal_name)));
 				Rule::AddRule(Rule::SharedPtr(category[0]->GetLeft(), { category[0]->GetRight(0,1)[0], nonterminal_name }));
 				for (auto rule : category)
 				{
 					auto test = rule->GetRight(1, -1);
-					Rule::AddRule(Rule::SharedPtr(nonterminal_name, (rule->GetRight().size() > 1) ? rule->GetRight(1, -1) : vector<string>{ "epsilon" })); //  not sure
+					Rule::AddRule(Rule::SharedPtr(nonterminal_name, (rule->GetRight().size() > 1) ? rule->GetRight(1, -1) : vector<string>{ "epsilon" })); //  k_not sure
 					Rule::RemoveRule(rule);
 				}
 				to_check.push_back(new_nonterminal);
@@ -92,7 +91,7 @@ void Factorization()
 }
 
 /**
- * @brief Removes left recursion from rules by creating right recursion with new nonterminal and epsilon transition
+ * @brief Removes left recursion from rules by creating right recursion with new nonterminal k_and epsilon transition
 */
 void RemoveLeftRecursion()
 {
@@ -191,7 +190,6 @@ void CalculateFollow()
 		for (shared_ptr<Rule> rule : rules)
 		{
 			auto right = rule->GetRight();
-			cout << right << endl;
 			for (int i = 0; i < right.size() - 1; i++)
 			{
 				set<string> follow = Symbol::First({ right.begin() + i + 1, right.end() });
@@ -276,20 +274,20 @@ int main()
 {
 	/*
 	Symbol::InitTable({
-		NonTerminal::Pair("<prog>", true),
+		NonTerminal::Pair("prog", true),
 		Terminal::Pair("begin"),
-		NonTerminal::Pair("<st-list>"),
-		NonTerminal::Pair("<stat>"),
+		NonTerminal::Pair("st-list"),
+		NonTerminal::Pair("stat"),
 		Terminal::Pair(";"),
-		Terminal::Pair("end"),
+		Terminal::Pair("k_end"),
 		Terminal::Pair("read"),
 		Terminal::Pair("id"),
 		Terminal::Pair("write"),
-		NonTerminal::Pair("<item>"),
+		NonTerminal::Pair("item"),
 		Terminal::Pair(":="),
 		Terminal::Pair("add"),
 		Terminal::Pair("("),
-		NonTerminal::Pair("<it-list>"),
+		NonTerminal::Pair("it-list"),
 		Terminal::Pair(","),
 		Terminal::Pair(")"),
 		Terminal::Pair("int"),
@@ -298,19 +296,19 @@ int main()
 	});
 	/
 	Rule::InitVector({
-		Rule::SharedPtr("<prog>", {"begin", "<st-list>"}),
-		Rule::SharedPtr("<st-list>", {"<stat>", ";", "<st-list>"}),
-		Rule::SharedPtr("<st-list>", {"end"}),
-		Rule::SharedPtr("<stat>", {"read", "id"}),
-		Rule::SharedPtr("<stat>", {"write", "<item>"}),
-		Rule::SharedPtr("<stat>", {"id", ":=", "add", "(", "<item>", "<it-list>"}),
-		Rule::SharedPtr("<it-list>", {",", "<item>", "<it-list>"}),
-		Rule::SharedPtr("<it-list>", {")"}),
-		Rule::SharedPtr("<item>", {"int"}),
-		Rule::SharedPtr("<item>", {"id"}),
-		Rule::SharedPtr("<item>", { "<item>", ")" }),   random
-		Rule::SharedPtr("<it-list>", {",", "add"}),   random
-		Rule::SharedPtr("<it-list>", {",", "<item>", "id"}),   random
+		Rule::SharedPtr("prog", {"begin", "st-list"}),
+		Rule::SharedPtr("st-list", {"stat", ";", "st-list"}),
+		Rule::SharedPtr("st-list", {"k_end"}),
+		Rule::SharedPtr("stat", {"read", "id"}),
+		Rule::SharedPtr("stat", {"write", "item"}),
+		Rule::SharedPtr("stat", {"id", ":=", "add", "(", "item", "it-list"}),
+		Rule::SharedPtr("it-list", {",", "item", "it-list"}),
+		Rule::SharedPtr("it-list", {")"}),
+		Rule::SharedPtr("item", {"int"}),
+		Rule::SharedPtr("item", {"id"}),
+		Rule::SharedPtr("item", { "item", ")" }),   random
+		Rule::SharedPtr("it-list", {",", "add"}),   random
+		Rule::SharedPtr("it-list", {",", "item", "id"}),   random
 
 	});*/
 	
@@ -338,94 +336,94 @@ int main()
 		});*/
 	
 	Symbol::InitTable({
-		NonTerminal::Pair("<program>", true),
-		NonTerminal::Pair("<global_scope>"),
-		NonTerminal::Pair("<function_declare>"),
-		NonTerminal::Pair("<function_define>"),
-		NonTerminal::Pair("<function_call>"),
+		NonTerminal::Pair("program", true),
+		NonTerminal::Pair("global_scope"),
+		NonTerminal::Pair("function_declare"),
+		NonTerminal::Pair("function_define"),
+		NonTerminal::Pair("function_call"),
 
-		NonTerminal::Pair("<parameters>"),
-		NonTerminal::Pair("<parameter>"),
-		NonTerminal::Pair("<parameter_name>"),
-		NonTerminal::Pair("<parameters_defined>"),
-		NonTerminal::Pair("<parameter_defined>"),
+		NonTerminal::Pair("parameters"),
+		NonTerminal::Pair("parameter"),
+		NonTerminal::Pair("parameter_name"),
+		NonTerminal::Pair("parameters_defined"),
+		NonTerminal::Pair("parameter_defined"),
 
-		NonTerminal::Pair("<returning>"),
+		NonTerminal::Pair("returning"),
 
-		NonTerminal::Pair("<scope>"),
-		NonTerminal::Pair("<declare>"),
-		NonTerminal::Pair("<id>"),
-		NonTerminal::Pair("<if>"),
-		NonTerminal::Pair("<while>"),
-		NonTerminal::Pair("<return>"),
-		NonTerminal::Pair("<declare_assign>"),
-		NonTerminal::Pair("<assign>"),
+		NonTerminal::Pair("scope"),
+		NonTerminal::Pair("declare"),
+		NonTerminal::Pair("id"),
+		NonTerminal::Pair("if"),
+		NonTerminal::Pair("while"),
+		NonTerminal::Pair("return"),
+		NonTerminal::Pair("declare_assign"),
+		NonTerminal::Pair("assign"),
 
-		NonTerminal::Pair("<condition>"),
-		NonTerminal::Pair("<condition_branch>"),
+		NonTerminal::Pair("condition"),
+		NonTerminal::Pair("condition_branch"),
 		
-		NonTerminal::Pair("<lvalues>"),
-		NonTerminal::Pair("<lvalue>"),
-		NonTerminal::Pair("<rvalues>"),
-		NonTerminal::Pair("<rvalue>"),
+		NonTerminal::Pair("lvalues"),
+		NonTerminal::Pair("lvalue"),
+		NonTerminal::Pair("rvalues"),
+		NonTerminal::Pair("rvalue"),
 
-		NonTerminal::Pair("<expression>"),
-		NonTerminal::Pair("<expression_2>"),
-		NonTerminal::Pair("<expression_3>"),
+		NonTerminal::Pair("expression"),
+		NonTerminal::Pair("expression_2"),
+		NonTerminal::Pair("expression_3"),
 
-		NonTerminal::Pair("<datatypes>"),
-		NonTerminal::Pair("<datatype>"),
+		NonTerminal::Pair("datatypes"),
+		NonTerminal::Pair("datatype"),
 
-		NonTerminal::Pair("<unary_operator>"),
-		NonTerminal::Pair("<binary_operator>"),
+		NonTerminal::Pair("unary_operator"),
+		NonTerminal::Pair("binary_operator"),
 
 
-		Terminal::Pair("global"),
-		Terminal::Pair("function"),
-		Terminal::Pair("f_id"),
-		Terminal::Pair("f_integer"),
-		Terminal::Pair("f_number"),
-		Terminal::Pair("f_string"),
-		Terminal::Pair("f_minus"),
-		Terminal::Pair("f_plus"),
-		Terminal::Pair("f_mul"),
-		Terminal::Pair("f_div"),
-		Terminal::Pair("f_int_div"),
-		Terminal::Pair("f_def"),
-		Terminal::Pair("f_comma"),
-		Terminal::Pair("f_len"),
-		Terminal::Pair("f_left"),
-		Terminal::Pair("f_right"),
-		Terminal::Pair("f_less"),
-		Terminal::Pair("f_leq"),
-		Terminal::Pair("f_grt"),
-		Terminal::Pair("f_geq"),
-		Terminal::Pair("f_concat"),
-		Terminal::Pair("f_ass"),
-		Terminal::Pair("f_eq"),
-		Terminal::Pair("f_neq"),
-		Terminal::Pair("integer"),
-		Terminal::Pair("number"),
-		Terminal::Pair("string"),
-		Terminal::Pair("nil"),
-		Terminal::Pair("local"),
-		Terminal::Pair("boolean"),
-		Terminal::Pair("require"),
-		Terminal::Pair("true"),
-		Terminal::Pair("false"),
-		Terminal::Pair("and"),
-		Terminal::Pair("or"),
-		Terminal::Pair("not"),
+		Terminal::Pair("k_global"),
+		Terminal::Pair("k_function"),
+		Terminal::Pair("t_id"),
+		Terminal::Pair("t_integer"),
+		Terminal::Pair("t_number"),
+		Terminal::Pair("t_string"),
+		Terminal::Pair("t_minus"),
+		Terminal::Pair("t_plus"),
+		Terminal::Pair("t_mul"),
+		Terminal::Pair("t_div"),
+		Terminal::Pair("t_int_div"),
+		Terminal::Pair("t_def"),
+		Terminal::Pair("t_comma"),
+		Terminal::Pair("t_len"),
+		Terminal::Pair("t_left"),
+		Terminal::Pair("t_right"),
+		Terminal::Pair("t_less"),
+		Terminal::Pair("t_leq"),
+		Terminal::Pair("t_grt"),
+		Terminal::Pair("t_geq"),
+		Terminal::Pair("t_concat"),
+		Terminal::Pair("t_ass"),
+		Terminal::Pair("t_eq"),
+		Terminal::Pair("t_neq"),
+		Terminal::Pair("k_integer"),
+		Terminal::Pair("k_number"),
+		Terminal::Pair("k_string"),
+		Terminal::Pair("k_nil"),
+		Terminal::Pair("k_local"),
+		Terminal::Pair("k_boolean"),
+		Terminal::Pair("k_require"),
+		Terminal::Pair("k_true"),
+		Terminal::Pair("k_false"),
+		Terminal::Pair("k_and"),
+		Terminal::Pair("k_or"),
+		Terminal::Pair("k_not"),
 
-		Terminal::Pair("if"),
-		Terminal::Pair("then"),
-		Terminal::Pair("else"),
-		Terminal::Pair("elseif"),
-		Terminal::Pair("end"),
+		Terminal::Pair("k_if"),
+		Terminal::Pair("k_then"),
+		Terminal::Pair("k_else"),
+		Terminal::Pair("k_elseif"),
+		Terminal::Pair("k_end"),
 
-		Terminal::Pair("return"),
-		Terminal::Pair("while"),
-		Terminal::Pair("do"),
+		Terminal::Pair("k_return"),
+		Terminal::Pair("k_while"),
+		Terminal::Pair("k_do"),
 
 		Terminal::Pair("epsilon", true),
 		Terminal::Pair("$")
@@ -433,97 +431,97 @@ int main()
 
 
 	Rule::InitVector({
-		Rule::SharedPtr("<declare>", {"local", "<lvalues>", "f_def", "<datatypes>", "<declare_assign>"}), 
-		Rule::SharedPtr("<declare_assign>", {"<assign>"}), 
-		Rule::SharedPtr("<declare_assign>", {"epsilon"}), 
-		Rule::SharedPtr("<lvalues>", {"<lvalues>", "f_comma", "<lvalue>"}), 
-		Rule::SharedPtr("<lvalues>", {"<lvalue>"}), 
-		Rule::SharedPtr("<lvalue>", {"f_id"}), 
-		Rule::SharedPtr("<rvalues>", {"<rvalues>", "f_comma", "<rvalue>"}), 
-		Rule::SharedPtr("<rvalues>", {"<rvalue>"}), 
-		Rule::SharedPtr("<rvalue>", {"<expression>"}), 
+		Rule::SharedPtr("declare", {"k_local", "lvalues", "t_def", "datatypes", "declare_assign"}), 
+		Rule::SharedPtr("declare_assign", {"assign"}), 
+		Rule::SharedPtr("declare_assign", {"epsilon"}), 
+		Rule::SharedPtr("lvalues", {"lvalues", "t_comma", "lvalue"}), 
+		Rule::SharedPtr("lvalues", {"lvalue"}), 
+		Rule::SharedPtr("lvalue", {"t_id"}), 
+		Rule::SharedPtr("rvalues", {"rvalues", "t_comma", "rvalue"}), 
+		Rule::SharedPtr("rvalues", {"rvalue"}), 
+		Rule::SharedPtr("rvalue", {"expression"}), 
 		
-		Rule::SharedPtr("<id>", {"f_id", "f_left", "<rvalues>", "f_right"}), 
-		Rule::SharedPtr("<id>", {"f_id", "<assign>" }), 
-		Rule::SharedPtr("<id>", {"f_id", "f_comma", "<lvalues>", "<assign>"}), 
-		Rule::SharedPtr("<assign>", {"f_ass", "<rvalues>"}), 
+		Rule::SharedPtr("id", {"t_id", "t_left", "rvalues", "t_right"}), 
+		Rule::SharedPtr("id", {"t_id", "assign" }), 
+		Rule::SharedPtr("id", {"t_id", "t_comma", "lvalues", "assign"}), 
+		Rule::SharedPtr("assign", {"t_ass", "rvalues"}), 
 		
-		Rule::SharedPtr("<expression>", {"<expression>", "<binary_operator>", "<expression_2>"}), 
-		Rule::SharedPtr("<expression>", {"<expression_2>"}), 
-		Rule::SharedPtr("<expression_2>", {"<unary_operator>", "<expression_3>"}), 
-		Rule::SharedPtr("<expression_2>", {"<expression_3>"}), 
-		Rule::SharedPtr("<expression_3>", {"f_left", "<expression>", "f_right" }), 
-		Rule::SharedPtr("<expression_3>", {"f_id", "f_left", "<rvalues>", "f_right"}),
-		Rule::SharedPtr("<expression_3>", {"f_id"}), 
-		Rule::SharedPtr("<expression_3>", {"f_integer"}), 
-		Rule::SharedPtr("<expression_3>", {"f_number"}), 
-		Rule::SharedPtr("<expression_3>", {"f_string"}),
-		Rule::SharedPtr("<expression_3>", {"nil"}), 
-		Rule::SharedPtr("<expression_3>", {"true"}),
-		Rule::SharedPtr("<expression_3>", {"false"}),  
+		Rule::SharedPtr("expression", {"expression", "binary_operator", "expression_2"}), 
+		Rule::SharedPtr("expression", {"expression_2"}), 
+		Rule::SharedPtr("expression_2", {"unary_operator", "expression_3"}), 
+		Rule::SharedPtr("expression_2", {"expression_3"}), 
+		Rule::SharedPtr("expression_3", {"t_left", "expression", "t_right" }), 
+		Rule::SharedPtr("expression_3", {"t_id", "t_left", "rvalues", "t_right"}),
+		Rule::SharedPtr("expression_3", {"t_id"}), 
+		Rule::SharedPtr("expression_3", {"t_integer"}), 
+		Rule::SharedPtr("expression_3", {"t_number"}), 
+		Rule::SharedPtr("expression_3", {"t_string"}),
+		Rule::SharedPtr("expression_3", {"k_nil"}), 
+		Rule::SharedPtr("expression_3", {"k_true"}),
+		Rule::SharedPtr("expression_3", {"k_false"}),  
 
-		Rule::SharedPtr("<unary_operator>", {"f_len"}),  
-		Rule::SharedPtr("<unary_operator>", {"not"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_plus"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_minus"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_mul"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_div"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_int_div"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_concat"}),  
+		Rule::SharedPtr("unary_operator", {"t_len"}),  
+		Rule::SharedPtr("unary_operator", {"k_not"}),  
+		Rule::SharedPtr("binary_operator", {"t_plus"}),  
+		Rule::SharedPtr("binary_operator", {"t_minus"}),  
+		Rule::SharedPtr("binary_operator", {"t_mul"}),  
+		Rule::SharedPtr("binary_operator", {"t_div"}),  
+		Rule::SharedPtr("binary_operator", {"t_int_div"}),  
+		Rule::SharedPtr("binary_operator", {"t_concat"}),  
 
-		Rule::SharedPtr("<datatype>", {"integer"}),  
-		Rule::SharedPtr("<datatype>", {"number"}),  
-		Rule::SharedPtr("<datatype>", {"string"}),  
-		Rule::SharedPtr("<datatype>", {"boolean"}),  
+		Rule::SharedPtr("datatype", {"k_integer"}),  
+		Rule::SharedPtr("datatype", {"k_number"}),  
+		Rule::SharedPtr("datatype", {"k_string"}),  
+		Rule::SharedPtr("datatype", {"k_boolean"}),  
 
-		Rule::SharedPtr("<binary_operator>", {"f_less"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_leq"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_grt"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_geq"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_eq"}),  
-		Rule::SharedPtr("<binary_operator>", {"f_neq"}),  
-		Rule::SharedPtr("<binary_operator>", {"and"}),  
-		Rule::SharedPtr("<binary_operator>", {"or"}),  
+		Rule::SharedPtr("binary_operator", {"t_less"}),  
+		Rule::SharedPtr("binary_operator", {"t_leq"}),  
+		Rule::SharedPtr("binary_operator", {"t_grt"}),  
+		Rule::SharedPtr("binary_operator", {"t_geq"}),  
+		Rule::SharedPtr("binary_operator", {"t_eq"}),  
+		Rule::SharedPtr("binary_operator", {"t_neq"}),  
+		Rule::SharedPtr("binary_operator", {"k_and"}),  
+		Rule::SharedPtr("binary_operator", {"k_or"}),  
 
-		Rule::SharedPtr("<if>", {"if", "<condition>", "end"}),  
-		Rule::SharedPtr("<condition>", {"<expression>", "then", "<scope>", "<condition_branch>"}),  
-		Rule::SharedPtr("<condition_branch>", {"else", "<scope>"}),  
-		Rule::SharedPtr("<condition_branch>", {"elseif", "<condition>"}),  
-		Rule::SharedPtr("<condition_branch>", {"epsilon"}),  
-		Rule::SharedPtr("<scope>", {"<if>"}),  
-		Rule::SharedPtr("<scope>", {"<declare>"}),  
-		Rule::SharedPtr("<scope>", {"<id>"}),  
-		Rule::SharedPtr("<scope>", {"<while>"}),  
-		Rule::SharedPtr("<scope>", {"<return>"}),  
-		Rule::SharedPtr("<global_scope>", {"<function_declare>"}),  
-		Rule::SharedPtr("<global_scope>", {"<function_define>"}),  
-		Rule::SharedPtr("<global_scope>", {"<function_call>"}),  
-		Rule::SharedPtr("<program>", {"require", "f_string", "<global_scope>"}),  
+		Rule::SharedPtr("if", {"k_if", "condition", "k_end"}),  
+		Rule::SharedPtr("condition", {"expression", "k_then", "scope", "condition_branch"}),  
+		Rule::SharedPtr("condition_branch", {"k_else", "scope"}),  
+		Rule::SharedPtr("condition_branch", {"k_elseif", "condition"}),  
+		Rule::SharedPtr("condition_branch", {"epsilon"}),  
+		Rule::SharedPtr("scope", {"if"}),  
+		Rule::SharedPtr("scope", {"declare"}),  
+		Rule::SharedPtr("scope", {"id"}),  
+		Rule::SharedPtr("scope", {"while"}),  
+		Rule::SharedPtr("scope", {"return"}),  
+		Rule::SharedPtr("global_scope", {"function_declare"}),  
+		Rule::SharedPtr("global_scope", {"function_define"}),  
+		Rule::SharedPtr("global_scope", {"function_call"}),  
+		Rule::SharedPtr("program", {"k_require", "t_string", "global_scope"}),  
 
-		Rule::SharedPtr("<function_call>", {"f_id", "f_left", "<rvalues>", "f_right"}),  
-		Rule::SharedPtr("<function_declare>", {"global", "f_id", "f_def", "function", "f_left", "<parameters>", "f_right", "<returning>"}),  
-		Rule::SharedPtr("<function_define>", {"function", "f_id", "f_left", "<parameters_defined>", "f_right", "<returning>", "<scope>", "end"}),  
-		Rule::SharedPtr("<parameters>", {"<parameters>", "f_comma", "<parameter>"}),  
-		Rule::SharedPtr("<parameters>", {"<parameter>"}),  
-		Rule::SharedPtr("<parameter>", {"<parameter_name>", "<datatype>"}),
-		Rule::SharedPtr("<parameters>", {"epsilon"}),
-		Rule::SharedPtr("<parameters_defined>", {"<parameters_defined>", "f_comma", "<parameter_defined>"}),
-		Rule::SharedPtr("<parameters_defined>", {"<parameter_defined>"}),
-		Rule::SharedPtr("<parameters_defined>", {"epsilon"}),
-		Rule::SharedPtr("<parameter_defined>", {"f_id", "f_def", "<datatype>"}),
-		Rule::SharedPtr("<return>", {"return", "<rvalues>"}),
-		Rule::SharedPtr("<return>", {"return"}),
-		Rule::SharedPtr("<parameter_name>", {"f_id", "f_def"}),
-		Rule::SharedPtr("<parameter_name>", {"epsilon"}),
-		Rule::SharedPtr("<returning>", {"f_def", "<datatypes>"}), 
-		Rule::SharedPtr("<returning>", {"epsilon"}),
+		Rule::SharedPtr("function_call", {"t_id", "t_left", "rvalues", "t_right"}),  
+		Rule::SharedPtr("function_declare", {"k_global", "t_id", "t_def", "k_function", "t_left", "parameters", "t_right", "returning"}),  
+		Rule::SharedPtr("function_define", {"k_function", "t_id", "t_left", "parameters_defined", "t_right", "returning", "scope", "k_end"}),  
+		Rule::SharedPtr("parameters", {"parameters", "t_comma", "parameter"}),  
+		Rule::SharedPtr("parameters", {"parameter"}),  
+		Rule::SharedPtr("parameter", {"parameter_name", "datatype"}),
+		Rule::SharedPtr("parameters", {"epsilon"}),
+		Rule::SharedPtr("parameters_defined", {"parameters_defined", "t_comma", "parameter_defined"}),
+		Rule::SharedPtr("parameters_defined", {"parameter_defined"}),
+		Rule::SharedPtr("parameters_defined", {"epsilon"}),
+		Rule::SharedPtr("parameter_defined", {"t_id", "t_def", "datatype"}),
+		Rule::SharedPtr("return", {"k_return", "rvalues"}),
+		Rule::SharedPtr("return", {"k_return"}),
+		Rule::SharedPtr("parameter_name", {"t_id", "t_def"}),
+		Rule::SharedPtr("parameter_name", {"epsilon"}),
+		Rule::SharedPtr("returning", {"t_def", "datatypes"}), 
+		Rule::SharedPtr("returning", {"epsilon"}),
 
 
 
-		Rule::SharedPtr("<datatypes>", {"<datatypes>", "f_comma", "<datatype>"}),
-		Rule::SharedPtr("<datatypes>", {"<datatype>"}),
+		Rule::SharedPtr("datatypes", {"datatypes", "t_comma", "datatype"}),
+		Rule::SharedPtr("datatypes", {"datatype"}),
 
-		Rule::SharedPtr("<while>", {"while", "<expression>", "do", "<scope>", "end"})
+		Rule::SharedPtr("while", {"k_while", "expression", "k_do", "scope", "k_end"})
 
 		});
 
@@ -544,6 +542,38 @@ int main()
 	Rule::PrintRules();
 
 	PrintLLTable();
+
+	auto terminals = Terminal::Table();
+	stringstream data;
+	data << "typedef enum Terminal { ";
+	for (auto [id, terminal] : terminals)
+	{
+		string name = terminal->GetName();
+		if (name == "epsilon")
+			continue;
+		transform(name.begin(), name.end(), name.begin(), ::toupper);
+		data << name << ", ";
+	}
+	data.seekp(-2, data.cur); 
+	data << "} Terminal;";
+
+	PrintToHeader("../../../../src/Syntax/Terminal.h", data);
+
+	auto nonterminals = NonTerminal::Table();
+	data.str("");
+	data << "typedef enum NonTerminal { ";
+	for (auto [id, nonterminal] : nonterminals)
+	{
+		string name = nonterminal->GetName();
+		transform(name.begin(), name.end(), name.begin(), ::toupper);
+		data << name << ", ";
+	}
+	data.seekp(-2, data.cur);
+	data << "} NonTerminal;";
+
+	PrintToHeader("../../../../src/Syntax/NonTerminal.h", data);
+
+
 
 	return 0;
 }
