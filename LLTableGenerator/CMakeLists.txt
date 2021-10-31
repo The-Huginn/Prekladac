@@ -16,6 +16,8 @@ set(LL_TABLE_GENERATOR_FILES
     nonterminal.h
     rule.cpp
     rule.h
+    fileoutput.cpp
+    fileoutput.h
     )
 
 set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/build/bin/${PROJECT_NAME}")
