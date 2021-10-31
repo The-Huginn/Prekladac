@@ -38,7 +38,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
     static Token *token;
     Symbol *top = Stack_Top(topToBottomStack);
 
-    if (Symbol_IsTerminal(top) && (Terminal)Symbol_getValue(top) == $)
+    if (Symbol_IsTerminal(top) && (Terminal)Symbol_GetValue(top) == $)
     {
         if (getType(token) == $)
             return 1;
@@ -47,7 +47,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
     }
     else if (Symbol_IsTerminal(top))
     {
-        if (getType(token) == (Terminal) Symbol_getValue(top))
+        if (getType(token) == (Terminal) Symbol_GetValue(top))
         {
             Stack_Pop(topToBottomStack);
             token = getToken(input);

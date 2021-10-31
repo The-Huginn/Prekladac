@@ -28,7 +28,17 @@ bool Symbol_IsTerminal(Symbol *symbol)
     return symbol->isTerminal;
 }
 
-int Symbol_getValue(Symbol *symbol)
+int Symbol_GetValue(Symbol *symbol)
 {
     return symbol->value;
+}
+
+int Rule_GetSize(Rule *rule)
+{
+    return rule->size;
+}
+
+Symbol Rule_GetSymbol(Rule *rule, int index)
+{
+    return rule->symbols[index];
 }
