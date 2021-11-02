@@ -237,7 +237,7 @@ void PrintLLTable()
 	auto terminals = Terminal::Table();
 	auto nonterminals = NonTerminal::Table();
 
-	unsigned int cell_size = 22;
+	unsigned int cell_size = 26;
 	unsigned int h_cell_size = cell_size / 2;
 
 	printf("%s\n", string((cell_size + 1) * (terminals.size() + 1) + 1, '-').c_str());
@@ -336,46 +336,46 @@ int main()
 		});*/
 	
 	Symbol::InitTable({
-		NonTerminal::Pair("program", true),
-		NonTerminal::Pair("global_scope"),
-		NonTerminal::Pair("function_declare"),
-		NonTerminal::Pair("function_define"),
-		NonTerminal::Pair("function_call"),
+		NonTerminal::Pair("nt_program", true),
+		NonTerminal::Pair("nt_global_scope"),
+		NonTerminal::Pair("nt_function_declare"),
+		NonTerminal::Pair("nt_function_define"),
+		NonTerminal::Pair("nt_function_call"),
 
-		NonTerminal::Pair("parameters"),
-		NonTerminal::Pair("parameter"),
-		NonTerminal::Pair("parameter_name"),
-		NonTerminal::Pair("parameters_defined"),
-		NonTerminal::Pair("parameter_defined"),
+		NonTerminal::Pair("nt_parameters"),
+		NonTerminal::Pair("nt_parameter"),
+		NonTerminal::Pair("nt_parameter_name"),
+		NonTerminal::Pair("nt_parameters_defined"),
+		NonTerminal::Pair("nt_parameter_defined"),
 
-		NonTerminal::Pair("returning"),
+		NonTerminal::Pair("nt_returning"),
 
-		NonTerminal::Pair("scope"),
-		NonTerminal::Pair("declare"),
-		NonTerminal::Pair("id"),
-		NonTerminal::Pair("if"),
-		NonTerminal::Pair("while"),
-		NonTerminal::Pair("return"),
-		NonTerminal::Pair("declare_assign"),
-		NonTerminal::Pair("assign"),
+		NonTerminal::Pair("nt_scope"),
+		NonTerminal::Pair("nt_declare"),
+		NonTerminal::Pair("nt_id"),
+		NonTerminal::Pair("nt_if"),
+		NonTerminal::Pair("nt_while"),
+		NonTerminal::Pair("nt_return"),
+		NonTerminal::Pair("nt_declare_assign"),
+		NonTerminal::Pair("nt_assign"),
 
-		NonTerminal::Pair("condition"),
-		NonTerminal::Pair("condition_branch"),
+		NonTerminal::Pair("nt_condition"),
+		NonTerminal::Pair("nt_condition_branch"),
 		
-		NonTerminal::Pair("lvalues"),
-		NonTerminal::Pair("lvalue"),
-		NonTerminal::Pair("rvalues"),
-		NonTerminal::Pair("rvalue"),
+		NonTerminal::Pair("nt_lvalues"),
+		NonTerminal::Pair("nt_lvalue"),
+		NonTerminal::Pair("nt_rvalues"),
+		NonTerminal::Pair("nt_rvalue"),
 
-		NonTerminal::Pair("expression"),
-		NonTerminal::Pair("expression_2"),
-		NonTerminal::Pair("expression_3"),
+		NonTerminal::Pair("nt_expression"),
+		NonTerminal::Pair("nt_expression_2"),
+		NonTerminal::Pair("nt_expression_3"),
 
-		NonTerminal::Pair("datatypes"),
-		NonTerminal::Pair("datatype"),
+		NonTerminal::Pair("nt_datatypes"),
+		NonTerminal::Pair("nt_datatype"),
 
-		NonTerminal::Pair("unary_operator"),
-		NonTerminal::Pair("binary_operator"),
+		NonTerminal::Pair("nt_unary_operator"),
+		NonTerminal::Pair("nt_binary_operator"),
 
 
 		Terminal::Pair("k_global"),
@@ -431,97 +431,97 @@ int main()
 
 
 	Rule::InitVector({
-		Rule::SharedPtr("declare", {"k_local", "lvalues", "t_def", "datatypes", "declare_assign"}), 
-		Rule::SharedPtr("declare_assign", {"assign"}), 
-		Rule::SharedPtr("declare_assign", {"epsilon"}), 
-		Rule::SharedPtr("lvalues", {"lvalues", "t_comma", "lvalue"}), 
-		Rule::SharedPtr("lvalues", {"lvalue"}), 
-		Rule::SharedPtr("lvalue", {"t_id"}), 
-		Rule::SharedPtr("rvalues", {"rvalues", "t_comma", "rvalue"}), 
-		Rule::SharedPtr("rvalues", {"rvalue"}), 
-		Rule::SharedPtr("rvalue", {"expression"}), 
+		Rule::SharedPtr("nt_declare", {"k_local", "nt_lvalues", "t_def", "nt_datatypes", "nt_declare_assign"}), 
+		Rule::SharedPtr("nt_declare_assign", {"nt_assign"}), 
+		Rule::SharedPtr("nt_declare_assign", {"epsilon"}), 
+		Rule::SharedPtr("nt_lvalues", {"nt_lvalues", "t_comma", "nt_lvalue"}), 
+		Rule::SharedPtr("nt_lvalues", {"nt_lvalue"}), 
+		Rule::SharedPtr("nt_lvalue", {"t_id"}), 
+		Rule::SharedPtr("nt_rvalues", {"nt_rvalues", "t_comma", "nt_rvalue"}), 
+		Rule::SharedPtr("nt_rvalues", {"nt_rvalue"}), 
+		Rule::SharedPtr("nt_rvalue", {"nt_expression"}), 
 		
-		Rule::SharedPtr("id", {"t_id", "t_left", "rvalues", "t_right"}), 
-		Rule::SharedPtr("id", {"t_id", "assign" }), 
-		Rule::SharedPtr("id", {"t_id", "t_comma", "lvalues", "assign"}), 
-		Rule::SharedPtr("assign", {"t_ass", "rvalues"}), 
+		Rule::SharedPtr("nt_id", {"t_id", "t_left", "nt_rvalues", "t_right"}), 
+		Rule::SharedPtr("nt_id", {"t_id", "nt_assign" }), 
+		Rule::SharedPtr("nt_id", {"t_id", "t_comma", "nt_lvalues", "nt_assign"}), 
+		Rule::SharedPtr("nt_assign", {"t_ass", "nt_rvalues"}), 
 		
-		Rule::SharedPtr("expression", {"expression", "binary_operator", "expression_2"}), 
-		Rule::SharedPtr("expression", {"expression_2"}), 
-		Rule::SharedPtr("expression_2", {"unary_operator", "expression_3"}), 
-		Rule::SharedPtr("expression_2", {"expression_3"}), 
-		Rule::SharedPtr("expression_3", {"t_left", "expression", "t_right" }), 
-		Rule::SharedPtr("expression_3", {"t_id", "t_left", "rvalues", "t_right"}),
-		Rule::SharedPtr("expression_3", {"t_id"}), 
-		Rule::SharedPtr("expression_3", {"t_integer"}), 
-		Rule::SharedPtr("expression_3", {"t_number"}), 
-		Rule::SharedPtr("expression_3", {"t_string"}),
-		Rule::SharedPtr("expression_3", {"k_nil"}), 
-		Rule::SharedPtr("expression_3", {"k_true"}),
-		Rule::SharedPtr("expression_3", {"k_false"}),  
+		Rule::SharedPtr("nt_expression", {"nt_expression", "nt_binary_operator", "nt_expression_2"}), 
+		Rule::SharedPtr("nt_expression", {"nt_expression_2"}), 
+		Rule::SharedPtr("nt_expression_2", {"nt_unary_operator", "nt_expression_3"}), 
+		Rule::SharedPtr("nt_expression_2", {"nt_expression_3"}), 
+		Rule::SharedPtr("nt_expression_3", {"t_left", "nt_expression", "t_right" }), 
+		Rule::SharedPtr("nt_expression_3", {"t_id", "t_left", "nt_rvalues", "t_right"}),
+		Rule::SharedPtr("nt_expression_3", {"t_id"}), 
+		Rule::SharedPtr("nt_expression_3", {"t_integer"}), 
+		Rule::SharedPtr("nt_expression_3", {"t_number"}), 
+		Rule::SharedPtr("nt_expression_3", {"t_string"}),
+		Rule::SharedPtr("nt_expression_3", {"k_nil"}), 
+		Rule::SharedPtr("nt_expression_3", {"k_true"}),
+		Rule::SharedPtr("nt_expression_3", {"k_false"}),  
 
-		Rule::SharedPtr("unary_operator", {"t_len"}),  
-		Rule::SharedPtr("unary_operator", {"k_not"}),  
-		Rule::SharedPtr("binary_operator", {"t_plus"}),  
-		Rule::SharedPtr("binary_operator", {"t_minus"}),  
-		Rule::SharedPtr("binary_operator", {"t_mul"}),  
-		Rule::SharedPtr("binary_operator", {"t_div"}),  
-		Rule::SharedPtr("binary_operator", {"t_int_div"}),  
-		Rule::SharedPtr("binary_operator", {"t_concat"}),  
+		Rule::SharedPtr("nt_unary_operator", {"t_len"}),  
+		Rule::SharedPtr("nt_unary_operator", {"k_not"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_plus"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_minus"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_mul"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_div"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_int_div"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_concat"}),  
 
-		Rule::SharedPtr("datatype", {"k_integer"}),  
-		Rule::SharedPtr("datatype", {"k_number"}),  
-		Rule::SharedPtr("datatype", {"k_string"}),  
-		Rule::SharedPtr("datatype", {"k_boolean"}),  
+		Rule::SharedPtr("nt_datatype", {"k_integer"}),  
+		Rule::SharedPtr("nt_datatype", {"k_number"}),  
+		Rule::SharedPtr("nt_datatype", {"k_string"}),  
+		Rule::SharedPtr("nt_datatype", {"k_boolean"}),  
 
-		Rule::SharedPtr("binary_operator", {"t_less"}),  
-		Rule::SharedPtr("binary_operator", {"t_leq"}),  
-		Rule::SharedPtr("binary_operator", {"t_grt"}),  
-		Rule::SharedPtr("binary_operator", {"t_geq"}),  
-		Rule::SharedPtr("binary_operator", {"t_eq"}),  
-		Rule::SharedPtr("binary_operator", {"t_neq"}),  
-		Rule::SharedPtr("binary_operator", {"k_and"}),  
-		Rule::SharedPtr("binary_operator", {"k_or"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_less"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_leq"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_grt"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_geq"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_eq"}),  
+		Rule::SharedPtr("nt_binary_operator", {"t_neq"}),  
+		Rule::SharedPtr("nt_binary_operator", {"k_and"}),  
+		Rule::SharedPtr("nt_binary_operator", {"k_or"}),  
 
-		Rule::SharedPtr("if", {"k_if", "condition", "k_end"}),  
-		Rule::SharedPtr("condition", {"expression", "k_then", "scope", "condition_branch"}),  
-		Rule::SharedPtr("condition_branch", {"k_else", "scope"}),  
-		Rule::SharedPtr("condition_branch", {"k_elseif", "condition"}),  
-		Rule::SharedPtr("condition_branch", {"epsilon"}),  
-		Rule::SharedPtr("scope", {"if"}),  
-		Rule::SharedPtr("scope", {"declare"}),  
-		Rule::SharedPtr("scope", {"id"}),  
-		Rule::SharedPtr("scope", {"while"}),  
-		Rule::SharedPtr("scope", {"return"}),  
-		Rule::SharedPtr("global_scope", {"function_declare"}),  
-		Rule::SharedPtr("global_scope", {"function_define"}),  
-		Rule::SharedPtr("global_scope", {"function_call"}),  
-		Rule::SharedPtr("program", {"k_require", "t_string", "global_scope"}),  
+		Rule::SharedPtr("nt_if", {"k_if", "nt_condition", "k_end"}),  
+		Rule::SharedPtr("nt_condition", {"nt_expression", "k_then", "nt_scope", "nt_condition_branch"}),  
+		Rule::SharedPtr("nt_condition_branch", {"k_else", "nt_scope"}),  
+		Rule::SharedPtr("nt_condition_branch", {"k_elseif", "nt_condition"}),  
+		Rule::SharedPtr("nt_condition_branch", {"epsilon"}),  
+		Rule::SharedPtr("nt_scope", {"nt_if"}),  
+		Rule::SharedPtr("nt_scope", {"nt_declare"}),  
+		Rule::SharedPtr("nt_scope", {"nt_id"}),  
+		Rule::SharedPtr("nt_scope", {"nt_while"}),  
+		Rule::SharedPtr("nt_scope", {"nt_return"}),  
+		Rule::SharedPtr("nt_global_scope", {"nt_function_declare"}),  
+		Rule::SharedPtr("nt_global_scope", {"nt_function_define"}),  
+		Rule::SharedPtr("nt_global_scope", {"nt_function_call"}),  
+		Rule::SharedPtr("nt_program", {"k_require", "t_string", "nt_global_scope"}),  
 
-		Rule::SharedPtr("function_call", {"t_id", "t_left", "rvalues", "t_right"}),  
-		Rule::SharedPtr("function_declare", {"k_global", "t_id", "t_def", "k_function", "t_left", "parameters", "t_right", "returning"}),  
-		Rule::SharedPtr("function_define", {"k_function", "t_id", "t_left", "parameters_defined", "t_right", "returning", "scope", "k_end"}),  
-		Rule::SharedPtr("parameters", {"parameters", "t_comma", "parameter"}),  
-		Rule::SharedPtr("parameters", {"parameter"}),  
-		Rule::SharedPtr("parameter", {"parameter_name", "datatype"}),
-		Rule::SharedPtr("parameters", {"epsilon"}),
-		Rule::SharedPtr("parameters_defined", {"parameters_defined", "t_comma", "parameter_defined"}),
-		Rule::SharedPtr("parameters_defined", {"parameter_defined"}),
-		Rule::SharedPtr("parameters_defined", {"epsilon"}),
-		Rule::SharedPtr("parameter_defined", {"t_id", "t_def", "datatype"}),
-		Rule::SharedPtr("return", {"k_return", "rvalues"}),
-		Rule::SharedPtr("return", {"k_return"}),
-		Rule::SharedPtr("parameter_name", {"t_id", "t_def"}),
-		Rule::SharedPtr("parameter_name", {"epsilon"}),
-		Rule::SharedPtr("returning", {"t_def", "datatypes"}), 
-		Rule::SharedPtr("returning", {"epsilon"}),
+		Rule::SharedPtr("nt_function_call", {"t_id", "t_left", "nt_rvalues", "t_right"}),  
+		Rule::SharedPtr("nt_function_declare", {"k_global", "t_id", "t_def", "k_function", "t_left", "nt_parameters", "t_right", "nt_returning"}),  
+		Rule::SharedPtr("nt_function_define", {"k_function", "t_id", "t_left", "nt_parameters_defined", "t_right", "nt_returning", "nt_scope", "k_end"}),  
+		Rule::SharedPtr("nt_parameters", {"nt_parameters", "t_comma", "nt_parameter"}),  
+		Rule::SharedPtr("nt_parameters", {"nt_parameter"}),  
+		Rule::SharedPtr("nt_parameter", {"nt_parameter_name", "nt_datatype"}),
+		Rule::SharedPtr("nt_parameters", {"epsilon"}),
+		Rule::SharedPtr("nt_parameters_defined", {"nt_parameters_defined", "t_comma", "nt_parameter_defined"}),
+		Rule::SharedPtr("nt_parameters_defined", {"nt_parameter_defined"}),
+		Rule::SharedPtr("nt_parameters_defined", {"epsilon"}),
+		Rule::SharedPtr("nt_parameter_defined", {"t_id", "t_def", "nt_datatype"}),
+		Rule::SharedPtr("nt_return", {"k_return", "nt_rvalues"}),
+		Rule::SharedPtr("nt_return", {"k_return"}),
+		Rule::SharedPtr("nt_parameter_name", {"t_id", "t_def"}),
+		Rule::SharedPtr("nt_parameter_name", {"epsilon"}),
+		Rule::SharedPtr("nt_returning", {"t_def", "nt_datatypes"}), 
+		Rule::SharedPtr("nt_returning", {"epsilon"}),
 
 
 
-		Rule::SharedPtr("datatypes", {"datatypes", "t_comma", "datatype"}),
-		Rule::SharedPtr("datatypes", {"datatype"}),
+		Rule::SharedPtr("nt_datatypes", {"nt_datatypes", "t_comma", "nt_datatype"}),
+		Rule::SharedPtr("nt_datatypes", {"nt_datatype"}),
 
-		Rule::SharedPtr("while", {"k_while", "expression", "k_do", "scope", "k_end"})
+		Rule::SharedPtr("nt_while", {"k_while", "nt_expression", "k_do", "nt_scope", "k_end"})
 
 		});
 
@@ -545,12 +545,12 @@ int main()
 
 	auto terminals = Terminal::Table();
 	stringstream data;
-	data << "typedef enum Terminal { ";
+	data << "typedef enum Terminal { ERROR, ";
 	for (auto [id, terminal] : terminals)
 	{
 		string name = terminal->GetName();
-		if (name == "epsilon")
-			continue;
+		//if (name == "epsilon")
+		//	continue;
 		transform(name.begin(), name.end(), name.begin(), ::toupper);
 		data << name << ", ";
 	}
@@ -573,7 +573,9 @@ int main()
 
 	PrintToHeader("../../../../src/Syntax/NonTerminal.h", data);
 
+	ReplaceDefines("../../../../src/Syntax/LLTable.h", terminals.size(), nonterminals.size(), Rule::Vector().size());
 
+	PrintArrays("../../../../src/Syntax/Arrays.c");
 
 	return 0;
 }

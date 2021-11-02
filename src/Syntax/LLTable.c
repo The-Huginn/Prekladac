@@ -40,5 +40,5 @@ int Rule_GetSize(Rule *rule)
 
 Symbol Rule_GetSymbol(Rule *rule, int index)
 {
-    return rule->symbols[index];
+    return rule->right_side[index];
 }
