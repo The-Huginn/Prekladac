@@ -81,9 +81,9 @@ void* Stack_Push(Stack* stack, void* data)
 void Stack_Pop(Stack* stack)
 {
 	if (stack == NULL)
-		ERROR("Invalid argument!");
+		ERROR_VOID("Invalid argument!");
 	if (stack->top == NULL)
-		ERROR("Stack is empty!");
+		ERROR_VOID("Stack is empty!");
 
 	SElement* temp = stack->top->next;
 
