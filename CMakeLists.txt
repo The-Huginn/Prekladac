@@ -15,7 +15,7 @@ add_subdirectory(tests/LexicalAnalyzer)
 add_subdirectory(tests/SyntaxAnalyzer)
 
 # No time to fix for linux now
-if (MSCV)
+if (MSVC)
     add_subdirectory(LLTableGenerator)
 endif()
 
