@@ -65,7 +65,7 @@ Token *getToken(FILE *input)
     if (getFinalState(lexeme) == ERROR_STATE)
         token->type = ERROR;
     else if (getFinalState(lexeme) == EOF_STATE)
-        token->type = END_OF_FILE;
+        token->type = $;
     else
     {
         int keyword = IsKeyWord(lexeme);
@@ -76,7 +76,7 @@ Token *getToken(FILE *input)
         else
         {
             // needs to be redone, one enum has to be renamed
-            token->type = NT_ASS + getFinalState(lexeme) - F_ASS;
+            token->type = T_ASS + getFinalState(lexeme) - F_ASS;
 
             // need to send value
             if (getFinalState(lexeme) == F_ID ||
