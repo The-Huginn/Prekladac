@@ -13,6 +13,8 @@
 #define FORMAT_RULE(first, ...) ((Symbol_IsTerminal(first)) ? ", %d" : ", <%d>") FORMAT_RULE(__VA__ARGS__)
 #define PRINT_RULE(format, left, first, ...) fprint(stderr, format "%d" FORMAT_RULE(__VA_ARGS__))
 
+// #define DEBUG_SYNTAX
+
 /**
  * @brief Top to Bottom syntax method implemented as predictive parsing
  * @param input source code stream
@@ -46,7 +48,9 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
 
     Symbol *top = (Symbol *) Stack_Top(topToBottomStack);
 
-    fprintf(error_output, "token [%d], stack top [%d, %d]\n", Token_getType(token), Symbol_IsTerminal(top), Symbol_GetValue(top));
+    #ifdef DEBUG_SYNTAX
+        fprintf(error_output, "token [%d], stack top [%d, %d]\n", Token_getType(token), Symbol_IsTerminal(top), Symbol_GetValue(top));
+    #endif
     
     if (Token_getType(token) == ERROR)
         return -1;
@@ -56,7 +60,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
         if (Token_getType(token) == $)
             return 1;
         else
-            return 0; 
+            return -1; 
     }
     else if (Symbol_IsTerminal(top))
     {
@@ -74,8 +78,6 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
     {
         // to skip ERROR enum
         int index = LLTable[Symbol_GetValue(top)][Token_getType(token) - 1];
-
-        fprintf(error_output, "Apply new rule: %d\n", index);
         
         if (index == -1)
             return -1;
@@ -94,18 +96,22 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
             Stack_Push(topToBottomStack, next);
         }
 
-        if (Symbol_IsTerminal(Rule_GetSymbol(&(rules[index]), 0)))
-            fprintf(error_output, "<%d> -> %d", Symbol_GetValue(&(rules[index].left_side)), Symbol_GetValue(Rule_GetSymbol(&(rules[index]), 0)));
-        else
-            fprintf(error_output, "<%d> -> <%d>", Symbol_GetValue(&(rules[index].left_side)), Symbol_GetValue(Rule_GetSymbol(&(rules[index]), 0)));
-        for (int i = 1 ; i < Rule_GetSize(&(rules[index])); i++)
-        {
-            if (Symbol_IsTerminal(Rule_GetSymbol(&(rules[index]), i)))
-                fprintf(error_output, ", %d", Symbol_GetValue(Rule_GetSymbol(&(rules[index]), i)));
+        #ifdef DEBUG_SYNTAX
+            fprintf(error_output, "Apply new rule: %d\n", index);
+
+            if (Symbol_IsTerminal(Rule_GetSymbol(&(rules[index]), 0)))
+                fprintf(error_output, "<%d> -> %d", Symbol_GetValue(&(rules[index].left_side)), Symbol_GetValue(Rule_GetSymbol(&(rules[index]), 0)));
             else
-                fprintf(error_output, ", <%d>", Symbol_GetValue(Rule_GetSymbol(&(rules[index]), i)));
-        }
-        fprintf(error_output, "\n");
+                fprintf(error_output, "<%d> -> <%d>", Symbol_GetValue(&(rules[index].left_side)), Symbol_GetValue(Rule_GetSymbol(&(rules[index]), 0)));
+            for (int i = 1 ; i < Rule_GetSize(&(rules[index])); i++)
+            {
+                if (Symbol_IsTerminal(Rule_GetSymbol(&(rules[index]), i)))
+                    fprintf(error_output, ", %d", Symbol_GetValue(Rule_GetSymbol(&(rules[index]), i)));
+                else
+                    fprintf(error_output, ", <%d>", Symbol_GetValue(Rule_GetSymbol(&(rules[index]), i)));
+            }
+            fprintf(error_output, "\n");
+        #endif
     }
 
     return 0;
