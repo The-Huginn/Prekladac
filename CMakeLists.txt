@@ -10,8 +10,12 @@ set(CMAKE_SUPPRESS_REGENERATION true)
 add_subdirectory(src/LexicalAnalyzer)
 add_subdirectory(tests/LexicalAnalyzer)
 add_subdirectory(src/Utils)
-add_subdirectory(LLTableGenerator)
 add_subdirectory(src/Syntax)
+
+# No time to fix for linux now
+if (MSCV)
+    add_subdirectory(LLTableGenerator)
+endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
 add_custom_target(runLexicalAnalyzerTests
