@@ -38,7 +38,7 @@ int Rule_GetSize(Rule *rule)
     return rule->size;
 }
 
-Symbol Rule_GetSymbol(Rule *rule, int index)
+Symbol *Rule_GetSymbol(Rule *rule, int index)
 {
-    return rule->right_side[index];
+    return &(rule->right_side[index]);
 }

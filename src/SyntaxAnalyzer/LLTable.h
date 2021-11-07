@@ -67,6 +67,6 @@ int Rule_GetSize(Rule *rule);
  * @param index index of the symbol
  * @return symbol at specific place
  */
-Symbol Rule_GetSymbol(Rule *rule, int index);
+Symbol *Rule_GetSymbol(Rule *rule, int index);
 
 #endif
