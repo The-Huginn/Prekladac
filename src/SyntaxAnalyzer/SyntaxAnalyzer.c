@@ -30,7 +30,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
     // token and stack are NULLs
     if (topToBottomStack == NULL)
     {
-        topToBottomStack = Stack_Init((void (*)(void*))Symbol_Destroy);
+        topToBottomStack = Stack_Init((void (*)(void*)) Symbol_Destroy);
         if (topToBottomStack == NULL)
             return -1;
 
@@ -44,7 +44,9 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
         token = getToken(input);
     }
 
-    Symbol *top = Stack_Top(topToBottomStack);
+    Symbol *top = (Symbol *) Stack_Top(topToBottomStack);
+
+    fprintf(error_output, "token [%d], stack top [%d, %d]\n", Token_getType(token), Symbol_IsTerminal(top), Symbol_GetValue(top));
     
     if (Token_getType(token) == ERROR)
         return -1;
@@ -70,7 +72,10 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
     }
     else
     {
-        int index = LLTable[Symbol_GetValue(top)][Token_getType(token)];
+        // to skip ERROR enum
+        int index = LLTable[Symbol_GetValue(top)][Token_getType(token) - 1];
+
+        fprintf(error_output, "Apply new rule: %d\n", index);
         
         if (index == -1)
             return -1;
@@ -78,13 +83,27 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
         Stack_Pop(topToBottomStack);
         for (int i = Rule_GetSize(&(rules[index])) - 1; i >= 0; i--)
         {
-            Stack_Push(topToBottomStack, Rule_GetSymbol(&(rules[index]), i));
+            Symbol *next = Symbol_Init(Symbol_IsTerminal(Rule_GetSymbol(&(rules[index]), i)), Symbol_GetValue(Rule_GetSymbol(&(rules[index]), i)));
+
+            if (Symbol_IsTerminal(next) && Symbol_GetValue(next) == EPSILON)
+            {
+                Symbol_Destroy(next);
+                break;
+            }
+
+            Stack_Push(topToBottomStack, next);
         }
 
-        fprintf(error_output, "%d -> %d", Symbol_GetValue(&(rules[index].left_side)), Symbol_GetValue(Rule_GetSymbol(&(rules[index]), 0)));
-        for (int i = 0 ; i < Rule_GetSize(&(rules[index])); i++)
+        if (Symbol_IsTerminal(Rule_GetSymbol(&(rules[index]), 0)))
+            fprintf(error_output, "<%d> -> %d", Symbol_GetValue(&(rules[index].left_side)), Symbol_GetValue(Rule_GetSymbol(&(rules[index]), 0)));
+        else
+            fprintf(error_output, "<%d> -> <%d>", Symbol_GetValue(&(rules[index].left_side)), Symbol_GetValue(Rule_GetSymbol(&(rules[index]), 0)));
+        for (int i = 1 ; i < Rule_GetSize(&(rules[index])); i++)
         {
-            fprintf(error_output, ", %d", Symbol_GetValue(Rule_GetSymbol(&(rules[index]), i)));
+            if (Symbol_IsTerminal(Rule_GetSymbol(&(rules[index]), i)))
+                fprintf(error_output, ", %d", Symbol_GetValue(Rule_GetSymbol(&(rules[index]), i)));
+            else
+                fprintf(error_output, ", <%d>", Symbol_GetValue(Rule_GetSymbol(&(rules[index]), i)));
         }
         fprintf(error_output, "\n");
     }
@@ -94,5 +113,13 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
 
 void parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
 {
-    while (TopToBottom(input, output, stderr) != 0);
+    while (true)
+    {
+        int a = TopToBottom(input, output, error_output);
+        if (a != 0)
+        {
+            fprintf(error_output, "%d\n", a);
+            break;
+        }
+    }
 }
