@@ -8,9 +8,11 @@ SET(CMAKE_C_STANDARD 99)
 set(CMAKE_SUPPRESS_REGENERATION true)
 
 add_subdirectory(src/LexicalAnalyzer)
-add_subdirectory(tests/LexicalAnalyzer)
 add_subdirectory(src/Utils)
-add_subdirectory(src/Syntax)
+add_subdirectory(src/SyntaxAnalyzer)
+
+add_subdirectory(tests/LexicalAnalyzer)
+add_subdirectory(tests/SyntaxAnalyzer)
 
 # No time to fix for linux now
 if (MSCV)
