@@ -10,8 +10,8 @@
 #include <stdbool.h>
 
 #define LLTABLE_WIDTH 46
-#define LLTABLE_HEIGHT 47
-#define RULE_ARRAY_SIZE 98
+#define LLTABLE_HEIGHT 50
+#define RULE_ARRAY_SIZE 103
 
 typedef struct
 {
