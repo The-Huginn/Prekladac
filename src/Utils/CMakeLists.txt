@@ -9,10 +9,13 @@ SET(CMAKE_C_STANDARD 99)
 set(UTILITY_FILES
     Token.c
     Token.h
+    symtable_testonly.h
     symtable.c
     symtable.h
     hashtable.c
     hashtable.h
+    jesus.h
+    jesus.c
     "list.c"
     "list.h"
     stack.c

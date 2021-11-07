@@ -16,10 +16,9 @@ typedef struct ListElement
 } LElement;
 
 /**
- * @brief creates and initializes list element and copies string value
- * @param key pointer, where the original string is
- * @param data pointer, where the stack is
- * @return newly created list element
+ * @brief Creates and initializes list element
+ * @param data Pointer to data
+ * @return Newly created list element
  */
 LElement *LElement_Init(void *data)
 {
@@ -34,8 +33,8 @@ LElement *LElement_Init(void *data)
 }
 
 /**
- * @brief destructor for list element, it's string key should not be accessed from another struct
- * @param element the list element to be destroyed
+ * @brief Destructor for list element. Dtor of element is called
+ * @param element The list element to be destroyed
  */
 void LElement_Destroy(LElement *element, void (*DataDtor)(void*))
 {
@@ -46,10 +45,10 @@ void LElement_Destroy(LElement *element, void (*DataDtor)(void*))
     free(element);
 }
 
-LList *List_Init(void (*DataDtor)(void*), bool (*Comp)(void*, void*))
+LList *List_Init(void (*DataDtor)(void*), const bool (*Comp)(void*, const void*))
 {
     if (Comp == NULL)
-        ERROR("Missing comparator function!");
+        WARNING("Missing comparator function!");
 
     LList *list = (LList*) malloc(sizeof(LList));
 
@@ -59,6 +58,7 @@ LList *List_Init(void (*DataDtor)(void*), bool (*Comp)(void*, void*))
     list->DataDtor = DataDtor;
     list->Comp = Comp;
 	list->begin = NULL;
+    list->active = NULL;
 
     return list;
 }
@@ -96,10 +96,10 @@ void* List_AddFirst(LList* list, void* data)
     new_element->next = list->begin;
     list->begin = new_element;
 
-    return new_element;
+    return new_element->data;
 }
 
-void ListRemoveFirst(LList* list)
+void List_RemoveFirst(LList* list)
 {
     if (list == NULL)
         ERROR_VOID("Invalid argument!");
@@ -111,10 +111,13 @@ void ListRemoveFirst(LList* list)
     return;
 }
 
-void *List_GetData(LList *list, void* con)
+void *List_GetData(LList *list, const void* con)
 {
     if (list == NULL)
         ERROR("Invalid argument!");
+    
+    if (list->Comp == NULL)
+        ERROR("Missing comparator function!");
 
     if (con == NULL)
         WARNING("Conparing to NULL!");
@@ -129,4 +132,57 @@ void *List_GetData(LList *list, void* con)
         tmp = tmp->next;
     }
     return NULL;
+}
+
+bool List_IsEmpty(LList *list)
+{
+    return list->begin == NULL ? true : false;
+}
+
+void *List_GetFirst(LList *list)
+{
+    if (list == NULL)
+        ERROR("Invalid parameter!");
+
+    if (list->begin == NULL)
+    {
+        WARNING("Accesing empty element!");
+        return NULL;
+    }
+    return list->begin->data;
+}
+
+void List_SetFirstActive(LList* list)
+{
+    if (list == NULL)
+        ERROR_VOID("Invalid argument!");
+
+    list->active = list->begin;
+    return;
+}
+
+void List_SetNextActive(LList* list)
+{
+    if (list == NULL)
+        ERROR_VOID("Invalid argument!");
+
+    if (list->active == NULL)
+        ERROR_VOID("List is not active!");
+
+    list->active = list->active->next;
+    return;
+}
+
+void* List_GetActive(LList* list)
+{
+    if (list == NULL)
+        ERROR("Invalid argument!");
+
+    if (list->active == NULL)
+    {
+        WARNING("List is not active!");
+        return NULL;
+    }
+
+    return list->active->data;
 }
