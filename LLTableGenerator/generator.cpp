@@ -341,6 +341,7 @@ int main()
 		NonTerminal::Pair("nt_function_declare"),
 		NonTerminal::Pair("nt_function_define"),
 		NonTerminal::Pair("nt_function_call"),
+		NonTerminal::Pair("nt_called_parameters"),
 
 		NonTerminal::Pair("nt_parameters"),
 		NonTerminal::Pair("nt_parameter"),
@@ -445,7 +446,7 @@ int main()
 		Rule::SharedPtr("nt_rvalues", {"nt_rvalue"}),
 		Rule::SharedPtr("nt_rvalue", {"nt_expression"}),
 
-		Rule::SharedPtr("nt_id", {"t_id", "t_left", "nt_rvalues", "t_right"}),
+		Rule::SharedPtr("nt_id", {"t_id", "t_left", "nt_called_parameters", "t_right"}),
 		Rule::SharedPtr("nt_id", {"t_id", "nt_assign" }),
 		Rule::SharedPtr("nt_id", {"t_id", "t_comma", "nt_lvalues", "nt_assign"}),
 		Rule::SharedPtr("nt_assign", {"t_ass", "nt_rvalues"}),
@@ -455,7 +456,7 @@ int main()
 		Rule::SharedPtr("nt_expression_2", {"nt_unary_operator", "nt_expression_3"}),
 		Rule::SharedPtr("nt_expression_2", {"nt_expression_3"}),
 		Rule::SharedPtr("nt_expression_3", {"t_left", "nt_expression", "t_right" }),
-		Rule::SharedPtr("nt_expression_3", {"t_id", "t_left", "nt_rvalues", "t_right"}),
+		Rule::SharedPtr("nt_expression_3", {"t_id", "t_left", "nt_called_parameters", "t_right"}),
 		Rule::SharedPtr("nt_expression_3", {"t_id"}),
 		Rule::SharedPtr("nt_expression_3", {"t_integer"}),
 		Rule::SharedPtr("nt_expression_3", {"t_number"}),
@@ -507,7 +508,9 @@ int main()
 		Rule::SharedPtr("nt_global_scope", {"nt_function_call"}),  
 		Rule::SharedPtr("nt_program", {"k_require", "t_string", "nt_global_scope"}),  
 
-		Rule::SharedPtr("nt_function_call", {"t_id", "t_left", "nt_rvalues", "t_right"}),  
+		Rule::SharedPtr("nt_called_parameters", {"nt_rvalues"}),
+		Rule::SharedPtr("nt_called_parameters", {"epsilon"}),
+		Rule::SharedPtr("nt_function_call", {"t_id", "t_left", "nt_called_parameters", "t_right"}),  
 		Rule::SharedPtr("nt_function_declare", {"k_global", "t_id", "t_def", "k_function", "t_left", "nt_parameters", "t_right", "nt_returning"}),  
 		Rule::SharedPtr("nt_function_define", {"k_function", "t_id", "t_left", "nt_parameters_defined", "t_right", "nt_returning", "nt_scope", "k_end"}),  
 		Rule::SharedPtr("nt_parameters", {"nt_parameters", "t_comma", "nt_parameter"}),  
