@@ -52,7 +52,7 @@ LList* HashTable_Insert(HTable* table, const char* key)
 	uint32_t hash = HashTable_Hash(key) % table->size;
 
 	if (table->array[hash] == NULL)
-		table->array[hash] = List_Init(Stack_Destroy, DuplicateList_Comp);
+		table->array[hash] = List_Init((void (*)(void *)) Stack_Destroy, (bool (*)(void *, void *))DuplicateList_Comp);
 
 	return table->array[hash];
 }

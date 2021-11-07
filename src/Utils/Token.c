@@ -5,12 +5,12 @@
  */
 #include "Token.h"
 
-Terminal getType(Token *token)
+Terminal Token_getType(Token *token)
 {
     return token->type;
 }
 
-void *getData(Token *token)
+void *Token_getData(Token *token)
 {
     return token->attribute;
 }

@@ -6,7 +6,7 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-#include"../Syntax/Terminal.h"
+#include"../SyntaxAnalyzer/Terminal.h"
 
 /**
  * class defining Token for output communication from Lexical analyzer
@@ -20,12 +20,12 @@ typedef struct {
  * @param token
  * @return enum type of token
  */
-Terminal getType(Token *token);
+Terminal Token_getType(Token *token);
 
 /**
  * @param token
  * @return data of token
  */
-void *getData(Token *token);
+void *Token_getData(Token *token);
 
 #endif // !TOKEN_H
