@@ -10,10 +10,7 @@
 #include "../Utils/stack.h"
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
 
-#define FORMAT_RULE(first, ...) ((Symbol_IsTerminal(first)) ? ", %d" : ", <%d>") FORMAT_RULE(__VA__ARGS__)
-#define PRINT_RULE(format, left, first, ...) fprint(stderr, format "%d" FORMAT_RULE(__VA_ARGS__))
-
-// #define DEBUG_SYNTAX
+//#define DEBUG_SYNTAX
 
 /**
  * @brief Top to Bottom syntax method implemented as predictive parsing

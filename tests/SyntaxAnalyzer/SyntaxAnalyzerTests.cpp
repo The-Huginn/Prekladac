@@ -14,24 +14,30 @@ extern "C"
 class SyntaxTests : public ::testing::Test
 {
     public:
-    FILE* input;
 
     void SetUp() override
     {
-        input = fopen("../../../../tests/files/getLexemeTests.txt", "r");
     }
 
     void TearDown() override
     {
-        fclose(input);
     }
 };
 
 TEST_F(SyntaxTests, 1_SimpleTest)
 {
     EXPECT_TRUE(true);
-    fprintf(stderr, "Test Begins:\n");
+    FILE* input = fopen("../../../../tests/files/getLexemeTests.txt", "r");
     parseAndGenerate(input, NULL, stderr);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 2_SimpleTest)
+{
+    EXPECT_FALSE(false);
+    FILE* input = fopen("../../../../tests/files/syntaxTest1.txt", "r");
+    parseAndGenerate(input, NULL, stderr);
+    fclose(input);
 }
 
 int main(int argc, char **argv) {
