@@ -10,21 +10,33 @@
 #include "../Utils/stack.h"
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
 
-//#define DEBUG_SYNTAX
+// #define DEBUG_SYNTAX
 
 /**
  * @brief Top to Bottom syntax method implemented as predictive parsing
  * @param input source code stream
  * @param output assembly output stream
  * @param error_output stream for everything else
- * @return -1 upon single or multiple errors
- *          0 upon work in progress
- *          1 upon successful finish
+ * @param clear whether this function was called only to clear stack
+ * @return -1 upon work in progress
+ *          1-9 & 99 upon an error
+ *          0 upon successful finish
  */
-int TopToBottom(FILE *input, FILE *output, FILE *error_output)
+int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 {
     static Stack *topToBottomStack = NULL;
     static Token *token;
+
+    if (clear)
+    {
+        Stack_Destroy(topToBottomStack);
+        topToBottomStack = NULL;
+
+        // maybe Token_Destroy in the future
+        token = NULL;
+
+        return 0;
+    }
 
     // token and stack are NULLs
     if (topToBottomStack == NULL)
@@ -50,14 +62,14 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
     #endif
     
     if (Token_getType(token) == ERROR)
-        return -1;
+        return 1;
 
     if (Symbol_IsTerminal(top) && (Terminal)Symbol_GetValue(top) == $)
     {
         if (Token_getType(token) == $)
-            return 1;
+            return 0;
         else
-            return -1; 
+            return 2; 
     }
     else if (Symbol_IsTerminal(top))
     {
@@ -68,16 +80,16 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
         }
         else
         {
-            return -1;
+            return 2;
         }
     }
     else
     {
-        // to skip ERROR enum
+        // -1 in index to skip ERROR enum
         int index = LLTable[Symbol_GetValue(top)][Token_getType(token) - 1];
         
         if (index == -1)
-            return -1;
+            return 2;
         
         Stack_Pop(topToBottomStack);
         for (int i = Rule_GetSize(&(rules[index])) - 1; i >= 0; i--)
@@ -111,18 +123,34 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output)
         #endif
     }
 
-    return 0;
+    return -1;
 }
 
-void parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
+int parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
 {
+    int return_value = 0;
     while (true)
     {
-        int a = TopToBottom(input, output, error_output);
-        if (a != 0)
+        int a = TopToBottom(input, output, error_output, false);
+
+        // success
+        if (a == 0)
+            break;
+
+        // error
+        if (a > 0)
         {
-            fprintf(error_output, "%d\n", a);
+            // only the first error is propagated as output value
+            if (return_value == 0)
+                return_value = a;
             break;
         }
     }
+
+    TopToBottom(NULL, NULL, NULL, true);
+
+    // might move to main later
+    fprintf(error_output, "Exit code: %d", return_value);
+
+    return return_value;
 }

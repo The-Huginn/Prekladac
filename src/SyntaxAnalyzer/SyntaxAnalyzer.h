@@ -13,8 +13,9 @@
  * @param input source code stream
  * @param output assembly output stream
  * @param error_output stream for everything else
+ * @return exit code
  */
-void parseAndGenerate(FILE *input, FILE *output, FILE* error_output);
+int parseAndGenerate(FILE *input, FILE *output, FILE* error_output);
 
 
 #endif // !__SYNTAX_ANALYZER_H__

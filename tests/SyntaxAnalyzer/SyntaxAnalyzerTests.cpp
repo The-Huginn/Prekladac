@@ -26,17 +26,43 @@ class SyntaxTests : public ::testing::Test
 
 TEST_F(SyntaxTests, 1_SimpleTest)
 {
-    EXPECT_TRUE(true);
-    FILE* input = fopen("../../../../tests/files/getLexemeTests.txt", "r");
-    parseAndGenerate(input, NULL, stderr);
+    FILE* input = fopen("../../../../tests/files/testSource1.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 2_SimpleTest)
 {
-    EXPECT_FALSE(false);
-    FILE* input = fopen("../../../../tests/files/syntaxTest1.txt", "r");
-    parseAndGenerate(input, NULL, stderr);
+    FILE* input = fopen("../../../../tests/files/testSource2.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 3_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource3.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 4_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource4.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 1_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong1.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 1);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 2_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong3.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
     fclose(input);
 }
 

@@ -1,4 +1,5 @@
 --[[toto je komentar btw]]
+require "ifj21"
 global foo : function()
 
 function foo()
