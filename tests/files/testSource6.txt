@@ -1,0 +1,3 @@
+function main()
+    return10 end
+main

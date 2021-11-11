@@ -1,0 +1,2 @@
+-- this is a very long and annoying comment that your FSM should skip without overflowing from it's buffer. Otherwise you have done a terrible terrible job at programming your Compiler. Best of luck to you with this test not failing. Hopefully you won't mind me writing some useless words at the end to prolong your suffering as I expect you to ignore me either way. See you
+global
