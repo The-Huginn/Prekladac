@@ -1,0 +1,13 @@
+s = reads() -> READ <s> <string>
+i = readi() -> READ <i> <int>
+n = readn() -> READ <n> <float>
+write(t0, t1, ... , tn) -> WRITE <symb>
+i = tointeger(n) -> FLOAT2INT <i> <n> // var = integer, symb = number
+s = substr(string, n ,m) ->
+	DEFVAR <temp>
+	for (int i = n; i <= m; i++) {
+	GETCHAR <temp> <string> <i>
+	CONCAT <s> <s> <temp>
+}
+i = ord(string, int) -> STRI2INT <i> <string> <int>
+s = chr(i) -> INT2CHAR <s> <i>
