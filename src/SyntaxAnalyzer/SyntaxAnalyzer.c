@@ -33,6 +33,8 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         topToBottomStack = NULL;
 
         // maybe Token_Destroy in the future
+        if (token != NULL)
+            free(token);
         token = NULL;
 
         return 0;
@@ -62,24 +64,39 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     #endif
     
     if (Token_getType(token) == ERROR)
+    {
+        free(token);
+        token = NULL;
         return 1;
+    }
 
     if (Symbol_IsTerminal(top) && (Terminal)Symbol_GetValue(top) == $)
     {
         if (Token_getType(token) == $)
+        {
+            free(token);
+            token = NULL;
             return 0;
+        }
         else
-            return 2; 
+        {
+            free(token);
+            token = NULL;
+            return 2;
+        }
     }
     else if (Symbol_IsTerminal(top))
     {
         if (Token_getType(token) == (Terminal) Symbol_GetValue(top))
         {
             Stack_Pop(topToBottomStack);
+            free(token);
             token = getToken(input);
         }
         else
         {
+            free(token);
+            token = NULL;
             return 2;
         }
     }
@@ -89,7 +106,11 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         int index = LLTable[Symbol_GetValue(top)][Token_getType(token) - 1];
         
         if (index == -1)
+        {
+            free(token);
+            token = NULL;
             return 2;
+        }
         
         Stack_Pop(topToBottomStack);
         for (int i = Rule_GetSize(&(rules[index])) - 1; i >= 0; i--)
@@ -148,6 +169,7 @@ int parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
     }
 
     TopToBottom(NULL, NULL, NULL, true);
+    LexicalDestroy();
 
     // might move to main later
     fprintf(error_output, "Exit code: %d\n", return_value);

@@ -29,6 +29,7 @@ class LexicalTests : public ::testing::Test
     {
         Token *token = getToken(input);
         ASSERT_EQ(Token_getType(token), req);
+        free(token);
     }
 
     FILE *input;
@@ -41,6 +42,7 @@ class LexicalTests : public ::testing::Test
     void TearDown() override
     {
         fclose(input);
+        LexicalDestroy();
     }
 };
 

@@ -112,8 +112,9 @@ void LexicalDestroy()
     {
         Token *token = Stack_Top(stack);
         // token free function
+        free(token);
         Stack_Pop(stack);
     }
-
     Stack_Destroy(stack);    
+    stack = NULL;
 }
