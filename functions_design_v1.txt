@@ -48,7 +48,6 @@ LABEL LF@_str_error
 	
 LABEL LF@_str_empty
 	MOVE LF@s ""
-	JUMP LF@_str_end
 	
 LABEL LF@_str_push
 	PUSHS LF@s
@@ -82,23 +81,23 @@ LABEL LF@_write_loop
 write(t0, t1, ... , tn-1) -> 
 	// n = pocet termov na vypis
 	for (int i = n-1; i >= 0; i--) {
-		PUSHS GF@t[i]
+		PUSHS LF@t[i]
 	}
-	PUSHS GF@n
-	CALL GF@_write
+	PUSHS LF@n
+	CALL LF@_write
 
 
-s = reads() -> READ GF@s string
-i = readi() -> READ GF@i int
-n = readn() -> READ GF@n float
+s = reads() -> READ LF@s string
+i = readi() -> READ LF@i int
+n = readn() -> READ LF@n float
 
-i = tointeger(n) -> FLOAT2INT GF@i GF@n // var = integer, symb = number
-i = ord(string, int) -> STRI2INT GF@i GF@string GF@int
-s = chr(i) -> INT2CHAR GF@s GF@i
+i = tointeger(n) -> FLOAT2INT LF@i LF@n // var = integer, symb = number
+i = ord(string, int) -> STRI2INT LF@i GF@string LF@int
+s = chr(i) -> INT2CHAR LF@s LF@i
 
 s = substr(string, n ,m) ->
-	PUSHS GF@m
-	PUSHS GF@n
-	PUSHS GF@string
-	CALL GF@_substr
-	POPS GF@s
+	PUSHS LF@m
+	PUSHS LF@n
+	PUSHS LF@string
+	CALL LF@_substr
+	POPS LF@s
