@@ -1,0 +1,18 @@
+require "ifj21"
+
+function void()
+
+end
+
+function one() : integer
+    return 1
+end
+
+function main()
+    local a : integer = 1
+    local b : integer = 2*a
+    local c : integer = 3void()
+    local d : integer = 5 + one()
+end
+
+main()

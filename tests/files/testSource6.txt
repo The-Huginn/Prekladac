@@ -1,3 +1,1 @@
-function main()
-    return10 end
-main
+require "ifj21" function ahoj() end function main() ahoj() return10(1,2) return end main()

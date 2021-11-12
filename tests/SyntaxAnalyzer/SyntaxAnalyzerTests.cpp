@@ -52,6 +52,41 @@ TEST_F(SyntaxTests, 4_SimpleTest)
     fclose(input);
 }
 
+TEST_F(SyntaxTests, 5_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource5.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 6_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource6.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 7_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource7.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 8_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource8.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 9_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource9.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
 TEST_F(SyntaxTests, 1_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong1.txt", "r");
@@ -63,6 +98,22 @@ TEST_F(SyntaxTests, 2_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong3.txt", "r");
     EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
+    fclose(input);
+}
+
+// unable to decide correctness of this test, whether it is syntax error or semantic erro
+// but it's an error nonetheless
+TEST_F(SyntaxTests, 3_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong5.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 4_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong6.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 1);
     fclose(input);
 }
 
