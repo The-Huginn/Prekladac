@@ -150,7 +150,7 @@ int parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
     TopToBottom(NULL, NULL, NULL, true);
 
     // might move to main later
-    fprintf(error_output, "Exit code: %d", return_value);
+    fprintf(error_output, "Exit code: %d\n", return_value);
 
     return return_value;
 }

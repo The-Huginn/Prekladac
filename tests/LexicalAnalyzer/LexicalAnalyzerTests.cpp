@@ -84,13 +84,15 @@ TEST_F(LexicalTests, 4_ExpectCorrect) {
 TEST_F(LexicalTests, 5_ExpectCorrect) {
     input = fopen("../../../../tests/files/testSource5.txt", "r");
 
-    TestLexeme({"global", K_GLOBAL});
+    TestLexeme({"require", K_REQUIRE});
+    TestLexeme({"\"ifj21\"", T_STRING});
 
     fclose(input);
 
     input = fopen("../../../../tests/files/testSource5.txt", "r");
 
-    TestToken(K_GLOBAL);
+    TestToken(K_REQUIRE);
+    TestToken(T_STRING);
 }
 
 TEST_F(LexicalTests, 6_ExpectCorrect) {
