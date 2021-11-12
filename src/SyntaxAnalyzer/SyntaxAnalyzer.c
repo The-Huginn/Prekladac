@@ -10,6 +10,8 @@
 #include "../Utils/stack.h"
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
 
+#include <stdlib.h>
+
 // #define DEBUG_SYNTAX
 
 /**

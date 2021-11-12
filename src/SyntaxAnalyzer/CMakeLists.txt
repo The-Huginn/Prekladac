@@ -10,6 +10,8 @@ set(SYNTAX_FILES
     SyntaxAnalyzer.h
     LLTable.c
     LLTable.h
+    PrecedenceTable.c
+    PrecedenceTable.h
     Terminal.h
     NonTerminal.h
     Arrays.c
