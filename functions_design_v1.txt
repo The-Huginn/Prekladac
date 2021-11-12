@@ -1,13 +1,104 @@
-s = reads() -> READ <s> <string>
-i = readi() -> READ <i> <int>
-n = readn() -> READ <n> <float>
-write(t0, t1, ... , tn) -> WRITE <symb>
-i = tointeger(n) -> FLOAT2INT <i> <n> // var = integer, symb = number
+----------------------------------------------
+
+LABEL GF@_substr
+	
+	CREATEFRAME
+	PUSHFRAME
+	DEFVAR LF@string
+	POPS LF@string
+	DEFVAR LF@n
+	POPS LF@n
+	DEFVAR LF@m
+	POPS LF@m
+	DEFVAR LF@temp
+	MOVE LF@temp "nil"
+	DEFVAR LF@temp1
+	TYPE LF@temp1 LF@string
+	JUMPIFEQ LF@_str_error LF@temp LF@temp1
+	TYPE LF@temp1 LF@n
+	JUMPIFEQ LF@_str_error LF@temp LF@temp1
+	TYPE LF@temp1 LF@m
+	JUMPIFEQ LF@_str_error LF@temp LF@temp1
+	DEFVAR LF@check
+	DEFVAR LF@len
+	STRLEN LF@len LF@string
+	LT LF@check LF@n 1
+	JUMPIFEQ LF@_str_empty LF@check true
+	LT LF@check LF@m 1
+	JUMPIFEQ LF@_str_empty LF@check true
+	GT LF@check LF@n LF@len
+	JUMPIFEQ LF@_str_empty LF@check true
+	GT LF@check LF@m LF@len
+	JUMPIFEQ LF@_str_empty LF@check true
+	GT LF@check LF@n LF@m
+	JUMPIFEQ LF@_str_empty LF@check true
+	MOVE LF@len LF@n
+	SUB LF@len 1
+	
+LABEL LF@_str_loop
+	GETCHAR LF@temp LF@string LF@len
+	CONCAT LF@s LF@s LF@temp
+	ADD LF@len 1
+	JUMPIFEQ LF@_str_push LF@temp LF@m
+	JUMP LF@_str_loop
+
+LABEL LF@_str_error
+	EXIT 8
+	JUMP LF@_str_end
+	
+LABEL LF@_str_empty
+	MOVE LF@s ""
+	JUMP LF@_str_end
+	
+LABEL LF@_str_push
+	PUSHS LF@s
+
+LABEL LF@_str_end
+	POPFRAME
+	RETURN
+
+----------------------------------------------
+
+LABEL GF@_write
+
+	CREATEFRAME
+	PUSHFRAME
+
+	DEFVAR LF@n
+	POPS LF@n
+	DEFVAR LF@term
+	
+LABEL LF@_write_loop	
+	POPS LF@term
+	WRITE LF@term
+	SUB LF@n 1
+	JUMPIFNEQ LF@_write_loop LF@n 0
+
+	POPFRAME
+	RETURN
+	
+----------------------------------------------	
+
+write(t0, t1, ... , tn-1) -> 
+	// n = pocet termov na vypis
+	for (int i = n-1; i >= 0; i--) {
+		PUSHS GF@t[i]
+	}
+	PUSHS GF@n
+	CALL GF@_write
+
+
+s = reads() -> READ GF@s string
+i = readi() -> READ GF@i int
+n = readn() -> READ GF@n float
+
+i = tointeger(n) -> FLOAT2INT GF@i GF@n // var = integer, symb = number
+i = ord(string, int) -> STRI2INT GF@i GF@string GF@int
+s = chr(i) -> INT2CHAR GF@s GF@i
+
 s = substr(string, n ,m) ->
-	DEFVAR <temp>
-	for (int i = n; i <= m; i++) {
-	GETCHAR <temp> <string> <i>
-	CONCAT <s> <s> <temp>
-}
-i = ord(string, int) -> STRI2INT <i> <string> <int>
-s = chr(i) -> INT2CHAR <s> <i>
+	PUSHS GF@m
+	PUSHS GF@n
+	PUSHS GF@string
+	CALL GF@_substr
+	POPS GF@s
