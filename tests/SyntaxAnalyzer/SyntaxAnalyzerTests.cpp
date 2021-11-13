@@ -24,6 +24,13 @@ class SyntaxTests : public ::testing::Test
     }
 };
 
+TEST_F(SyntaxTests, 0_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource0.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
 TEST_F(SyntaxTests, 1_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource1.txt", "r");

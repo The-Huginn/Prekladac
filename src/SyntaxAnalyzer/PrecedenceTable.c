@@ -31,12 +31,13 @@ char precedenceTable[PRECEDENCE_TABLE_HEIGHT][PRECEDENCE_TABLE_WIDTH] = {
 
 Precedence_Rule precedence_rules[PRECEDENCE_RULE_ARRAY_SIZE] = {
 {.size = 1, .right_side = { {.type = P_I} } },
-{.size = 1, .right_side = { {.type = P_VOID} } },
-{.size = 2, .right_side = { {.type = P_UNARY_OPERATOR}, {.type = P_E} } },
+//{.size = 1, .right_side = { {.type = P_VOID} } },
+{.size = 2, .right_side = { {.type = P_E}, { .type = P_UNARY_OPERATOR} } },
 {.size = 3, .right_side = { {.type = P_E}, {.type = P_BINARY_OPERATOR}, {.type = P_E} } },
-{.size = 3, .right_side = { {.type = P_LEFT}, {.type = P_E}, {.type = P_RIGHT} } },
-{.size = 4, .right_side = { {.type = P_I}, {.type = P_LEFT}, {.type = P_E}, {.type = P_RIGHT} } },
-{.size = 3, .right_side = { {.type = P_E}, {.type = P_COMMA}, {.type = P_E} } } };
+{.size = 3, .right_side = { {.type = P_RIGHT}, {.type = P_E}, {.type = P_LEFT} } },
+//{.size = 4, .right_side = { {.type = P_RIGHT}, {.type = P_E}, {.type = P_LEFT}, {.type = P_I} } },
+//{.size = 3, .right_side = { {.type = P_E}, {.type = P_COMMA}, {.type = P_E} } } 
+};
 
 
 PrecedenceItem *PrecedenceItem_Init(PrecedenceItemType type, char character)
@@ -102,8 +103,8 @@ PrecedenceItemType Token_ToPrecedenceItemType(Token *token)
 
     switch (token_type)
     {
-    case T_COMMA:
-        return P_COMMA;
+    //case T_COMMA:
+    //    return P_COMMA;
     case T_LEFT:
         return P_LEFT;
     case T_RIGHT:

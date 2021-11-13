@@ -7,12 +7,141 @@
 #include "Terminal.h"
 #include "NonTerminal.h"
 #include "LLTable.h"
+#include "PrecedenceTable.h"
 #include "../Utils/stack.h"
+#include "../Utils/list.h"
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
+
 
 #include <stdlib.h>
 
-// #define DEBUG_SYNTAX
+#define DEBUG_SYNTAX
+
+int ApplyPrecedenceRule(LList* list)
+{
+    bool indexes[] = { 1, 1, 1, 1 };
+    int index = 0;
+    bool succ = false;
+
+    PrecedenceItem* top = List_GetFirst(list);
+
+    for (int i = 0; i < PRECEDENCE_RULE_ARRAY_SIZE; i++)
+    {
+        if (top == NULL)
+            return -1;
+        if (indexes[i])
+        {
+            if (PrecedenceItem_GetType(&(precedence_rules[i].right_side[index])) != PrecedenceItem_GetType(top))
+                indexes[i] = 0;
+            else if (index == precedence_rules[i].size - 1)
+                succ = true;
+        }
+
+        index++;
+        List_RemoveFirst(list);
+        top = List_GetFirst(list);
+        if (succ)
+        {
+            if (PrecedenceItem_GetChar(top) == '<')
+            {
+                top->character = '\0';
+                List_AddFirst(list, PrecedenceItem_Init(P_E, '\0'));
+                return i;
+            }
+            else
+                return -1;
+        }
+    }
+    return -1;
+}
+
+bool PrecedenceItem_IsTerminal(PrecedenceItem* a, PrecedenceItem* b)
+{
+    return PrecedenceItem_GetType(a) != P_E;
+}
+
+/**
+ * @brief 
+ * @param input 
+ * @param output 
+ * @param error_output 
+ * @return -1 upon success
+*/
+int BottomToTop(FILE* input, FILE* output, FILE* error_output)
+{
+    LList* bottomToTopList = List_Init((void (*) (void*))PrecedenceItem_Destroy, (bool (*)(void*, void*))PrecedenceItem_IsTerminal);
+    List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_$, '\0'));
+
+    Token* token = getToken(input);
+    int ret = -1;
+
+    PrecedenceItem* top = List_GetData(bottomToTopList, NULL);
+    while (Token_ToPrecedenceItemType(token) != P_$ || PrecedenceItem_GetType(top) != P_$)
+    {
+        char action = precedenceTable[PrecedenceItem_GetType(top) - P_LEFT][Token_ToPrecedenceItemType(token) - P_LEFT];
+
+        switch (action)
+        {
+        case '<':
+            top->character = '<';
+            List_AddFirst(bottomToTopList, PrecedenceItem_Init(Token_ToPrecedenceItemType(token), '\0'));
+            free(token);
+            token = getToken(input);
+            break;
+        case '>':
+            if (ApplyPrecedenceRule(bottomToTopList) == -1)
+                ret = 2;
+            break;
+        case '=':
+            List_AddFirst(bottomToTopList, PrecedenceItem_Init(Token_ToPrecedenceItemType(token), '\0'));
+            free(token);
+            token = getToken(input);
+            break;
+        case 'a':
+            List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_LEFT, '\0'));
+            free(token);
+            while ((token = getToken(input)), PrecedenceItem_GetType(token) != P_RIGHT)
+            {
+                returnToken(token);
+                // BottomToTop(input, output, error_output);
+
+                token = getToken(input);
+                if (PrecedenceItem_GetType(token) == P_COMMA)
+                {
+                    List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_E, '\0'));
+                }
+
+            }
+           
+            break;
+        case 'X':
+
+            if ((PrecedenceItem_GetType(top) == P_I || PrecedenceItem_GetType(top) == P_RIGHT) && Token_ToPrecedenceItemType(token) == P_I)
+            {
+                if (ApplyPrecedenceRule(bottomToTopList) == -1)
+                    ret = 2;  
+                goto smrcka;
+            }
+            else if (Token_ToPrecedenceItemType(token) == P_RIGHT)
+            {
+                if (PrecedenceItem_GetType(top) != P_$)
+                    ret = 2;
+                goto smrcka;
+            }
+            else
+                ret = 2;
+            break;
+        }
+        top = List_GetData(bottomToTopList, NULL);
+    }
+
+smrcka:
+    returnToken(token);
+    if (List_GetFirst(bottomToTopList) != P_E)
+        ret = 2;
+    List_Destroy(bottomToTopList);
+    return ret;
+}
 
 /**
  * @brief Top to Bottom syntax method implemented as predictive parsing
@@ -104,6 +233,15 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     }
     else
     {
+        if (Symbol_GetValue(top) == NT_EXPRESSION)
+        {
+            returnToken(token);
+            Stack_Pop(topToBottomStack);
+            int ret = BottomToTop(input, output, error_output);
+            token = getToken(input);
+            return ret;
+        }
+
         // -1 in index to skip ERROR enum
         int index = LLTable[Symbol_GetValue(top)][Token_getType(token) - 1];
         

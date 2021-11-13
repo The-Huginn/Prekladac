@@ -90,6 +90,7 @@ Token *getToken(FILE *input)
         }
     }
 
+    fprintf(stderr, "%s\n", getString(lexeme));
     freeLexeme(lexeme);
 
     return token;
