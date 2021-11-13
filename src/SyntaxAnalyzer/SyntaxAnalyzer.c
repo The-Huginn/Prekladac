@@ -69,7 +69,7 @@ bool PrecedenceItem_IsTerminal(PrecedenceItem* a, PrecedenceItem* b)
 */
 int BottomToTop(FILE* input, FILE* output, FILE* error_output)
 {
-    LList* bottomToTopList = List_Init((void (*) (void*))PrecedenceItem_Destroy, (bool (*)(void*, void*))PrecedenceItem_IsTerminal);
+    LList* bottomToTopList = List_Init((void (*) (void*))PrecedenceItem_Destroy, (const bool (*)(void*,const void*))PrecedenceItem_IsTerminal);
     List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_$, '\0'));
 
     Token* token = getToken(input);
@@ -100,13 +100,13 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output)
         case 'a':
             List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_LEFT, '\0'));
             free(token);
-            while ((token = getToken(input)), PrecedenceItem_GetType(token) != P_RIGHT)
+            while ((token = getToken(input)), Token_ToPrecedenceItemType(token) != P_RIGHT)
             {
                 returnToken(token);
                 // BottomToTop(input, output, error_output);
 
                 token = getToken(input);
-                if (PrecedenceItem_GetType(token) == P_COMMA)
+                if (Token_ToPrecedenceItemType(token) == P_COMMA)
                 {
                     List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_E, '\0'));
                 }
@@ -137,7 +137,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output)
 
 smrcka:
     returnToken(token);
-    if (List_GetFirst(bottomToTopList) != P_E)
+    if (PrecedenceItem_GetType(List_GetFirst(bottomToTopList)) != P_E)
         ret = 2;
     List_Destroy(bottomToTopList);
     return ret;
