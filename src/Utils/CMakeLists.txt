@@ -20,6 +20,8 @@ set(UTILITY_FILES
     "list.h"
     stack.c
     stack.h
+    vector.c
+    vector.h
     symbolelement.c
     symbolelement.h
     logger.h
