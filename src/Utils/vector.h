@@ -45,6 +45,12 @@ bool Vector_PopBack(Vector *vector);
 
 /**
  * @param vector Vector
+ * @return Last data in vector
+ */
+void *Vector_Back(Vector *vector);
+
+/**
+ * @param vector Vector
  * @return true if empty otherwise false
  */
 bool Vector_IsEmpty(Vector *vector);
@@ -58,7 +64,7 @@ int Vector_Size(Vector *vector);
 /**
  * @param vector Vector
  * @param index Index of wanted element
- * @return Element at certain index, NULL if out-of-bonds
+ * @return Element at certain index, NULL if out-of-bounds
  */
 void* Vector_GetElement(Vector *vector, int index);
 
@@ -70,3 +76,10 @@ void* Vector_GetElement(Vector *vector, int index);
  * @return true upon success otherwise false
  */
 bool Vector_InsertElement(Vector *vector, int index, void* data);
+
+/**
+ * @param vector Vector
+ * @param index Removes element on index position
+ * @return true upon succes otherwise false, index out-of-bounds has no effect
+ */
+bool Vector_RemoveElement(Vector *vector, int index);

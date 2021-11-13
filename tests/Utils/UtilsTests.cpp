@@ -4,6 +4,8 @@ extern "C"
 {
     #include "../../src/Utils/list.h"
     #include "../../src/Utils/stack.h"
+    #include "../../src/Utils/vector.h"
+    #include "../../src/Utils/vector_testonly.h"
     #include "../../src/Utils/symtable_testonly.h"
     #include "../../src/Utils/logger.h"
 }
@@ -443,6 +445,182 @@ TEST_F(SymbolTableTests, 13_ClearingBuffer)
 
     EXPECT_EQ(nullptr, Symtable_GetElement(symtable->symtable, "local"));
     EXPECT_EQ(nullptr, Symtable_GetElementFromBuffer(symtable->symtable, "local"));
+}
+
+void FreeElement(int* data)
+{
+    free(data);
+}
+
+class VectorTests : public ::testing::Test
+{
+    public:
+    Vector *vector;
+
+    int* CreateElement(int number)
+    {
+        int *a = (int*)malloc(sizeof(int));
+        *a = number;
+        return a;
+    }
+
+    void PushBackVector()
+    {
+        for (int i = 0; i < 10; i++)
+            Vector_PushBack(vector, CreateElement(i));
+    }
+
+    void InsertVector()
+    {
+        for (int i = 0; i < 5; i++)
+            Vector_InsertElement(vector, i, CreateElement(i));
+    }
+
+    void SetUp() override
+    {
+        vector = Vector_Init((void (*)(void*))FreeElement);
+    }
+
+    void TearDown() override
+    {
+        Vector_Destroy(vector);
+    }
+};
+
+TEST_F(VectorTests, 1_PushValue)
+{
+    EXPECT_EQ(Vector_IsEmpty(vector), true);
+    EXPECT_NO_THROW(Vector_PushBack(vector, CreateElement(1)));
+    EXPECT_EQ(*((int*)Vector_Back(vector)), 1);
+}
+
+TEST_F(VectorTests, 2_InsertValue)
+{
+    Vector_InsertElement(vector, 0, CreateElement(1));
+    EXPECT_EQ(*((int*)Vector_GetElement(vector, 0)), 1);
+}
+
+TEST_F(VectorTests, 3_PushMultiplePushValues)
+{
+    PushBackVector();
+    EXPECT_EQ(Vector_Size(vector), 10);
+    for (int i = 0; i < Vector_Size(vector); i++)
+        EXPECT_EQ(*((int*)Vector_GetElement(vector, i)), i);
+}
+
+TEST_F(VectorTests, 4_MultipleInsertValues)
+{
+    InsertVector();
+    EXPECT_EQ(Vector_Size(vector), 5);
+    for (int i = 0; i < Vector_Size(vector); i++)
+        EXPECT_EQ(*((int*)Vector_GetElement(vector, i)), i);
+}
+
+TEST_F(VectorTests, 5_PopBackValue)
+{
+    PushBackVector();
+    Vector_PopBack(vector);
+    EXPECT_EQ(Vector_Size(vector), 9);
+    for (int i = 0; i < Vector_Size(vector); i++)
+        EXPECT_EQ(*((int*)Vector_GetElement(vector, i)), i);
+}
+
+TEST_F(VectorTests, 5_RemoveLastValue)
+{
+    PushBackVector();
+    Vector_RemoveElement(vector, 9);
+    EXPECT_EQ(Vector_Size(vector), 9);
+    for (int i = 0; i < Vector_Size(vector); i++)
+        EXPECT_EQ(*((int*)Vector_GetElement(vector, i)), i);
+}
+
+TEST_F(VectorTests, 6_PopBackAllValues)
+{
+    PushBackVector();
+    for (int i = 0; i < 10; i++)
+    {
+        Vector_PopBack(vector);
+        EXPECT_EQ(Vector_Size(vector), 10-i-1);
+        for (int j = 0; j < Vector_Size(vector); j++)
+            EXPECT_EQ(*((int*)Vector_GetElement(vector, j)), j);
+    }
+}
+
+TEST_F(VectorTests, 7_RemoveAllValues)
+{
+    InsertVector();
+    for (int i = 0; i < 5; i++)
+    {
+        Vector_RemoveElement(vector, 5-i-1);
+        EXPECT_EQ(Vector_Size(vector), 5-i-1);
+        if (i != 4) 
+            EXPECT_EQ(*((int*)Vector_Back(vector)), 5-i-2);
+        else
+            EXPECT_EQ(((int*)Vector_Back(vector)), nullptr);
+    }
+}
+
+TEST_F(VectorTests, 8_ClearAndPushBack)
+{
+    InsertVector();
+    Vector_Clear(vector);
+    EXPECT_EQ(Vector_Size(vector), 0);
+    PushBackVector();
+    for (int i = 0; i < 10; i ++)
+    {
+        EXPECT_EQ(*((int*)Vector_GetElement(vector, i)), i);
+    }
+}
+
+TEST_F(VectorTests, 9_ClearAndPushBack)
+{
+    PushBackVector();
+    EXPECT_EQ(Vector_IsEmpty(vector), false);
+    Vector_Clear(vector);
+    EXPECT_EQ(Vector_IsEmpty(vector), true);
+    InsertVector();
+    for (int i = 4; i >= 0; i--)
+    {
+        EXPECT_EQ(*((int*)Vector_Back(vector)), i);
+        Vector_PopBack(vector);
+    }
+}
+
+TEST_F(VectorTests, 10_DestroyAndInit)
+{
+    PushBackVector();
+    TearDown();
+    SetUp();
+    EXPECT_EQ(Vector_Size(vector), 0);
+    EXPECT_EQ(Vector_IsEmpty(vector), true);
+    InsertVector();
+    EXPECT_EQ(Vector_Size(vector), 5);
+    EXPECT_EQ(Vector_IsEmpty(vector), false);
+    for (int i = 4; !Vector_IsEmpty(vector); i--)
+    {
+        EXPECT_EQ(*((int*)Vector_Back(vector)), i);
+        Vector_PopBack(vector);
+    }
+}
+
+TEST_F(VectorTests, 11_LargeVector)
+{
+    for (int i = 0; i < 10; i++)
+        PushBackVector();
+
+    for (int i = 0; i < 100; i++)
+        EXPECT_EQ(*((int*)Vector_GetElement(vector, i)), i % 10);
+
+    for (int i = 0; i < 87; i++)
+    {
+        Vector_PopBack(vector);
+    }
+
+    EXPECT_EQ(Vector_Size(vector), 13);
+    for (int i = 0; i < Vector_Size(vector); i++)
+    {
+        EXPECT_EQ(*((int*)Vector_GetElement(vector, i)), i % 10);
+    }
 }
 
 int main(int argc, char **argv) {

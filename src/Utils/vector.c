@@ -6,6 +6,9 @@
 #include "vector.h"
 #include "logger.h"
 
+// for testing purposes only
+#include "vector_testonly.h"
+
 #include <stdlib.h>
 
 #define VECTOR_INIT_SIZE 10
@@ -97,6 +100,11 @@ bool Vector_PopBack(Vector *vector)
     return true;
 }
 
+void *Vector_Back(Vector *vector)
+{
+    return vector->index == -1 ? NULL : vector->array[vector->index];
+}
+
 bool Vector_IsEmpty(Vector *vector)
 {
     return vector->index == -1;
@@ -111,13 +119,13 @@ void* Vector_GetElement(Vector *vector, int index)
 {
     if (index < 0 || index > vector->index)
         return NULL;
-    
+
     return vector->array[index];
 }
 
 bool Vector_InsertElement(Vector *vector, int index, void* data)
 {
-    if (index < 0 || index > vector->index)
+    if (index < 0 || index > vector->index + 1)
         return false;
 
     if (Vector_Size(vector) == vector->maxSize)
@@ -137,3 +145,34 @@ bool Vector_InsertElement(Vector *vector, int index, void* data)
 
     return true;
 }
+
+bool Vector_RemoveElement(Vector *vector, int index)
+{
+    if (index < 0 || index > vector->index)
+        return true;
+
+    if (vector->VectorElementDtor != NULL)
+        vector->VectorElementDtor(vector->array[index]);
+
+    vector->index--;
+
+    for (int i = index; i < Vector_Size(vector); i++)
+        vector->array[i] = vector->array[i + 1];
+
+    if (Vector_Size(vector) < vector->maxSize / 4 && vector->maxSize > 2 * VECTOR_INIT_SIZE) // to not reallocate with small vector
+    {
+        vector->maxSize /= 2;
+        vector->array = (void**)realloc(vector->array, sizeof(void*) * vector->maxSize);
+        if (vector->array == NULL)
+            ERROR("Reallocation failed");
+    }
+
+    return true;    
+}
+
+// for testing purposes only
+void **Vector_GetArray(Vector* vector)
+{
+    return vector->array;
+}
+
