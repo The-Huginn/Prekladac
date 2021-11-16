@@ -23,6 +23,8 @@ set(UTILITY_FILES
     vector_testonly.h
     vector.c
     vector.h
+    node.h
+    node.c
     symbolelement.c
     symbolelement.h
     logger.h
