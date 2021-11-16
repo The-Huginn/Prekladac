@@ -6,15 +6,15 @@
 #ifndef __PRECEDENCE_TABLE_H__
 #define __PRECEDENCE_TABLE_H__
 
-#define PRECEDENCE_TABLE_HEIGHT 20
-#define PRECEDENCE_TABLE_WIDTH (PRECEDENCE_TABLE_HEIGHT)
-#define PRECEDENCE_RULE_ARRAY_SIZE 4
+#define PRECEDENCE_TABLE_HEIGHT 22
+#define PRECEDENCE_TABLE_WIDTH 21
+#define PRECEDENCE_RULE_ARRAY_SIZE 7
 
 #include <stdbool.h>
 #include "../Utils/Token.h"
 
 typedef enum {
-    P_VOID, P_COMMA, P_E, P_BINARY_OPERATOR, P_UNARY_OPERATOR, P_LEFT, P_RIGHT, P_LEN, P_NOT, P_MUL, P_DIV, P_INT_DIV, P_PLUS, P_MINUS, P_CONCAT, P_GRT, P_LESS, P_GEQ, P_LEQ, P_EQ, P_NEQ, P_AND, P_OR, P_I, P_$
+    P_VOID, P_E, P_BINARY_OPERATOR, P_UNARY_OPERATOR, P_LEFT, P_RIGHT, P_LEN, P_NOT, P_MUL, P_DIV, P_INT_DIV, P_PLUS, P_MINUS, P_CONCAT, P_GRT, P_LESS, P_GEQ, P_LEQ, P_EQ, P_NEQ, P_AND, P_OR, P_I, P_COMMA, P_FUNCTION, P_$
 }PrecedenceItemType;
 
 typedef struct
@@ -58,6 +58,12 @@ PrecedenceItemType PrecedenceItem_GetType(PrecedenceItem *item);
  * @return char of PrecedenceItem
  */
 char PrecedenceItem_GetChar(PrecedenceItem *item);
+
+/**
+ * @param item  PrecedenceItem
+ * @param character Character to change to
+ */
+void PrecedenceItem_SetChar(PrecedenceItem *item, char character);
 
 /**
  * @param item PrecedenceItem
