@@ -12,6 +12,8 @@ set(SYNTAX_FILES
     LLTable.h
     PrecedenceTable.c
     PrecedenceTable.h
+    BottomToTop.c
+    BottomToTop.h
     Terminal.h
     NonTerminal.h
     Arrays.c

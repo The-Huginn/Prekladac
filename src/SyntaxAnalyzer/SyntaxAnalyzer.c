@@ -7,200 +7,17 @@
 #include "Terminal.h"
 #include "NonTerminal.h"
 #include "LLTable.h"
-#include "PrecedenceTable.h"
+#include "BottomToTop.h"
+
 #include "../Utils/stack.h"
 #include "../Utils/list.h"
+
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
 
 
 #include <stdlib.h>
 
-#define DEBUG_SYNTAX
-
-bool EqualsRule(PrecedenceItem *rule, PrecedenceItem *top)
-{
-    if (PrecedenceItem_GetType(rule) == PrecedenceItem_GetType(top))
-        return true;
-    
-    if (PrecedenceItem_GetType(rule) == PrecedenceItem_IsBinaryOperator(top) &&
-        PrecedenceItem_IsBinaryOperator(top) != P_VOID)
-        return true;
-
-    if (PrecedenceItem_GetType(rule) == PrecedenceItem_IsUnaryOperator(top) &&
-        PrecedenceItem_IsUnaryOperator(top) != P_VOID)
-        return true;
-
-    return false;
-}
-
-int ApplyPrecedenceRule(LList* list)
-{
-    bool indexes[] = { 1, 1, 1, 1, 1, 1, 1};
-    int index = 0;
-    bool succ = false;
-
-    PrecedenceItem* top = (PrecedenceItem*) List_GetFirst(list);
-
-    int possible = PRECEDENCE_RULE_ARRAY_SIZE;
-    while (possible > 0)
-    {
-        int i = 0;
-        // check all rules's first rule, second etc
-        for (; i < PRECEDENCE_RULE_ARRAY_SIZE; i++)
-        {
-            if (top == NULL)
-                return -1;
-            if (indexes[i])
-            {
-                if (!EqualsRule(&(precedence_rules[i].right_side[index]), top))
-                {
-                    indexes[i] = 0;
-                    possible--;
-                }
-                else if (index == precedence_rules[i].size - 1)
-                {
-                    succ = true;
-                    break;
-                }
-            }
-        }
-
-
-        index++;
-        List_RemoveFirst(list);
-        top = (PrecedenceItem*)List_GetFirst(list);
-        if (succ)
-        {
-            #ifdef DEBUG_SYNTAX
-                fprintf(stderr, "Applying rule:\n");
-            #endif
-
-            if (PrecedenceItem_GetChar(top) == '<')
-            {
-                #ifdef DEBUG_SYNTAX
-                    fprintf(stderr, "Rule number: %d\n", i);
-                #endif
-
-                top->character = '\0';
-                List_AddFirst(list, PrecedenceItem_Init(P_E, '\0'));
-                return i;
-            }
-            else
-                return -1;
-        }
-    }
-
-    return -1;
-}
-
-bool PrecedenceItem_IsTerminal(PrecedenceItem* a, PrecedenceItem* b)
-{
-    return PrecedenceItem_GetType(a) != P_E;
-}
-
-/**
- * @brief 
- * @param input 
- * @param output 
- * @param error_output 
- * @return -1 upon success
-*/
-int BottomToTop(FILE* input, FILE* output, FILE* error_output)
-{
-    #ifdef DEBUG_SYNTAX
-        fprintf(error_output, "------- Entering Precedence table! -------\n");
-    #endif
-
-    LList* bottomToTopList = List_Init((void (*) (void*))PrecedenceItem_Destroy, (const bool (*)(void*,const void*))PrecedenceItem_IsTerminal);
-    List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_$, '\0'));
-
-    Token* token = getToken(input);
-    int ret = -1;
-
-    PrecedenceItem* top = (PrecedenceItem*)List_GetData(bottomToTopList, NULL);
-    while ((Token_ToPrecedenceItemType(token) != P_$ || PrecedenceItem_GetType(top) != P_$) && ret == -1)
-    {
-        PrecedenceItemType token_type = Token_ToPrecedenceItemType(token);
-
-                                                                            // P_FUNCTION is not valid token, so we want to skip this as it is in the order the table
-        char action = precedenceTable[PrecedenceItem_GetType(top) - P_LEFT][ (token_type - P_LEFT) - (token_type > P_FUNCTION ? 1 : 0)];
-
-        switch (action)
-        {
-        case '<':
-            // special case for $E stack and i as token we want to break as that id does not belong to us
-            if (PrecedenceItem_GetType((PrecedenceItem*)List_GetFirst(bottomToTopList)) == P_E && token_type == P_I)
-                goto end;
-
-            top->character = '<';
-
-            // pushing comma on stack is done in beta
-            if (token_type != P_COMMA)
-                List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
-
-            free(token);
-            token = getToken(input);
-            break;
-        case '>':
-            if (ApplyPrecedenceRule(bottomToTopList) == -1)
-                ret = 2;
-            break;
-        case '=':
-            List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
-            free(token);
-            token = getToken(input);
-            break;
-        case 'a':
-            // < for P_FUNCTION to reduce the next void expression
-            List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_FUNCTION, '<'));   // This < might get skipped upon function call with 0 arguments
-            List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_VOID, '\0'));
-            ApplyPrecedenceRule(bottomToTopList);
-            
-            free(token);
-            token = getToken(input);
-
-            break;
-        case 'b':
-            // change top terminal's char to <
-            PrecedenceItem_SetChar((PrecedenceItem*)List_GetData(bottomToTopList, NULL), '<');
-            // push , on Top
-            List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_COMMA, '\0'));
-
-            returnToken(token);
-
-            ret = BottomToTop(input, output, error_output);
-            // if we dont get P_E as result we will break either way from the cycle as ret == -1 condition is not met
-            List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_E, '\0'));
-
-            token = getToken(input);
-            break;
-        case 'X':
-
-            while (!List_IsEmpty(bottomToTopList))
-            {
-                if (PrecedenceItem_GetType((PrecedenceItem*)List_GetFirst(bottomToTopList)) == P_E &&
-                    PrecedenceItem_GetType((PrecedenceItem*)List_GetData(bottomToTopList, NULL)) == P_$)
-                goto end;
-
-                ApplyPrecedenceRule(bottomToTopList);
-            }
-
-            ret = 2;
-            // every time we want to leave
-            goto end;
-            break;
-        }
-        top = (PrecedenceItem*)List_GetData(bottomToTopList, NULL);
-    }
-
-end:
-    #ifdef DEBUG_SYNTAX
-        fprintf(error_output, "------- Leaving Precedence table! -------\n");
-    #endif
-
-    returnToken(token);
-    return ret;
-}
+// #define DEBUG_SYNTAX
 
 /**
  * @brief Top to Bottom syntax method implemented as predictive parsing
@@ -296,7 +113,13 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         {
             returnToken(token);
             Stack_Pop(topToBottomStack);
-            int ret = BottomToTop(input, output, error_output);
+            
+            Node* expression = NULL;
+            int ret = BottomToTop(input, output, error_output, &expression);
+            // TODO with expression
+            if (expression != NULL)
+                Node_PostOrder(expression, true);
+
             token = getToken(input);
             return ret;
         }
