@@ -3,6 +3,8 @@
  * @author Rastislav Budinsky
  * @brief This file contains struct Node and interface for working with this structure
  */
+#include "vector.h"
+
 #include <stdbool.h>
 
 typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID}NodeType;
@@ -38,6 +40,6 @@ bool Node_AppendSon(Node* parent, Node *son);
  * @brief Iterates in post-order for code-generation
  * @param node Node
  * @param destroy Set to true to call destructor upon all Nodes
- * @return Identifier for value of evaluated expression
+ * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
-int Node_PostOrder(Node* node, bool destroy);
+Vector* Node_PostOrder(Node* node, bool destroy);
