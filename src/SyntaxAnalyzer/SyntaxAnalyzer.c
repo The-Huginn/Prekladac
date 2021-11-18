@@ -39,7 +39,7 @@ int ApplyPrecedenceRule(LList* list)
     int index = 0;
     bool succ = false;
 
-    PrecedenceItem* top = List_GetFirst(list);
+    PrecedenceItem* top = (PrecedenceItem*) List_GetFirst(list);
 
     int possible = PRECEDENCE_RULE_ARRAY_SIZE;
     while (possible > 0)
@@ -68,7 +68,7 @@ int ApplyPrecedenceRule(LList* list)
 
         index++;
         List_RemoveFirst(list);
-        top = List_GetFirst(list);
+        top = (PrecedenceItem*)List_GetFirst(list);
         if (succ)
         {
             #ifdef DEBUG_SYNTAX
@@ -117,7 +117,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output)
     Token* token = getToken(input);
     int ret = -1;
 
-    PrecedenceItem* top = List_GetData(bottomToTopList, NULL);
+    PrecedenceItem* top = (PrecedenceItem*)List_GetData(bottomToTopList, NULL);
     while ((Token_ToPrecedenceItemType(token) != P_$ || PrecedenceItem_GetType(top) != P_$) && ret == -1)
     {
         PrecedenceItemType token_type = Token_ToPrecedenceItemType(token);
@@ -129,7 +129,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output)
         {
         case '<':
             // special case for $E stack and i as token we want to break as that id does not belong to us
-            if (PrecedenceItem_GetType(List_GetFirst(bottomToTopList)) == P_E && token_type == P_I)
+            if (PrecedenceItem_GetType((PrecedenceItem*)List_GetFirst(bottomToTopList)) == P_E && token_type == P_I)
                 goto end;
 
             top->character = '<';
@@ -162,7 +162,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output)
             break;
         case 'b':
             // change top terminal's char to <
-            PrecedenceItem_SetChar(List_GetData(bottomToTopList, NULL), '<');
+            PrecedenceItem_SetChar((PrecedenceItem*)List_GetData(bottomToTopList, NULL), '<');
             // push , on Top
             List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_COMMA, '\0'));
 
@@ -172,14 +172,14 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output)
             // if we dont get P_E as result we will break either way from the cycle as ret == -1 condition is not met
             List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_E, '\0'));
 
-            token = getToken(token);
+            token = getToken(input);
             break;
         case 'X':
 
             while (!List_IsEmpty(bottomToTopList))
             {
-                if (PrecedenceItem_GetType(List_GetFirst(bottomToTopList)) == P_E &&
-                    PrecedenceItem_GetType(List_GetData(bottomToTopList, NULL)) == P_$)
+                if (PrecedenceItem_GetType((PrecedenceItem*)List_GetFirst(bottomToTopList)) == P_E &&
+                    PrecedenceItem_GetType((PrecedenceItem*)List_GetData(bottomToTopList, NULL)) == P_$)
                 goto end;
 
                 ApplyPrecedenceRule(bottomToTopList);
@@ -190,7 +190,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output)
             goto end;
             break;
         }
-        top = List_GetData(bottomToTopList, NULL);
+        top = (PrecedenceItem*)List_GetData(bottomToTopList, NULL);
     }
 
 end:
