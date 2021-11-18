@@ -39,6 +39,24 @@ void Node_Destroy(Node* node, bool destroy);
 bool Node_AppendSon(Node* parent, Node *son);
 
 /**
+ * @param parent Node
+ * @return Vector of sons
+ */
+Vector *Node_GetSons(Node *parent);
+
+/**
+ * @param node Node
+ * @return If Node is type of operation returns Operation otherwise P_VOID
+ */
+PrecedenceItemType Node_GetOperation(Node *node);
+
+/**
+ * @param node 
+ * @return True if Node is operation otherwise false
+ */
+bool Node_IsOperation(Node *node);
+
+/**
  * @brief Iterates in post-order for code-generation
  * @param node Node
  * @param destroy Set to true to call destructor upon all Nodes

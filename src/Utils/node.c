@@ -18,19 +18,11 @@ struct Node_t
     PrecedenceItemType operation;    //! use only when it is operation
 };
 
-/**
- * @param node Node
- * @return If Node is type of operation returns Operation otherwise P_VOID
- */
 PrecedenceItemType Node_GetOperation(Node *node)
 {
     return node->nodeType == NODE_OPERATION ? node->operation : P_VOID;
 }
 
-/**
- * @param node 
- * @return True if Node is operation otherwise false
- */
 bool Node_IsOperation(Node *node)
 {
     return node->nodeType == NODE_OPERATION;
@@ -71,6 +63,11 @@ void Node_Destroy(Node *node, bool destroy)
 bool Node_AppendSon(Node *node, Node *son)
 {
     return Vector_PushBack(node->sons, son);
+}
+
+Vector *Node_GetSons(Node *parent)
+{
+    return parent->sons;
 }
 
 void DataDtor(void *data)
