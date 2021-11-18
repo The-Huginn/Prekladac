@@ -4,6 +4,7 @@
  * @brief This file contains struct Node and interface for working with this structure
  */
 #include "vector.h"
+#include "../SyntaxAnalyzer/PrecedenceTable.h"
 
 #include <stdbool.h>
 
@@ -18,8 +19,9 @@ typedef struct Node_t Node;
  * @param data Data
  * @param semanticType SemanticType
  * @param DataDtor Desctructor for Data
+ * @param operation If NodeType equals NODE_OPERATION then sets remembers operation otherwise it is set to P_VOID
  */
-Node *Node_Init(NodeType NodeType, void *data, SemanticType semanticType, void (*DataDtor)(void *));
+Node *Node_Init(NodeType NodeType, void *data, SemanticType semanticType, void (*DataDtor)(void *), PrecedenceItemType operation);
 
 /**
  * @brief Destroys Node
