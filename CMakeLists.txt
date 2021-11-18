@@ -13,6 +13,7 @@ add_subdirectory(src/SyntaxAnalyzer)
 
 add_subdirectory(tests/LexicalAnalyzer)
 add_subdirectory(tests/SyntaxAnalyzer)
+add_subdirectory(tests/Utils)
 
 # No time to fix for linux now
 if (MSVC)
