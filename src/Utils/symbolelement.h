@@ -21,7 +21,7 @@ typedef enum SymbolType
 typedef struct SymbolElement Element;
 
 /**
- * @brief Allocates memory and initializes it according to arguments
+ * @brief Allocates memory and initializes it according to arguments @note This function should be called only via Symtable interface
  * @param key Pointer to already allocated string
  * @param type SymbolType
  * @return Pointer to the Element
@@ -29,7 +29,7 @@ typedef struct SymbolElement Element;
 Element* Element_Init(const char* key, SymbolType type);
 
 /**
- * @brief Frees all allocated memory
+ * @brief Frees all allocated memory @note This function should be called only via Symtable interface
  * @param element Element to be freed
 */
 void Element_Destroy(Element* element);
@@ -44,19 +44,19 @@ const char *Element_GetKey(Element *element);
 /**
  * @brief
  * @param element Element
- * @return True is element was previously defined otherwise false
+ * @return True if element was previously defined otherwise false
  */
 bool Element_IsDefined(Element *element);
 
 /**
- * @brief Set defined to 1 regardless of previous state
+ * @brief Set defined to true regardless of previous state
  * @param element Element
  */
 void Element_Define(Element *element);
 
 /**
  * @param element Element
- * @param new_type If element is Variable then changes Semantic type of variable, if function then adds new return value Semantic type
+ * @param new_type If element is Variable then changes Semantic type of variable, if function, then adds new return value Semantic type
  */
 void Element_SetSemantic(Element *element, SemanticType new_type);
 

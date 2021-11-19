@@ -5,7 +5,7 @@
  */
 #include "symbolelement.h"
 #include "logger.h"
-#include "data.h"
+#include "functiondata.h"
 
 #include <stdlib.h>
 
@@ -15,7 +15,8 @@ struct SymbolElement
 	bool isDefined;		//! Bool value deciding whether Symbol was defined
 	const char* key;	//! Pointer to the string with key, currently is not allocated in SymbolElement
 	void* data;			//! Pointer to the data, should be casted
-
+	int ID;				//! ID of current variable instance
+	SemanticType semanticType;	//! Semantic Type of Variable of first return value
 };
 
 Element* Element_Init(const char* key, SymbolType type)
@@ -27,11 +28,17 @@ Element* Element_Init(const char* key, SymbolType type)
 	element->key = key;
 	element->type = type;
 	element->isDefined = false;
-	element->data = Data_Init(type);
-	if (element->data == NULL)
+	element->ID = -1;
+	element->semanticType = SEMANTIC_VOID;
+	
+	if (type == FUNCTION)
 	{
-		free(element);
-		return NULL;
+		element->data = FunctionData_Init(type);
+		if (element->data == NULL)
+		{
+			free(element);
+			return NULL;
+		}
 	}
 	
 	return element;
@@ -40,9 +47,7 @@ Element* Element_Init(const char* key, SymbolType type)
 void Element_Destroy(Element* element)
 {
 	if (element->type == FUNCTION)
-		Data_Function_Destroy(element->data);
-	else
-		Data_Variable_Destroy(element->data);
+		FunctionData_Destroy(element->data);
 
 	free(element);
 	return;
@@ -66,40 +71,64 @@ void Element_Define(Element *element)
 
 void Element_SetSemantic(Element *element, SemanticType new_type)
 {
+	if (new_type == SEMANTIC_VOID)
+		WARNING("Setting element to VOID");
+
+	// return if variable
 	if (element->type == VARIABLE)
-		Data_Variable_SetSemantic(element->data, new_type);
-	else
-		Data_AddSemanticReturn(element->data, new_type);
+	{
+		element->semanticType = new_type;
+		return;
+	}
+
+	// should change only upon first set Semantic type
+	if (element->type == FUNCTION && element->semanticType == SEMANTIC_VOID)
+		element->type = new_type;
+
+	FunctionData_AddSemanticReturn(element->data, new_type);
 }
 
 void Element_AddSemanticParam(Element *element, SemanticType type)
 {
-	Data_AddSemanticParam(element->data, type);
+	if (element->type == FUNCTION)
+		FunctionData_AddSemanticParam(element->data, type);
+	else
+		WARNING("Function only function called upon Variable!");
 }
 
 SemanticType Element_GetSemantic(Element *element)
 {
-	return Data_GetSemanticType(element->data, element->type);
+	return element->semanticType;
 }
 
 Vector *Element_GetFunctionParameters(Element *element)
 {
-	return Data_Function_Params(element->data);
+	if (element->type == VARIABLE)
+	{
+		WARNING("Function only function called upon Variable!");
+		return NULL;
+	}
+	return FunctionData_Params(element->data);
 }
 
 Vector *Element_GetFunctionReturns(Element *element)
 {
-	return Data_Function_ReturnVals(element->data);
+	if (element->type == VARIABLE)
+	{
+		WARNING("Function only function called upon Variable!");
+		return NULL;
+	}
+	return FunctionData_ReturnVals(element->data);
 }
 
 void Element_SetID(Element *element, int new_ID)
 {
-	Data_SetID(element->data, element->type, new_ID);
+	element->ID = new_ID;
 }
 
 int Element_GetID(Element *element)
 {
-	return Data_GetID(element->data, element->type);
+	return element->ID;
 }
 
 bool Element_IsEqual(Element *element1, Element *element2)

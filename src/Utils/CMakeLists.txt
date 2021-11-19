@@ -25,8 +25,8 @@ set(UTILITY_FILES
     vector.h
     node.h
     node.c
-    data.h
-    data.c
+    functiondata.c
+    functiondata.h
     semantictype.h
     semantictype.c
     symbolelement.c
