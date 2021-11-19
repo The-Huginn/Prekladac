@@ -47,7 +47,6 @@ bool AbstractSemanticTree_UpdateFunctionCalls(Node *root)
     Vector *children = Node_GetSons(root);
     Node *child = (Node*)Vector_GetElement(children, 0);
 
-
     while (Node_IsOperation(child) && Node_GetOperation(child) == P_COMMA)
     {
         children = Node_GetSons(child);
@@ -55,12 +54,17 @@ bool AbstractSemanticTree_UpdateFunctionCalls(Node *root)
         // See function comments
         // This is why indexes 0 and 1 are switch compared to the picture above
         Vector_PushBack(new_sons, Vector_GetElement(children, 0));
+        
         Node *next = (Node*)Vector_GetElement(children, 1);
 
         Node_Destroy(child, false);
         child = next;
     }
+
     Vector_PushBack(new_sons, child);
+
+    // We want to ignore Void parameter
+    Vector_PopBack(new_sons);
 
     // we clear current parameters
     Vector_Clear(Node_GetSons(root));
