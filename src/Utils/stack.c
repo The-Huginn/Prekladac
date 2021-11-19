@@ -35,14 +35,16 @@ void SElement_Destroy(SElement* sElement, void (*DataDtor)(void*))
 	if (sElement == NULL)
 		ERROR_VOID("Invalid argument!");
 
-	DataDtor(sElement->data);
+	if (DataDtor != NULL)
+		DataDtor(sElement->data);
+
 	free(sElement);
 }
 
 Stack* Stack_Init(void (*DataDtor)(void*))
 {
 	if (DataDtor == NULL)
-		ERROR("Invalid parameter!");
+		WARNING("Missing DataDtor!");
 		
 	Stack* stack = (Stack*) malloc(sizeof(Stack)); // not sure this works
 	if (stack == NULL)
@@ -63,32 +65,30 @@ void Stack_Destroy(Stack *stack)
 	free(stack);
 }
 
-void* Stack_Push(Stack* stack, void* element)
+void* Stack_Push(Stack* stack, void* data)
 {
-	if (stack == NULL || element == NULL)
+	if (stack == NULL || data == NULL)
 		ERROR("Invalid argument!");
 
-	SElement* newTop = SElement_Init(element, stack->top);
+	SElement* newTop = SElement_Init(data, stack->top);
 	if (newTop == NULL)
 		ERROR("Allocation failed!");
 
 	stack->top = newTop;
-	return element;
+	return data;
 }
 
-void* Stack_Pop(Stack* stack)
+void Stack_Pop(Stack* stack)
 {
 	if (stack == NULL)
-		ERROR("Invalid argument!");
+		ERROR_VOID("Invalid argument!");
 	if (stack->top == NULL)
-		ERROR("Stack is empty!");
+		ERROR_VOID("Stack is empty!");
 
 	SElement* temp = stack->top->next;
-	void* ret = stack->top->data;
 
 	SElement_Destroy(stack->top, stack->DataDtor);
 	stack->top = temp;
-	return ret;
 }
 
 void* Stack_Top(Stack* stack)
@@ -112,10 +112,10 @@ void Stack_Clear(Stack* stack)
 	return;
 }
 
-int Stack_IsEmpty(Stack* stack)
+bool Stack_IsEmpty(Stack* stack)
 {
 	if (stack == NULL)
 		ERROR("Invalid argument!");
 
-	return (stack->top == NULL) ? 1 : 0;
+	return (stack->top == NULL) ? true : false;
 }

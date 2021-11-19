@@ -1,0 +1,13 @@
+require "ifj21"
+
+global foo: function(integer) : integer
+
+function bar(param:integer) :integer
+    return foo(param)
+end
+
+function foo(param:integer) :integer
+    return param + 1
+end
+
+write("Vysledok ma byt 3. Vysledok: ", foo(bar(1)),"\n")

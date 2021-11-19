@@ -6,17 +6,26 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
-/**
- * enum for classification of Token
- */
-typedef enum {ERROR, ID, KEYWORD, FLOAT, STRING, MINUS, PLUS, MUL, DIV, INT_DIV, DEF, COMMA, LEN, LEFT, RIGHT, LESS, LEQ, GRT, GEQ, CONCAT, ASS, EQ, NEQ} TokenType;
+#include"../SyntaxAnalyzer/Terminal.h"
 
 /**
  * class defining Token for output communication from Lexical analyzer
  */
 typedef struct {
-    TokenType type;
+    Terminal type;
     void *attribute;
 } Token;
+
+/**
+ * @param token
+ * @return enum type of token
+ */
+Terminal Token_getType(Token *token);
+
+/**
+ * @param token
+ * @return data of token
+ */
+void *Token_getData(Token *token);
 
 #endif // !TOKEN_H

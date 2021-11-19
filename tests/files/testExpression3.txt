@@ -1,0 +1,47 @@
+a(b+d) + c(a(b+d)+e)
+--[[
+Correct result should look like:    
+Node [0, 11, 4] was called
+Node [0, 11, 4] calling son...
+Node [2, 0, 4] was called
+Node [2, 0, 4] calling son...
+Node [4, 0, 4] was called
+WARNING [Vector_Clear]: Missing Dtor
+Node [2, 0, 4] calling son...
+Node [0, 11, 4] was called
+Node [0, 11, 4] calling son...
+Node [4, 0, 4] was called
+WARNING [Vector_Clear]: Missing Dtor
+Node [0, 11, 4] calling son...
+Node [2, 0, 4] was called
+Node [2, 0, 4] calling son...
+Node [4, 0, 4] was called
+WARNING [Vector_Clear]: Missing Dtor
+Node [2, 0, 4] calling son...
+Node [0, 11, 4] was called
+Node [0, 11, 4] calling son...
+Node [4, 0, 4] was called
+WARNING [Vector_Clear]: Missing Dtor
+Node [0, 11, 4] calling son...
+Node [4, 0, 4] was called
+WARNING [Vector_Clear]: Missing Dtor
+WARNING [Vector_Clear]: Missing Dtor
+WARNING [Vector_Clear]: Missing Dtor
+WARNING [Vector_Clear]: Missing Dtor
+WARNING [Vector_Clear]: Missing Dtor
+Node [0, 11, 4] calling son...
+Node [2, 0, 4] was called
+Node [2, 0, 4] calling son...
+Node [4, 0, 4] was called
+WARNING [Vector_Clear]: Missing Dtor
+Node [2, 0, 4] calling son...
+Node [0, 11, 4] was called
+Node [0, 11, 4] calling son...
+Node [4, 0, 4] was called
+WARNING [Vector_Clear]: Missing Dtor
+Node [0, 11, 4] calling son...
+Node [4, 0, 4] was called
+WARNING [Vector_Clear]: Missing Dtor
+WARNING [Vector_Clear]: Missing Dtor
+WARNING [Vector_Clear]: Missing Dtor
+WARNING [Vector_Clear]: Missing Dtor]]

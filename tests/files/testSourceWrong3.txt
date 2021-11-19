@@ -1,0 +1,10 @@
+--[[toto je komentar btw]]
+require "ifj21"
+global foo : function()
+
+function foo()
+    local a : integer
+    local b : number = 10a --this is wrong
+    b = 10e5
+    b = 10.1.0
+end

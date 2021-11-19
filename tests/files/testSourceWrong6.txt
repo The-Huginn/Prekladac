@@ -1,0 +1,7 @@
+require "ifj21"
+
+function main (    )
+    local a, b : integer, number = 10, 10e15.1
+end
+
+main(      )
