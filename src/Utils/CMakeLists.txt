@@ -25,6 +25,10 @@ set(UTILITY_FILES
     vector.h
     node.h
     node.c
+    data.h
+    data.c
+    semantictype.h
+    semantictype.c
     symbolelement.c
     symbolelement.h
     logger.h

@@ -4,13 +4,12 @@
  * @brief This file contains struct Node and interface for working with this structure
  */
 #include "vector.h"
+#include "semantictype.h"
 #include "../SyntaxAnalyzer/PrecedenceTable.h"
 
 #include <stdbool.h>
 
 typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID}NodeType;
-
-typedef enum {SEMANTIC_INTEGER, SEMANTIC_NUMBER, SEMANTIC_BOOLEAN, SEMANTIC_STRING, SEMANTIC_VOID}SemanticType;
 
 typedef struct Node_t Node;
 
