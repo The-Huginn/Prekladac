@@ -7,6 +7,9 @@
 #ifndef __SYMBOL_ELEMENT__
 #define __SYMBOL_ELEMENT__
 
+#include "semantictype.h"
+#include "vector.h"
+
 #include <stdbool.h>
 
 typedef enum SymbolType
@@ -20,12 +23,10 @@ typedef struct SymbolElement Element;
 /**
  * @brief Allocates memory and initializes it according to arguments
  * @param key Pointer to already allocated string
- * @param type 
- * @param isDefined 
- * @param data 
+ * @param type SymbolType
  * @return Pointer to the Element
 */
-Element* Element_Init(const char* key, SymbolType type, bool isDefined, void* data);
+Element* Element_Init(const char* key, SymbolType type);
 
 /**
  * @brief Frees all allocated memory
@@ -54,11 +55,50 @@ bool Element_IsDefined(Element *element);
 void Element_Define(Element *element);
 
 /**
+ * @param element Element
+ * @param new_type If element is Variable then changes Semantic type of variable, if function then adds new return value Semantic type
+ */
+void Element_SetSemantic(Element *element, SemanticType new_type);
+
+/**
+ * @brief Should be called only upon Function
+ * @param element Element
+ * @param type Semantic type of newly added parameter @note this adds new parameter and sets it's Semantic type
+ */
+void Element_AddSemanticParam(Element *element, SemanticType type);
+
+/**
+ * @param element Element
+ * @return Semantic type of Element, if function then Semantic type of first return value 
+ */
+SemanticType Element_GetSemantic(Element *element);
+
+/**
+ * @brief Should be called only upon Function
+ * @param element Element
+ * @return Vector* of SemanticType* of parameters
+ */
+Vector *Element_GetFunctionParameters(Element *element);
+
+/**
+ * @brief Should be called only upon Function
+ * @param element Element
+ * @return Vector* of SemanticType* of return values
+ */
+Vector *Element_GetFunctionReturns(Element *element);
+
+/**
  * @brief
  * @param element Element
- * @return Pointer to data
+ * @param new_ID new ID to assign
  */
-void *Element_GetData(Element *element);
+void Element_SetID(Element *element, int new_ID);
+
+/**
+ * @param element Element
+ * @return ID previously assigned to element otherwise -1
+ */
+int Element_GetID(Element *element);
 
 /**
  * @brief Checks, whether 2 elements pointers are the same
