@@ -114,7 +114,7 @@ Element *Symtable_GetElement(Symtable *symtable, const char *id)
     return (Element*) Stack_Top(stack);    
 }
 
-Element *Symtable_CreateElement(Symtable *symtable, const char *id, int flags)
+Element *Symtable_CreateElement(Symtable *symtable, const char *id, SymbolType type)
 {
     if (id == NULL)
         ERROR("Invalid parameter!");
@@ -133,7 +133,7 @@ Element *Symtable_CreateElement(Symtable *symtable, const char *id, int flags)
     if (stack == NULL)
         return NULL;
 
-    Element *element = Element_Init(Jesus_GetKey(jesus), FUNCTION, false, NULL);
+    Element *element = Element_Init(Jesus_GetKey(jesus), type);
     if (element == NULL)
         return NULL;
 

@@ -33,12 +33,13 @@ Element *Symtable_GetElement(Symtable *symtable, const char* id);
 
 /**
  * @brief Creates an Element, saves it into the Symbol table and returns pointer to Element
+ *      For further definition of Element symbolelement.h interface should be used
  * @param symtable Symbol table
  * @param id the identifier
- * @param flags The flags for initial setup, only temporary
+ * @param type The type of variable
  * @return Pointer to the newly created Element
  */
-Element *Symtable_CreateElement(Symtable *symtable, const char* id, int flags);
+Element *Symtable_CreateElement(Symtable *symtable, const char* id, SymbolType type);
 
 /**
  * @brief Finds the Element in the buffer i.e. Element that is not visible from this scope but was in scope before
