@@ -349,6 +349,16 @@ end:
     if (Vector_Size(expressions) != 1)
         ret = 2;
 
+    int size = 0;
+    while (!List_IsEmpty(bottomToTopList))
+    {
+        size++;
+        List_RemoveFirst(bottomToTopList);
+    }
+
+    if (size != 2)
+        ret = 2;
+
     Vector_Destroy(expressions);
     List_Destroy(bottomToTopList);
 
