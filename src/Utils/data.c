@@ -133,7 +133,7 @@ void Data_Function_Destroy(void *data)
     free(function);
 }
 
-void Data_ID_Destroy(void *data)
+void Data_Variable_Destroy(void *data)
 {
     free((Variable*)data);
 }

@@ -3,6 +3,9 @@
  * @author Rastislav Budinsky
  * @brief This file contains interface for working with data of ID / FUNCTION
  */
+#ifndef __DATA_H__
+#define __DATA_H__
+
 #include "semantictype.h"
 #include "symbolelement.h"
 #include "vector.h"
@@ -82,4 +85,6 @@ void Data_Function_Destroy(void *data);
  * @brief Destroy function for Id data
  * @param data Data
  */
-void Data_Id_Destroy(void *data);
+void Data_Variable_Destroy(void *data);
+
+#endif //!__DATA_H__
