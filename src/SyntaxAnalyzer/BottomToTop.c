@@ -101,7 +101,7 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                         node = Node_Init(NODE_OPERATION, NULL, SEMANTIC_VOID, NULL, top_terminal);
                         if (node == NULL)
                             return 99;
-                        Node_AppendSon(node, Vector_Back(expressions));
+                        Node_AppendSon(node, (Node*)Vector_Back(expressions));
                         Vector_PopBack(expressions);
 
                         return_value = AbstractSemanticTree_UnaryOperator(node);
@@ -113,9 +113,9 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                         node = Node_Init(NODE_OPERATION, NULL, SEMANTIC_VOID, NULL, top_terminal);
                         if (node == NULL)
                             return 99;
-                        Node_AppendSon(node, Vector_Back(expressions));
+                        Node_AppendSon(node, (Node*)Vector_Back(expressions));
                         Vector_PopBack(expressions);
-                        Node_AppendSon(node, Vector_Back(expressions));
+                        Node_AppendSon(node, (Node*)Vector_Back(expressions));
                         Vector_PopBack(expressions);
 
                         return_value = AbstractSemanticTree_BinaryOperator(node);
@@ -130,7 +130,7 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                         node = Node_Init(NODE_FUNCTION, /*TS pointer*/ NULL, /*Semantic type of first return*/SEMANTIC_VOID, NULL, P_VOID);
                         if (node == NULL)
                             return 99;
-                        Node_AppendSon(node, Vector_Back(expressions));
+                        Node_AppendSon(node, (Node*)Vector_Back(expressions));
                         Vector_PopBack(expressions);
 
                         
@@ -148,9 +148,9 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                         node = Node_Init(NODE_OPERATION, NULL, SEMANTIC_VOID, NULL, top_terminal);
                         if (node == NULL)
                             return 99;
-                        Node_AppendSon(node, Vector_Back(expressions));
+                        Node_AppendSon(node, (Node*)Vector_Back(expressions));
                         Vector_PopBack(expressions);
-                        Node_AppendSon(node, Vector_Back(expressions));
+                        Node_AppendSon(node, (Node*)Vector_Back(expressions));
                         Vector_PopBack(expressions);
                         break;
                     
