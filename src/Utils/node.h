@@ -12,7 +12,7 @@
 
 #include <stdbool.h>
 
-typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID}NodeType;
+typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL}NodeType;
 
 typedef struct Node_t Node;
 
