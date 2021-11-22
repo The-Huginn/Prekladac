@@ -12,6 +12,8 @@ set(SYNTAX_FILES
     LLTable.h
     PrecedenceTable.c
     PrecedenceTable.h
+    SemanticActions.c
+    SemanticActions.h
     BottomToTop.c
     BottomToTop.h
     Terminal.h
