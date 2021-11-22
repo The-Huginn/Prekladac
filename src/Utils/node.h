@@ -83,6 +83,12 @@ int Node_GetParamCount(Node *node);
 Vector *Node_GetSons(Node *parent);
 
 /**
+ * @param parent 
+ * @return Vector of returns 
+ */
+Vector *Node_GetReturns(Node *parent);
+
+/**
  * @param root Node
  * @return Semantic type of Node 
  */

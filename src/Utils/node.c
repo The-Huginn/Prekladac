@@ -162,6 +162,11 @@ Vector *Node_GetSons(Node *parent)
     return parent->sons;
 }
 
+Vector *Node_GetReturns(Node *parent)
+{
+    return parent->returns;
+}
+
 void DataDtor(void *data)
 {
     free(data);

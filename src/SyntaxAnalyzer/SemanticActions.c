@@ -12,6 +12,34 @@
 
 #define NOT_IMPLEMENTED
 
+/**
+ * @brief Adds new node where it compares with nil, if we expect function index can be added
+ * @param node Node which needs to be compared with nil
+ * @param index Set default to 0 unless in function call as function return
+ * @return -1 on success otherwise error code
+ */
+int AbstractSemanticTree_CompareWithNil(Node *node, int index)
+{
+    if (Node_GetType(node) == NODE_FUNCTION)
+    {
+        Vector *returns = Node_GetReturns(node);
+
+        // no returns from function
+        if (Vector_Size(returns) == 0)
+            return 5;
+            
+        if (Node_CompareWithNil(Vector_GetElement(returns, index)) == false)
+            return 99;
+    }
+    else
+    {
+        if (Node_CompareWithNil(node) == false)
+            return 99;
+    }
+
+    return -1;
+}
+
 //              E
 //            / , \
 //          E      \
@@ -191,14 +219,16 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     case P_OR:
         if (first != SEMANTIC_BOOLEAN)
         {
-            if (Node_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0)) == false)
-                return 99;
+            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0), 0);
+            if (ret != -1)
+                return ret;
             first = SEMANTIC_BOOLEAN;
         }
         if (second != SEMANTIC_BOOLEAN)
         {
-            if (Node_CompareWithNil(Vector_GetElement(Node_GetSons(root), 1)) == false)
-                return 99;
+            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 1), 0);
+            if (ret != -1)
+                return ret;
         }
         break;
     // not a binary operator
@@ -241,8 +271,9 @@ int AbstractSemanticTree_UnaryOperator(Node *root)
     case P_NOT:
         if (first != SEMANTIC_BOOLEAN)
         {
-            if (Node_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0)) == false)
-                return 99;
+            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0), 0);
+            if (ret != -1)
+                return ret;
             first = SEMANTIC_BOOLEAN;
         }
         break;
