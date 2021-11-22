@@ -110,14 +110,16 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
 
     // we check all available params once
     for (int i = 0; i < Vector_Size(Node_GetSons(root)); i++)
-        if (Node_GetSemantic(Vector_GetElement(Node_GetSons(root), i)) != *((SemanticType*)Vector_GetElement(function_call, i)))
+        if (Node_GetSemantic(Vector_GetElement(Node_GetSons(root), i)) != *((SemanticType*)Vector_GetElement(function_call, i)) &&
+            *((SemanticType*)Vector_GetElement(function_call, i)) != SEMANTIC_BOOLEAN)
             return 5;
 
     Vector *last_function = Element_GetFunctionReturns(Node_GetData(Vector_Back(Node_GetSons(root))));
     int size = Vector_Size(Node_GetSons(root));
 
     for (int i = 0; i < Node_GetParamCount(root); i++)
-        if (*((SemanticType*)Vector_GetElement(last_function, i + 1)) != *((SemanticType*)Vector_GetElement(function_call, size + i + 1)));
+        if (*((SemanticType*)Vector_GetElement(last_function, i + 1)) != *((SemanticType*)Vector_GetElement(function_call, size + i + 1)) &&
+            *((SemanticType*)Vector_GetElement(function_call, size + i + 1)) != SEMANTIC_BOOLEAN)
             return 5;
 
     // returns something
@@ -189,20 +191,14 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     case P_OR:
         if (first != SEMANTIC_BOOLEAN)
         {
-            Node *comparator = Node_Init(NODE_OPERATION, NULL, SEMANTIC_BOOLEAN, (void (*)(void*))NULL, P_EQ);
-            Node_AppendSon(comparator, Vector_GetElement(Node_GetSons(root), 0));
-            Vector_RemoveElement(Node_GetSons(root), 0);
-            Node_AppendSon(comparator, Node_Init(NODE_NIL, NULL, SEMANTIC_VOID, (void(*)(void*))NULL, P_VOID));
-            Vector_InsertElement(Node_GetSons(root), 0, comparator);
+            if (Node_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0)) == false)
+                return 99;
             first = SEMANTIC_BOOLEAN;
         }
         if (second != SEMANTIC_BOOLEAN)
         {
-            Node *comparator = Node_Init(NODE_OPERATION, NULL, SEMANTIC_BOOLEAN, (void (*)(void*))NULL, P_EQ);
-            Node_AppendSon(comparator, Vector_GetElement(Node_GetSons(root), 1));
-            Vector_RemoveElement(Node_GetSons(root), 1);
-            Node_AppendSon(comparator, Node_Init(NODE_NIL, NULL, SEMANTIC_VOID, (void(*)(void*))NULL, P_VOID));
-            Vector_InsertElement(Node_GetSons(root), 1, comparator);
+            if (Node_CompareWithNil(Vector_GetElement(Node_GetSons(root), 1)) == false)
+                return 99;
         }
         break;
     // not a binary operator
@@ -245,11 +241,8 @@ int AbstractSemanticTree_UnaryOperator(Node *root)
     case P_NOT:
         if (first != SEMANTIC_BOOLEAN)
         {
-            Node *comparator = Node_Init(NODE_OPERATION, NULL, SEMANTIC_BOOLEAN, (void (*)(void*))NULL, P_EQ);
-            Node_AppendSon(comparator, Vector_GetElement(Node_GetSons(root), 0));
-            Vector_RemoveElement(Node_GetSons(root), 0);
-            Node_AppendSon(comparator, Node_Init(NODE_NIL, NULL, SEMANTIC_VOID, (void(*)(void*))NULL, P_VOID));
-            Vector_InsertElement(Node_GetSons(root), 0, comparator);
+            if (Node_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0)) == false)
+                return 99;
             first = SEMANTIC_BOOLEAN;
         }
         break;
