@@ -3,6 +3,9 @@
  * @author Rastislav Budinsky
  * @brief This file contains struct Node and interface for working with this structure
  */
+#ifndef __NODE_H__
+#define __NODE_H__
+
 #include "vector.h"
 #include "semantictype.h"
 #include "../SyntaxAnalyzer/PrecedenceTable.h"
@@ -38,10 +41,48 @@ void Node_Destroy(Node* node, bool destroy);
 bool Node_AppendSon(Node* parent, Node *son);
 
 /**
+ * @param node Node
+ * @return data
+ */
+void *Node_GetData(Node *node);
+
+/**
+ * @brief Sets how many times use the last expression @note It is expected this parameter is function call and has enough return values, otherwise unexpected behaviour
+ * @param node Function call
+ * @param count How many times use the last param explicitly @note It is already by default used once, default value is 0
+ */
+void Node_SetParamCount(Node *node, int count);
+
+/**
+ * @brief Getter for @see Node_SetParamCount
+ * @param node Function call
+ * @return default 0 unless change by @see Node_SetParamCount
+ */
+int Node_GetParamCount(Node *node);
+
+/**
  * @param parent Node
  * @return Vector of sons
  */
 Vector *Node_GetSons(Node *parent);
+
+/**
+ * @param root Node
+ * @return Semantic type of Node 
+ */
+SemanticType Node_GetSemantic(Node *root);
+
+/**
+ * @param root Node
+ * @param semanticType new SemanticType
+ */
+void Node_SetSemantic(Node *root, SemanticType semanticType);
+
+/**
+ * @param root Node
+ * @return Type of Node 
+ */
+NodeType Node_GetType(Node *root);
 
 /**
  * @param node Node
@@ -62,3 +103,5 @@ bool Node_IsOperation(Node *node);
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
 Vector* Node_PostOrder(Node* node, bool destroy);
+
+#endif //!__NODE_H__

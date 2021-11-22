@@ -14,9 +14,25 @@ struct Node_t
     void *data;
     Vector *sons;
     SemanticType semanticType;
+    int count;
     void (*DataDtor)(void*);
     PrecedenceItemType operation;    //! use only when it is operation
 };
+
+SemanticType Node_GetSemantic(Node *root)
+{
+    return root->semanticType;
+}
+
+void Node_SetSemantic(Node *root, SemanticType semanticType)
+{
+    root->semanticType = semanticType;
+}
+
+NodeType Node_GetType(Node *root)
+{
+    return root->nodeType;
+}
 
 PrecedenceItemType Node_GetOperation(Node *node)
 {
@@ -44,6 +60,7 @@ Node *Node_Init(NodeType nodeType, void *data, SemanticType semanticType, void (
     node->nodeType = nodeType;
     node->data = data;
     node->semanticType = semanticType;
+    node->count = 0;
     node->DataDtor = DataDtor;
     node->operation = nodeType == NODE_OPERATION ? operation : P_VOID;
 
@@ -63,6 +80,21 @@ void Node_Destroy(Node *node, bool destroy)
 bool Node_AppendSon(Node *node, Node *son)
 {
     return Vector_PushBack(node->sons, son);
+}
+
+void *Node_GetData(Node *node)
+{
+    return node->data;
+}
+
+void Node_SetParamCount(Node *node, int count)
+{
+    node->count = count;
+}
+
+int Node_GetParamCount(Node *node)
+{
+    return node->count;
 }
 
 Vector *Node_GetSons(Node *parent)
