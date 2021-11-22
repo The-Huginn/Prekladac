@@ -4,6 +4,7 @@
  * @brief This file contains implementation of interface of BottomToTop parser
  */
 #include "BottomToTop.h"
+#include "SemanticActions.h"
 
 #include "../Utils/list.h"
 
@@ -29,62 +30,6 @@ bool EqualsRule(PrecedenceItem *rule, PrecedenceItem *top)
     return false;
 }
 
-//              E
-//            / , \
-//          E      \
-//        / , \     \
-//       E     E     \
-//     / , \    \     \
-//    E    E    E     E
-// Tree of arguments should look like this
-// keep in mind this tree is mirrored as the rules are applied from the end. (Probably, works like this looks like)
-bool AbstractSemanticTree_UpdateFunctionCalls(Node *root)
-{
-    Vector *new_sons = Vector_Init(NULL);
-    if (new_sons == NULL)
-        return false;
-
-    Vector *children = Node_GetSons(root);
-    Node *child = (Node*)Vector_GetElement(children, 0);
-
-    while (Node_IsOperation(child) && Node_GetOperation(child) == P_COMMA)
-    {
-        children = Node_GetSons(child);
-
-        // See function comments
-        // This is why indexes 0 and 1 are switch compared to the picture above
-        Vector_PushBack(new_sons, Vector_GetElement(children, 0));
-        
-        Node *next = (Node*)Vector_GetElement(children, 1);
-
-        Node_Destroy(child, false);
-        child = next;
-    }
-
-    Vector_PushBack(new_sons, child);
-
-    // We want to ignore Void parameter
-    Vector_PopBack(new_sons);
-
-    // we clear current parameters
-    Vector_Clear(Node_GetSons(root));
-
-
-    // append new parameters in correct order
-    while (!Vector_IsEmpty(new_sons))
-    {
-        if (Node_AppendSon(root, Vector_Back(new_sons)))
-            Vector_PopBack(new_sons);
-        else
-        {
-            Vector_Destroy(new_sons);
-            return false;
-        }
-    }
-
-    return true;
-}
-
 int ApplyPrecedenceRule(LList* list, Vector* expressions)
 {
     bool indexes[] = { 1, 1, 1, 1, 1, 1, 1};
@@ -102,7 +47,7 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
         for (; i < PRECEDENCE_RULE_ARRAY_SIZE; i++)
         {
             if (top == NULL)
-                return -1;
+                return 2;
             if (indexes[i])
             {
                 if (!EqualsRule(&(precedence_rules[i].right_side[index]), top))
@@ -157,6 +102,11 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                             return 99;
                         Node_AppendSon(node, Vector_Back(expressions));
                         Vector_PopBack(expressions);
+
+                        int return_value = AbstractSemanticTree_UnaryOperator(node);
+                        if (return_value != -1)
+                            return return_value;
+
                         break;
                     case 3: // E->E BINARY E
                         node = Node_Init(NODE_OPERATION, NULL, SEMANTIC_VOID, NULL, top_terminal);
@@ -166,6 +116,11 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                         Vector_PopBack(expressions);
                         Node_AppendSon(node, Vector_Back(expressions));
                         Vector_PopBack(expressions);
+
+                        int return_value = AbstractSemanticTree_BinaryOperator(node);
+                        if (return_value != -1)
+                            return return_value;
+
                         break;
                     case 4: // E->( E )
                         // Nothing to do
@@ -183,6 +138,10 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                             Node_Destroy(node, true);
                             return 99;
                         }
+                        int return_value = AbstractSemanticTree_VerifyFunctionCall(node);
+                        if (return_value != -1)
+                            return return_value;
+
                         break;
                     case 6: // E->E , E
                         node = Node_Init(NODE_OPERATION, NULL, SEMANTIC_VOID, NULL, top_terminal);
@@ -202,14 +161,14 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
 
                 top->character = '\0';
                 List_AddFirst(list, PrecedenceItem_Init(P_E, '\0'));
-                return i;
+                return -1;
             }
             else
-                return -1;
+                return 2;
         }
     }
 
-    return -1;
+    return 2;
 }
 
 bool PrecedenceItem_IsTerminal(PrecedenceItem* a, PrecedenceItem* b)
@@ -272,8 +231,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
             token = getToken(input);
             break;
         case '>':
-            if (ApplyPrecedenceRule(bottomToTopList, expressions) == -1)
-                ret = 2;
+            ret = ApplyPrecedenceRule(bottomToTopList, expressions);
             break;
         case '=':
             List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
@@ -284,11 +242,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
             // < for P_FUNCTION to reduce the next void expression
             List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_FUNCTION, '<'));   // This < might get skipped upon function call with 0 arguments
             List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_VOID, '\0'));
-            int rule_return = ApplyPrecedenceRule(bottomToTopList, expressions);
-            if (rule_return == -1)
-                ret = 2;
-            else if (rule_return == 99)
-                ret = 99;
+            ret = ApplyPrecedenceRule(bottomToTopList, expressions);
             
             free(token);
             token = getToken(input);
@@ -321,17 +275,10 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
                     PrecedenceItem_GetType((PrecedenceItem*)List_GetData(bottomToTopList, NULL)) == P_$)
                 goto end;
 
-                int rule_return = ApplyPrecedenceRule(bottomToTopList, expressions);
-                if (rule_return == -1)
-                {
-                    ret = 2;
+                ret = ApplyPrecedenceRule(bottomToTopList, expressions);
+
+                if (ret != -1)
                     goto end;
-                }
-                else if (rule_return == 99)
-                {
-                    ret = 99;
-                    goto end;
-                }
             }
 
             ret = 2;
