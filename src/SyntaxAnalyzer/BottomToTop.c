@@ -39,6 +39,7 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
     PrecedenceItemType top_terminal = PrecedenceItem_GetType((PrecedenceItem*) List_GetData(list, NULL));
     PrecedenceItem* top = (PrecedenceItem*) List_GetFirst(list);
 
+    int return_value = -1;
     int possible = PRECEDENCE_RULE_ARRAY_SIZE;
     while (possible > 0)
     {
@@ -103,7 +104,7 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                         Node_AppendSon(node, Vector_Back(expressions));
                         Vector_PopBack(expressions);
 
-                        int return_value = AbstractSemanticTree_UnaryOperator(node);
+                        return_value = AbstractSemanticTree_UnaryOperator(node);
                         if (return_value != -1)
                             return return_value;
 
@@ -117,7 +118,7 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                         Node_AppendSon(node, Vector_Back(expressions));
                         Vector_PopBack(expressions);
 
-                        int return_value = AbstractSemanticTree_BinaryOperator(node);
+                        return_value = AbstractSemanticTree_BinaryOperator(node);
                         if (return_value != -1)
                             return return_value;
 
@@ -138,7 +139,7 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions)
                             Node_Destroy(node, true);
                             return 99;
                         }
-                        int return_value = AbstractSemanticTree_VerifyFunctionCall(node);
+                        return_value = AbstractSemanticTree_VerifyFunctionCall(node);
                         if (return_value != -1)
                             return return_value;
 
