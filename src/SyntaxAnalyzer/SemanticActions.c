@@ -15,10 +15,9 @@
 /**
  * @brief Adds new node where it compares with nil, if we expect function index can be added
  * @param node Node which needs to be compared with nil
- * @param index Set default to 0 unless in function call as function return
  * @return -1 on success otherwise error code
  */
-int AbstractSemanticTree_CompareWithNil(Node *node, int index)
+int AbstractSemanticTree_CompareWithNil(Node *node)
 {
     if (Node_GetType(node) == NODE_FUNCTION)
     {
@@ -28,7 +27,7 @@ int AbstractSemanticTree_CompareWithNil(Node *node, int index)
         if (Vector_Size(returns) == 0)
             return 5;
             
-        if (Node_CompareWithNil(Vector_GetElement(returns, index)) == false)
+        if (Node_CompareWithNil(Vector_GetElement(returns, 0)) == false)
             return 99;
     }
     else
@@ -138,17 +137,36 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
 
     // we check all available params once
     for (int i = 0; i < Vector_Size(Node_GetSons(root)); i++)
-        if (Node_GetSemantic(Vector_GetElement(Node_GetSons(root), i)) != *((SemanticType*)Vector_GetElement(function_call, i)) &&
-            *((SemanticType*)Vector_GetElement(function_call, i)) != SEMANTIC_BOOLEAN)
-            return 5;
+        if (Node_GetSemantic(Vector_GetElement(Node_GetSons(root), i)) != *((SemanticType*)Vector_GetElement(function_call, i)))
+        {
+            // if boolean as parameter we should convert to be compared with nil
+            if (*((SemanticType*)Vector_GetElement(function_call, i)) == SEMANTIC_BOOLEAN)
+            {
+                int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), i));
+                if (ret != -1)
+                    return ret;
+            }
+            else
+                return 5;
+        }
 
-    Vector *last_function = Element_GetFunctionReturns(Node_GetData(Vector_Back(Node_GetSons(root))));
+    // vector holding POP-ing expressions of function call
+    Vector *last_function = Node_GetReturns(Vector_Back(Node_GetSons(root)));
     int size = Vector_Size(Node_GetSons(root));
 
     for (int i = 0; i < Node_GetParamCount(root); i++)
-        if (*((SemanticType*)Vector_GetElement(last_function, i + 1)) != *((SemanticType*)Vector_GetElement(function_call, size + i + 1)) &&
-            *((SemanticType*)Vector_GetElement(function_call, size + i + 1)) != SEMANTIC_BOOLEAN)
-            return 5;
+        // last_function is Vector<Node*>
+        if (Node_GetSemantic(Vector_GetElement(last_function, i + 1)) != *((SemanticType*)Vector_GetElement(function_call, size + i + 1)))
+        {
+            if (*((SemanticType*)Vector_GetElement(function_call, size + i + 1)) == SEMANTIC_BOOLEAN)
+            {
+                int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(last_function, i + 1));
+                if (ret != -1)
+                    return ret;
+            }
+            else
+                return 5;
+        }
 
     // returns something
     if (Vector_Size(Element_GetFunctionReturns(Node_GetData(root))) > 0)
@@ -219,14 +237,14 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     case P_OR:
         if (first != SEMANTIC_BOOLEAN)
         {
-            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0), 0);
+            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0));
             if (ret != -1)
                 return ret;
             first = SEMANTIC_BOOLEAN;
         }
         if (second != SEMANTIC_BOOLEAN)
         {
-            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 1), 0);
+            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 1));
             if (ret != -1)
                 return ret;
         }
@@ -271,7 +289,7 @@ int AbstractSemanticTree_UnaryOperator(Node *root)
     case P_NOT:
         if (first != SEMANTIC_BOOLEAN)
         {
-            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0), 0);
+            int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), 0));
             if (ret != -1)
                 return ret;
             first = SEMANTIC_BOOLEAN;
