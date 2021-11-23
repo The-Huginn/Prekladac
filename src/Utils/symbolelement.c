@@ -19,7 +19,7 @@ struct SymbolElement
 	SemanticType semanticType;	//! Semantic Type of Variable of first return value
 };
 
-Element* Element_Init(const char* key, SymbolType type)
+Element* Element_Init(const char* key, SymbolType type, int id)
 {
 	Element *element = (Element*) malloc(sizeof(Element));
 	if (element == NULL)
@@ -28,7 +28,7 @@ Element* Element_Init(const char* key, SymbolType type)
 	element->key = key;
 	element->type = type;
 	element->isDefined = false;
-	element->ID = -1;
+	element->ID = id;
 	element->semanticType = SEMANTIC_VOID;
 	
 	if (type == FUNCTION)

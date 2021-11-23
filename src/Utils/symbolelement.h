@@ -24,9 +24,10 @@ typedef struct SymbolElement Element;
  * @brief Allocates memory and initializes it according to arguments @note This function should be called only via Symtable interface
  * @param key Pointer to already allocated string
  * @param type SymbolType
+ * @param id Unique ID based on scope
  * @return Pointer to the Element
 */
-Element* Element_Init(const char* key, SymbolType type);
+Element* Element_Init(const char* key, SymbolType type, int id);
 
 /**
  * @brief Frees all allocated memory @note This function should be called only via Symtable interface
