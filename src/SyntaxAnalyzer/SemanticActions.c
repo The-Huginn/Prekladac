@@ -108,11 +108,11 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
     }
         
     // function was called with too many parameters
-    if (Vector_Size(Element_GetFunctionParameters(Node_GetData(root))) < Vector_Size(Node_GetSons(root)))
+    if (Element_FunctionParameters_Size(Node_GetData(root)) < Vector_Size(Node_GetSons(root)))
         return 5;
 
     // we dont have same count of parameters, re-adjustments needed
-    if (Vector_Size(Element_GetFunctionParameters(Node_GetData(root))) > Vector_Size(Node_GetSons(root)))
+    if (Element_FunctionParameters_Size(Node_GetData(root)) > Vector_Size(Node_GetSons(root)))
     {
         // at least one param is here
         Node *last_param = Vector_Back(Node_GetSons(root));
@@ -125,22 +125,19 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
         Element *last_function = Node_GetData(last_param);
 
         // last function has less returns than needed
-        if (Vector_Size(Element_GetFunctionParameters(Node_GetData(root))) >
-            (Vector_Size(Node_GetSons(root)) - 1) + Vector_Size(Element_GetFunctionReturns(last_function)))
+        if (Element_FunctionParameters_Size(Node_GetData(root)) > (Vector_Size(Node_GetSons(root)) - 1) + Element_FunctionReturns_Size(last_function))
             return 5;
 
         // we need this many extra returns from the function
-        Node_SetParamCount(root, Vector_Size(Element_GetFunctionParameters(Node_GetData(root))) - Vector_Size(Node_GetSons(root)));
+        Node_SetParamCount(root, Element_FunctionParameters_Size(Node_GetData(root)) - Vector_Size(Node_GetSons(root)));
     }
-
-    Vector *function_call = Element_GetFunctionParameters(Node_GetData(root));
 
     // we check all available params once
     for (int i = 0; i < Vector_Size(Node_GetSons(root)); i++)
-        if (Node_GetSemantic(Vector_GetElement(Node_GetSons(root), i)) != *((SemanticType*)Vector_GetElement(function_call, i)))
+        if (Node_GetSemantic(Vector_GetElement(Node_GetSons(root), i)) != Element_FunctionParameter_GetSemantic(Node_GetData(root), i))
         {
             // if boolean as parameter we should convert to be compared with nil
-            if (*((SemanticType*)Vector_GetElement(function_call, i)) == SEMANTIC_BOOLEAN)
+            if (Element_FunctionParameter_GetSemantic(Node_GetData(root), i) == SEMANTIC_BOOLEAN)
             {
                 int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetSons(root), i));
                 if (ret != -1)
@@ -156,9 +153,9 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
 
     for (int i = 0; i < Node_GetParamCount(root); i++)
         // last_function is Vector<Node*>
-        if (Node_GetSemantic(Vector_GetElement(last_function, i + 1)) != *((SemanticType*)Vector_GetElement(function_call, size + i + 1)))
+        if (Node_GetSemantic(Vector_GetElement(last_function, i + 1)) != Element_FunctionParameter_GetSemantic(Node_GetData(root), size + i + 1))
         {
-            if (*((SemanticType*)Vector_GetElement(function_call, size + i + 1)) == SEMANTIC_BOOLEAN)
+            if (Element_FunctionParameter_GetSemantic(Node_GetData(root), size + i + 1) == SEMANTIC_BOOLEAN)
             {
                 int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(last_function, i + 1));
                 if (ret != -1)
@@ -169,9 +166,9 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
         }
 
     // returns something
-    if (Vector_Size(Element_GetFunctionReturns(Node_GetData(root))) > 0)
+    if (Element_FunctionReturns_Size(Node_GetData(root)) > 0)
         // changes semantic to first return value
-        Node_SetSemantic(root, *((SemanticType*)Vector_GetElement(Element_GetFunctionReturns(Node_GetData(root)), 0)));
+        Node_SetSemantic(root, Element_GetFunctionReturn_Semantic(Node_GetData(root), 0));
     
     return -1;
 }

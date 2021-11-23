@@ -24,20 +24,50 @@ void FunctionData_AddSemanticReturn(void *data, SemanticType semanticType);
 /**
  * @param data Data
  * @param semanticType SemanticType
+ * @param id Pointer to the char* which is then copied, set to NULL if yet unknown
  */
-void FunctionData_AddSemanticParam(void *data, SemanticType semanticType);
+void FunctionData_AddSemanticParam(void *data, SemanticType semanticType, char *id);
 
 /**
  * @param data Data
- * @return pointer to the Vector of SemanticType* of parameters. @note Do not change content
+ * @return Count of parameters
  */
-Vector *FunctionData_Params(void *data);
+int FunctionData_Params_Size(void *data);
 
 /**
  * @param data Data
- * @return pointer to the Vector of SemanticType* of return values. @note Do not change content
+ * @return Count of returns
  */
-Vector *FunctionData_ReturnVals(void *data);
+int FunctionData_Returns_Size(void *data);
+
+/**
+ * @param data Data
+ * @param index Index of wanted parameters name
+ * @return pointer to the name of indexed parameter. @note Do not change content
+ */
+char *FunctionData_Params_GetName(void *data, int index);
+
+/**
+ * @brief changes name of identifier on index
+ * @param data Data
+ * @param index Index of wanted parameter
+ * @param id new name
+ */
+void FunctionData_Params_SetName(void *data, int index, const char *id);
+
+/**
+ * @param data Data
+ * @param index Index of wanted parameters Semantic type
+ * @return Semantic type of indexed parameter @note Do not change content
+ */
+SemanticType FunctionData_Params_GetSemantic(void *data, int index);
+
+/**
+ * @param data Data
+ * @param index Index of wanted parameter Semantic type
+ * @return Semantic type of indexed parameter @note Do not change content
+ */
+SemanticType FunctionData_Returns_GetSemantic(void *data, int index);
 
 /**
  * @brief Destroy function for Function data

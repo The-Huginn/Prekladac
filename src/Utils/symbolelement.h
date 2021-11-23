@@ -55,8 +55,9 @@ bool Element_IsDefined(Element *element);
 void Element_Define(Element *element);
 
 /**
+ * @brief Should be called only upon Variable
  * @param element Element
- * @param new_type If element is Variable then changes Semantic type of variable, if function, then adds new return value Semantic type
+ * @param new_type Semantic type of Variable
  */
 void Element_SetSemantic(Element *element, SemanticType new_type);
 
@@ -65,7 +66,15 @@ void Element_SetSemantic(Element *element, SemanticType new_type);
  * @param element Element
  * @param type Semantic type of newly added parameter @note this adds new parameter and sets it's Semantic type
  */
-void Element_AddSemanticParam(Element *element, SemanticType type);
+void Element_AddReturn(Element *element, SemanticType type);
+
+/**
+ * @brief Should be called only upon Function
+ * @param element Element
+ * @param type Semantic type of newly added parameter @note this adds new parameter and sets it's Semantic type
+ * @param id pointer to the name of id @note if name not know set to NULL
+ */
+void Element_AddParam(Element *element, SemanticType type, char* id);
 
 /**
  * @param element Element
@@ -74,18 +83,49 @@ void Element_AddSemanticParam(Element *element, SemanticType type);
 SemanticType Element_GetSemantic(Element *element);
 
 /**
- * @brief Should be called only upon Function
  * @param element Element
- * @return Vector* of SemanticType* of parameters
+ * @return Count of function parameters
  */
-Vector *Element_GetFunctionParameters(Element *element);
+int Element_FunctionParameters_Size(Element *element);
+
+/**
+ * @param element Element
+ * @return Count of function returns
+ */
+int Element_FunctionReturns_Size(Element *element);
 
 /**
  * @brief Should be called only upon Function
  * @param element Element
- * @return Vector* of SemanticType* of return values
+ * @param index Index of parameter
+ * @return char * of name @note do not change content
  */
-Vector *Element_GetFunctionReturns(Element *element);
+const char *Element_FunctionParameter_GetName(Element *element, int index);
+
+/**
+ * @brief Should be called only upon Function
+ * @param element Element
+ * @param index Index of parameter
+ * @param id New name for the parameter
+ * @return Vector* of SemanticType* of parameters
+ */
+void Element_FunctionParameter_SetName(Element *element, int index, const char* id);
+
+/**
+ * @brief Should be called only upon Function
+ * @param element Element
+ * @param index Index of parameter
+ * @return Semantic type of parameter
+ */
+SemanticType Element_FunctionParameter_GetSemantic(Element *element, int index);
+
+/**
+ * @brief Should be called only upon Function
+ * @param element Element
+ * @param index Index of return value
+ * @return Semantic type of indexed return value
+ */
+SemanticType Element_GetFunctionReturn_Semantic(Element *element, int index);
 
 /**
  * @brief

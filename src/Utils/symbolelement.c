@@ -81,17 +81,25 @@ void Element_SetSemantic(Element *element, SemanticType new_type)
 		return;
 	}
 
-	// should change only upon first set Semantic type
-	if (element->type == FUNCTION && element->semanticType == SEMANTIC_VOID)
-		element->type = new_type;
-
-	FunctionData_AddSemanticReturn(element->data, new_type);
+	ERROR_VOID("Called with invalid element");
 }
 
-void Element_AddSemanticParam(Element *element, SemanticType type)
+void Element_AddReturn(Element *element, SemanticType type)
+{
+	if (element->type != FUNCTION)
+		ERROR_VOID("Called with invalid element");
+
+	// should change only upon first set Semantic type
+	if (element->semanticType == SEMANTIC_VOID)
+		element->semanticType = type;
+
+	FunctionData_AddSemanticReturn(element->data, type);
+}
+
+void Element_AddParam(Element *element, SemanticType type, char* id)
 {
 	if (element->type == FUNCTION)
-		FunctionData_AddSemanticParam(element->data, type);
+		FunctionData_AddSemanticParam(element->data, type, id);
 	else
 		WARNING("Function only function called upon Variable!");
 }
@@ -101,24 +109,44 @@ SemanticType Element_GetSemantic(Element *element)
 	return element->semanticType;
 }
 
-Vector *Element_GetFunctionParameters(Element *element)
+int Element_FunctionParameters_Size(Element *element)
 {
-	if (element->type == VARIABLE)
-	{
-		WARNING("Function only function called upon Variable!");
-		return NULL;
-	}
-	return FunctionData_Params(element->data);
+	return element->type == FUNCTION ? FunctionData_Params_Size(element->data) : -1;
 }
 
-Vector *Element_GetFunctionReturns(Element *element)
+int Element_FunctionReturns_Size(Element *element)
 {
-	if (element->type == VARIABLE)
+	return element->type == FUNCTION ? FunctionData_Returns_Size(element->data) : -1;
+}
+
+const char *Element_FunctionParameter_GetName(Element *element, int index)
+{
+	return FunctionData_Params_GetName(element->data, index);
+}
+
+void Element_FunctionParameter_SetName(Element *element, int index, const char* id)
+{
+	FunctionData_Params_SetName(element->data, index, id);
+}
+
+SemanticType Element_FunctionParameter_GetSemantic(Element *element, int index)
+{
+	if (element->type != VARIABLE)
 	{
 		WARNING("Function only function called upon Variable!");
-		return NULL;
+		return SEMANTIC_VOID;
 	}
-	return FunctionData_ReturnVals(element->data);
+	return FunctionData_Params_GetSemantic(element->data, index);
+}
+
+SemanticType Element_GetFunctionReturn_Semantic(Element *element, int index)
+{
+	if (element->type != VARIABLE)
+	{
+		WARNING("Function only function called upon Variable!");
+		return SEMANTIC_VOID;
+	}
+	return FunctionData_Returns_GetSemantic(element->data, index);
 }
 
 void Element_SetID(Element *element, int new_ID)
