@@ -12,6 +12,13 @@
 #include "../Utils/vector.h"
 
 /**
+ * @brief Adds new node where it compares with nil, if we expect function index can be added
+ * @param node Node which needs to be compared with nil
+ * @return -1 on success otherwise error code
+ */
+int AbstractSemanticTree_CompareWithNil(Node *node);
+
+/**
  * @brief This function only parses one expressions to multiple expressions and removes expressions with comma
  * @param root Node, which children are parsed
  * @return true upon success otherwise false

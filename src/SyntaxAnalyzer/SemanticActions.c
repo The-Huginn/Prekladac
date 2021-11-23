@@ -12,11 +12,6 @@
 
 #define NOT_IMPLEMENTED
 
-/**
- * @brief Adds new node where it compares with nil, if we expect function index can be added
- * @param node Node which needs to be compared with nil
- * @return -1 on success otherwise error code
- */
 int AbstractSemanticTree_CompareWithNil(Node *node)
 {
     if (Node_GetType(node) == NODE_FUNCTION)
