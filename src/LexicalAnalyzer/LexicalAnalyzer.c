@@ -58,7 +58,7 @@ Token *getToken(FILE *input)
     LexicalOutput *lexeme = getLexeme(input);
     if (lexeme == NULL)
     {
-        free(token);
+        Token_Destroy(token);
         return NULL;
     }
 
@@ -84,8 +84,7 @@ Token *getToken(FILE *input)
                 getFinalState(lexeme) == F_NUMBER ||
                 getFinalState(lexeme) == F_STRING)
             {
-                // token->attribute = strdup(getString(lexeme));
-                // token->attribute = symtable.getElement(getString(lexeme));
+                token->attribute = strdup(getString(lexeme));
             }
         }
     }
@@ -113,7 +112,7 @@ void LexicalDestroy()
     {
         Token *token = Stack_Top(stack);
         // token free function
-        free(token);
+        Token_Destroy(token);
         Stack_Pop(stack);
     }
     Stack_Destroy(stack);    

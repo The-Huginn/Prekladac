@@ -28,4 +28,10 @@ Terminal Token_getType(Token *token);
  */
 void *Token_getData(Token *token);
 
+/**
+ * @brief Destroys token and attribute
+ * @param token Token
+ */
+void Token_Destroy(Token *token);
+
 #endif // !TOKEN_H

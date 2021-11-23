@@ -228,7 +228,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
             if (token_type != P_COMMA)
                 List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
 
-            free(token);
+            Token_Destroy(token);
             token = getToken(input);
             break;
         case '>':
@@ -236,7 +236,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
             break;
         case '=':
             List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
-            free(token);
+            Token_Destroy(token);
             token = getToken(input);
             break;
         case 'a':
@@ -245,7 +245,7 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
             List_AddFirst(bottomToTopList, PrecedenceItem_Init(P_VOID, '\0'));
             ret = ApplyPrecedenceRule(bottomToTopList, expressions);
             
-            free(token);
+            Token_Destroy(token);
             token = getToken(input);
 
             break;

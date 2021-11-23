@@ -29,7 +29,7 @@ class LexicalTests : public ::testing::Test
     {
         Token *token = getToken(input);
         ASSERT_EQ(Token_getType(token), req);
-        free(token);
+        Token_Destroy(token);
     }
 
     FILE *input;
