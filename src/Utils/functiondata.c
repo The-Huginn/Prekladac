@@ -39,7 +39,7 @@ void FunctionData_FreeSemantic(void * type)
     free((SemanticType*)type);
 }
 
-FunctionParam *FunctionData_CreateParam(char *id, SemanticType type)
+FunctionParam *FunctionData_CreateParam(const char *id, SemanticType type)
 {
     FunctionParam *param = (FunctionParam*) malloc(sizeof(FunctionParam));
     if (param == NULL)
@@ -104,7 +104,7 @@ void FunctionData_AddSemanticReturn(void *data, SemanticType semanticType)
     Vector_PushBack(((Function*)data)->return_vals, new_type);
 }
 
-void FunctionData_AddSemanticParam(void *data, SemanticType semanticType, char* id)
+void FunctionData_AddSemanticParam(void *data, SemanticType semanticType, const char* id)
 {
     FunctionParam *new_type = FunctionData_CreateParam(id, semanticType);
     if (new_type == NULL)

@@ -81,7 +81,7 @@ void Element_AddReturn(Element *element, SemanticType type);
  * @param type Semantic type of newly added parameter @note this adds new parameter and sets it's Semantic type
  * @param id pointer to the name of id @note if name not know set to NULL
  */
-void Element_AddParam(Element *element, SemanticType type, char* id);
+void Element_AddParam(Element *element, SemanticType type, const char* id);
 
 /**
  * @param element Element

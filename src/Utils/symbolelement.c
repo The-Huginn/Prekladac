@@ -101,7 +101,7 @@ void Element_AddReturn(Element *element, SemanticType type)
 	FunctionData_AddSemanticReturn(element->data, type);
 }
 
-void Element_AddParam(Element *element, SemanticType type, char* id)
+void Element_AddParam(Element *element, SemanticType type, const char* id)
 {
 	if (element->type == FUNCTION)
 		FunctionData_AddSemanticParam(element->data, type, id);

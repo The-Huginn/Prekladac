@@ -26,7 +26,7 @@ void FunctionData_AddSemanticReturn(void *data, SemanticType semanticType);
  * @param semanticType SemanticType
  * @param id Pointer to the char* which is then copied, set to NULL if yet unknown
  */
-void FunctionData_AddSemanticParam(void *data, SemanticType semanticType, char *id);
+void FunctionData_AddSemanticParam(void *data, SemanticType semanticType, const char *id);
 
 /**
  * @param data Data
