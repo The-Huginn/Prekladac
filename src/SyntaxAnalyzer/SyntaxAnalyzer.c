@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 
-typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS}FSM_STATE;
+typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS}FSM_STATE;
 
 typedef struct
 {
@@ -28,6 +28,7 @@ typedef struct
     Vector *expressions;
     int position;
     bool declared;
+    Element *current_function;
 }Buffers;
 
 #define DEBUG_SYNTAX
@@ -80,8 +81,8 @@ int Syntax_SetSemantic(Buffers *buffer, Token *token)
     if (Vector_Size(buffer->variables) <= buffer->position)
         return 2;
 
-    Element_SetSemantic((Element*)Vector_GetElement(buffer->variables, (buffer->position)++), Syntax_GetSemantic(token));
-    Element_Define((Element*)Vector_Back(buffer->variables));
+    Element_SetSemantic((Element*)Vector_GetElement(buffer->variables, (buffer->position)), Syntax_GetSemantic(token));
+    Element_Define((Element*)Vector_GetElement(buffer->variables, (buffer->position)++));
     return -1;
 }
 
@@ -100,7 +101,8 @@ int Syntax_Assign(Buffers *buffer)
 
     while (!Vector_IsEmpty(buffer->expressions))
     {
-        if (Element_GetSemantic(Vector_Back(buffer->variables)) != Node_GetSemantic(Vector_Back(buffer->expressions)))
+        SemanticType type = Node_GetSemantic(Vector_Back(buffer->expressions));
+        if (Element_GetSemantic(Vector_Back(buffer->variables)) != type)
         {
             if (Element_GetSemantic(Vector_Back(buffer->variables)) == SEMANTIC_BOOLEAN)
                 // compare with nil for boolean value
@@ -112,6 +114,36 @@ int Syntax_Assign(Buffers *buffer)
 
         Vector_PopBack(buffer->variables);
         Vector_PopBack(buffer->expressions);
+    }
+}
+
+int Syntax_Return(Buffers *buffer)
+{
+    // we should get rid of extra expressions
+    while (Vector_Size(buffer->expressions) > Element_FunctionReturns_Size(buffer->current_function))
+        Vector_PopBack(buffer->expressions);
+
+    // we should fill with nils if we dont have enough
+    while (Vector_Size(buffer->expressions) != Element_FunctionReturns_Size(buffer->current_function))
+    {
+        // TODO generate nil return
+        void;
+    }
+
+    int i = 0;
+    while (!Vector_IsEmpty(buffer->expressions))
+    {
+        if (Element_FunctionReturn_GetSemantic(buffer->current_function, i++) != Node_GetSemantic(Vector_GetElement(buffer->expressions, 0)))
+        {
+            if (Element_FunctionReturn_GetSemantic(buffer->current_function, i - 1) == SEMANTIC_BOOLEAN)
+                // compare with nil for boolean value
+                AbstractSemanticTree_CompareWithNil(Vector_Back(buffer->expressions));
+            else
+                return 5;
+        }
+        // TODO generate code
+
+        Vector_RemoveElement(buffer->expressions, 0);
     }
 }
 
@@ -194,6 +226,8 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
                 }
                 else if (Token_getType(token) == T_LEFT)
                     *state = FSM_FUN_PARAMS;
+                else if (Token_getType(token) == T_ASS)
+                    *state = FSM_VAR_ASSIGN;
                 else if (Token_getType(token) != T_COMMA)
                     *state = FSM_START;
 
@@ -276,10 +310,18 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
                     else
                         function = Symtable_CreateElement(symtable, (const char*)Token_getData(token), FUNCTION);
 
+                    if (function == NULL)
+                    {
+                        *return_value = 99;
+                        break;
+                    }
                     Vector_PushBack(buffer->variables, function);
 
                     // define function
                     Element_Define(function);
+
+                    // Function we are currently parsing, we need this to have semantic actions for return
+                    buffer->current_function = function;
                 }
                 else if (Token_getType(token) == T_LEFT)
                     *state = FSM_FUN_DEF_PARAMS;
@@ -308,10 +350,14 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
             case FSM_FUN_DEF_WAIT:
                 // reset position for possible returns
                 buffer->position = 0;
+
                 if (Token_getType(token) == T_DEF)
                     *state = FSM_FUN_DEF_RETURNS;
                 else
+                {
+                    Symtable_AddScope(symtable);
                     *state = FSM_START;
+                }
                 break;
 
             case FSM_FUN_DEF_RETURNS:
@@ -323,7 +369,10 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
                         Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
                 }
                 else if (Token_getType(token) != T_COMMA)
+                {
+                    Symtable_AddScope(symtable);
                     *state = FSM_START;
+                }
                 break;
 
             default:
@@ -367,8 +416,8 @@ int Syntax_AddBuiltInFunctions(Symtable *symtable)
     if ( ( function = Symtable_CreateElement(symtable, "substr", FUNCTION)) == NULL)
         return -1;
     Element_AddParam(function, SEMANTIC_STRING, "s");
-    Element_AddParam(function, SEMANTIC_NUMBER, "i");
-    Element_AddParam(function, SEMANTIC_NUMBER, "j");
+    Element_AddParam(function, SEMANTIC_INTEGER, "i");
+    Element_AddParam(function, SEMANTIC_INTEGER, "j");
     Element_AddReturn(function, SEMANTIC_STRING);
     Element_Define(function);
 
@@ -428,6 +477,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         state = FSM_START;
         buffer->position = 0;
         buffer->declared = false;
+        buffer->current_function = NULL;
 
         return 0;
     }
@@ -478,6 +528,8 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 
         state = FSM_START;
         buffer->position = 0;
+        buffer->declared = false;
+        buffer->current_function = NULL;
 
         // built-in-functions
         if (Syntax_AddBuiltInFunctions(symtable) != 0)
@@ -487,6 +539,8 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             Symtable_Destroy(symtable);
             return 99;
         }
+        // for first non existing global_statement so we can allways pop scope
+        Symtable_AddScope(symtable);
     }
 
     Symbol *top = (Symbol *) Stack_Top(topToBottomStack);
@@ -539,7 +593,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     }
     else
     {
-        bool changed = true;
+        bool popScope = false;
         FSM_STATE previous_state = state;
 
         switch (Symbol_GetValue(top))
@@ -559,19 +613,52 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         case NT_ID:
             state = FSM_ID;
             break;
+        case NT_RETURN:
+            state = FSM_RETURNS;
+            break;
+        case NT_STATEMENT:
+            state = FSM_START;
+            break;
+
+        // we must pop after all changes from previous scope are done
+        case NT_GLOBAL_STATEMENT:
+            state = FSM_START;
+            popScope = true;
+            break;
             
         // do nothing
         default:
-            changed = false;
             break;
         }
 
-        if (changed == true)
+        if (previous_state != state)
         {
             switch (previous_state)
             {
             case FSM_VAR_ASSIGN:
-                Syntax_Assign(buffer);
+                return_value = Syntax_Assign(buffer);
+                break;
+            case FSM_RETURNS:
+                return_value = Syntax_Return(buffer);
+                break;
+
+            // add scope for current function
+            case FSM_FUN_DEF_WAIT:
+            case FSM_FUN_DEF_RETURNS:
+                Symtable_AddScope(symtable);
+
+                // add all parameters from current function to TS
+                for (int i = 0; i < Element_FunctionParameters_Size(buffer->current_function); i++)
+                {
+                    Element* parameter = Symtable_CreateElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i),VARIABLE);
+                    if (parameter == NULL)
+                    {
+                        return_value = 99;
+                        break;
+                    }
+                    Element_SetSemantic(parameter, Element_FunctionParameter_GetSemantic(buffer->current_function, i));
+                    Element_Define(parameter);
+                }
                 break;
             
             default:
@@ -584,6 +671,13 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             buffer->declared = false;
         }
 
+        if (popScope == true)
+            if (buffer->current_function != NULL)
+            {
+                buffer->current_function = NULL;
+                Symtable_PopScope(symtable);
+            }
+
         if (Symbol_GetValue(top) == NT_EXPRESSION)
         {
             returnToken(token);
@@ -592,9 +686,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             Node* expression = NULL;
             int ret = BottomToTop(input, output, error_output, &expression, symtable);
             
-
-            if (state == FSM_VAR_ASSIGN || state == FSM_FUN_PARAMS)
-                Vector_PushBack(buffer->expressions, expression);
+            Vector_PushBack(buffer->expressions, expression);
 
             token = getToken(input);
             return ret;

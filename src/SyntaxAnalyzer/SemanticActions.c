@@ -235,7 +235,7 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
 
     case P_EQ:
     case P_NEQ:
-        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER && first != SEMANTIC_BOOLEAN && first != SEMANTIC_NIL)
+        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER && first != SEMANTIC_BOOLEAN && first != SEMANTIC_NIL && first != SEMANTIC_STRING)
             return 6;
         break;
 
@@ -286,6 +286,7 @@ int AbstractSemanticTree_UnaryOperator(Node *root)
     case P_LEN:
         if (first != SEMANTIC_STRING)
             return 6;
+        first = SEMANTIC_INTEGER;
         break;
     
     case P_NOT:

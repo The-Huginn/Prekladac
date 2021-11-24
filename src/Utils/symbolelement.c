@@ -141,7 +141,7 @@ void Element_FunctionParameter_SetSemantic(Element *element, int index, Semantic
 
 SemanticType Element_FunctionParameter_GetSemantic(Element *element, int index)
 {
-	if (element->type != VARIABLE)
+	if (element->type == VARIABLE)
 	{
 		WARNING("Function only function called upon Variable!");
 		return SEMANTIC_VOID;
@@ -151,7 +151,7 @@ SemanticType Element_FunctionParameter_GetSemantic(Element *element, int index)
 
 SemanticType Element_FunctionReturn_GetSemantic(Element *element, int index)
 {
-	if (element->type != VARIABLE)
+	if (element->type == VARIABLE)
 	{
 		WARNING("Function only function called upon Variable!");
 		return SEMANTIC_VOID;
