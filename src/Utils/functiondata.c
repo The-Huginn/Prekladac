@@ -148,6 +148,14 @@ void FunctionData_Params_SetName(void *data, int index, const char *id)
     }
 }
 
+void FunctionData_Params_SetSemantic(void *data, int index, SemanticType semanticType)
+{
+    if (Vector_Size(((Function*)data)->params) <= index)
+        ERROR_VOID("Invalid index");
+
+    ((FunctionParam*)Vector_GetElement(((Function*)data)->params, index))->semanticType = semanticType;
+}
+
 SemanticType FunctionData_Params_GetSemantic(void *data, int index)
 {
     if (Vector_Size(((Function*)data)->params) <= index)

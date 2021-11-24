@@ -108,9 +108,16 @@ const char *Element_FunctionParameter_GetName(Element *element, int index);
  * @param element Element
  * @param index Index of parameter
  * @param id New name for the parameter
- * @return Vector* of SemanticType* of parameters
  */
 void Element_FunctionParameter_SetName(Element *element, int index, const char* id);
+
+/**
+ * @brief Should be called only upon Function
+ * @param element Element
+ * @param index Index of parameter
+ * @param semanticType New Semantic type for the parameter
+ */
+void Element_FunctionParameter_SetSemantic(Element *element, int index, SemanticType semanticType);
 
 /**
  * @brief Should be called only upon Function

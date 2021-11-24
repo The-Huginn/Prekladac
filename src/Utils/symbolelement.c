@@ -129,6 +129,11 @@ void Element_FunctionParameter_SetName(Element *element, int index, const char* 
 	FunctionData_Params_SetName(element->data, index, id);
 }
 
+void Element_FunctionParameter_SetSemantic(Element *element, int index, SemanticType semanticType)
+{
+	FunctionData_Params_SetSemantic(element->data, index, semanticType);
+}
+
 SemanticType Element_FunctionParameter_GetSemantic(Element *element, int index)
 {
 	if (element->type != VARIABLE)

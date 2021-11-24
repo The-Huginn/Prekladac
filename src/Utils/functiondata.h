@@ -56,6 +56,14 @@ char *FunctionData_Params_GetName(void *data, int index);
 void FunctionData_Params_SetName(void *data, int index, const char *id);
 
 /**
+ * @brief Changes Semantic type of identifier on index
+ * @param data Data
+ * @param index Index of wanted parameter
+ * @param semanticType new Semantic type
+ */
+void FunctionData_Params_SetSemantic(void *data, int index, SemanticType semanticType);
+
+/**
  * @param data Data
  * @param index Index of wanted parameters Semantic type
  * @return Semantic type of indexed parameter @note Do not change content
