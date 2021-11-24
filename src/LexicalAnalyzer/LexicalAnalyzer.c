@@ -77,18 +77,10 @@ Token *getToken(FILE *input)
         {
             // needs to be redone, one enum has to be renamed
             token->type = T_ASS + getFinalState(lexeme) - F_ASS;
-
-            // need to send value
-            if (getFinalState(lexeme) == F_ID ||
-                getFinalState(lexeme) == F_INTEGER ||
-                getFinalState(lexeme) == F_NUMBER ||
-                getFinalState(lexeme) == F_STRING)
-            {
-                token->attribute = strdup(getString(lexeme));
-            }
         }
     }
 
+    token->attribute = strdup(getString(lexeme));
     fprintf(stderr, "%s\n", getString(lexeme));
     freeLexeme(lexeme);
 

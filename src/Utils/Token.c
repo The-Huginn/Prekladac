@@ -12,7 +12,7 @@ Terminal Token_getType(Token *token)
     return token->type;
 }
 
-void *Token_getData(Token *token)
+const char *Token_getData(Token *token)
 {
     return token->attribute;
 }
