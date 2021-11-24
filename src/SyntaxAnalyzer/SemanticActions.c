@@ -9,8 +9,7 @@
 #include "../Utils/logger.h"
 
 #include <stdlib.h>
-
-#define NOT_IMPLEMENTED
+#include <string.h>
 
 int AbstractSemanticTree_CompareWithNil(Node *node)
 {
@@ -92,15 +91,15 @@ bool AbstractSemanticTree_UpdateFunctionCalls(Node *root)
 
 int AbstractSemanticTree_VerifyFunctionCall(Node *root)
 {
-    #ifdef NOT_IMPLEMENTED
-    return -1;
-    #endif
-
     if (Node_GetData(root) == NULL)
     {
         WARNING("No data yet");
         return 2;
     }
+
+    // Exception with write() function, which has variadic amount of parameters
+    if (strcmp(Element_GetKey(Node_GetData(root)), "write\0") == 0)
+        return -1;
         
     // function was called with too many parameters
     if (Element_FunctionParameters_Size(Node_GetData(root)) < Vector_Size(Node_GetSons(root)))
@@ -142,23 +141,31 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
                 return 5;
         }
 
-    // vector holding POP-ing expressions of function call
-    Vector *last_function = Node_GetReturns(Vector_Back(Node_GetSons(root)));
-    int size = Vector_Size(Node_GetSons(root));
-
-    for (int i = 0; i < Node_GetParamCount(root); i++)
-        // last_function is Vector<Node*>
-        if (Node_GetSemantic(Vector_GetElement(last_function, i + 1)) != Element_FunctionParameter_GetSemantic(Node_GetData(root), size + i + 1))
+    // if we have any parameters we might check
+    if (!Vector_IsEmpty(Node_GetSons(root)))
+    {
+        // only if last parameter is function call
+        if (Node_GetType(Vector_Back(Node_GetSons(root))) == FUNCTION)
         {
-            if (Element_FunctionParameter_GetSemantic(Node_GetData(root), size + i + 1) == SEMANTIC_BOOLEAN)
-            {
-                int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(last_function, i + 1));
-                if (ret != -1)
-                    return ret;
-            }
-            else
-                return 5;
+            // vector holding POP-ing expressions of function call
+            Vector *last_function = Node_GetReturns(Vector_Back(Node_GetSons(root)));
+            int size = Vector_Size(Node_GetSons(root));
+
+            for (int i = 0; i < Node_GetParamCount(root); i++)
+                // last_function is Vector<Node*>
+                if (Node_GetSemantic(Vector_GetElement(last_function, i + 1)) != Element_FunctionParameter_GetSemantic(Node_GetData(root), size + i + 1))
+                {
+                    if (Element_FunctionParameter_GetSemantic(Node_GetData(root), size + i + 1) == SEMANTIC_BOOLEAN)
+                    {
+                        int ret = AbstractSemanticTree_CompareWithNil(Vector_GetElement(last_function, i + 1));
+                        if (ret != -1)
+                            return ret;
+                    }
+                    else
+                        return 5;
+                }
         }
+    }
 
     // returns something
     if (Element_FunctionReturns_Size(Node_GetData(root)) > 0)
@@ -169,11 +176,7 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
 }
 
 int AbstractSemanticTree_BinaryOperator(Node *root)
-{
-    #ifdef NOT_IMPLEMENTED
-    return -1;
-    #endif
-    
+{    
     if (!Node_IsOperation(root))
     {
         WARNING("Expected Operator");
@@ -190,12 +193,17 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     SemanticType second = Node_GetSemantic(Vector_GetElement(Node_GetSons(root), 1));
 
     if (first != second)
-        return 6;
+    {
+        if (first != SEMANTIC_NIL && second != SEMANTIC_NIL)
+            return 6;
+    }
 
     switch (Node_GetOperation(root))
     {
-    case P_MUL:
     case P_DIV:
+        if (Node_GetType(Vector_GetElement(Node_GetSons(root), 1)) == NODE_VALUE && strcmp(Node_GetData(Vector_GetElement(Node_GetSons(root), 1)), "0") != 0)
+            return 9;
+    case P_MUL:
     case P_PLUS:
     case P_MINUS:
         if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER)
@@ -203,13 +211,18 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
         break;
     
     case P_INT_DIV:
+        if (Node_GetType(Vector_GetElement(Node_GetSons(root), 1)) == NODE_VALUE && strcmp(Node_GetData(Vector_GetElement(Node_GetSons(root), 1)), "0") != 0)
+            return 9;
+
         if (first != SEMANTIC_INTEGER)
             return 6;
         break;
 
+    // we can concat with nil probably
     case P_CONCAT:
         if (first != SEMANTIC_STRING)
-            return 6;
+            if (first != SEMANTIC_NIL && second != SEMANTIC_NIL)
+                return 6;
         break;
 
     case P_LESS:
@@ -222,7 +235,8 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
 
     case P_EQ:
     case P_NEQ:
-        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER && first != SEMANTIC_BOOLEAN)
+        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER && first != SEMANTIC_BOOLEAN && first != SEMANTIC_NIL)
+            return 6;
         break;
 
     case P_AND:
@@ -253,10 +267,6 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
 
 int AbstractSemanticTree_UnaryOperator(Node *root)
 {
-    #ifdef NOT_IMPLEMENTED
-    return -1;
-    #endif
-    
     if (!Node_IsOperation(root))
     {
         WARNING("Expected Operator");

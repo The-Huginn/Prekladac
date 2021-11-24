@@ -30,14 +30,14 @@ typedef struct
     bool declared;
 }Buffers;
 
-// #define DEBUG_SYNTAX
+#define DEBUG_SYNTAX
 
 
 int Syntax_AddToTS(Symtable *symtable, Buffers *buffer, Token *token, SymbolType type)
 {
-    Element *previous = Symtable_GetElement(symtable, Token_getData(token));
+    Element *previous = Symtable_GetElement(symtable, (const char*)Token_getData(token));
 
-    Element *new_element = Symtable_CreateElement(symtable, Token_getData(token), type);
+    Element *new_element = Symtable_CreateElement(symtable, (const char*)Token_getData(token), type);
 
     if (new_element == NULL)
         return 99;
@@ -80,8 +80,8 @@ int Syntax_SetSemantic(Buffers *buffer, Token *token)
     if (Vector_Size(buffer->variables) <= buffer->position)
         return 2;
 
-    Element_SetSemantic(Vector_GetElement(buffer->variables, (buffer->position)++), Syntax_GetSemantic(token));
-    Element_Define(Vector_Back(buffer->variables));
+    Element_SetSemantic((Element*)Vector_GetElement(buffer->variables, (buffer->position)++), Syntax_GetSemantic(token));
+    Element_Define((Element*)Vector_Back(buffer->variables));
     return -1;
 }
 
@@ -115,8 +115,14 @@ int Syntax_Assign(Buffers *buffer)
     }
 }
 
-int Syntax_FunctionCall(Buffers *buffer)
+int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer)
 {
+    Element *function = Symtable_GetElement(symtable, Element_GetKey(Vector_Back(buffer->variables)));
+
+    // calling undefined function
+    if (function == NULL)
+        return 3;
+
     Node *function_call = Node_Init(NODE_FUNCTION, Vector_Back(buffer->variables), P_VOID, NULL, P_FUNCTION);
 
     // create a function call node with all expressions as parameters, they are normalized no need for AST_UpdateFunctionCalls
@@ -127,6 +133,259 @@ int Syntax_FunctionCall(Buffers *buffer)
     }
 
     return AbstractSemanticTree_VerifyFunctionCall(function_call);
+}
+
+int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtable *symtable, Buffers *buffer)
+{
+    // state variable actions
+            switch (*state)
+            {
+            case FSM_VAR_DEC:           // if we ID we add it to the TS otherwise we go to datatypes for our variables
+                // :
+                if (Token_getType(token) == T_DEF)
+                {
+                    buffer->position = 0;
+                    *state = FSM_VAR_DATATYPES;
+                }
+                else if (Token_getType(token) == T_ID)
+                    *return_value = Syntax_AddToTS(symtable, buffer, token, VARIABLE);
+                break;
+
+            case FSM_VAR_DATATYPES:     // if we get '=' we go to assign, if we get datatype of ',' we stay and update variables otherwise START
+                if (Token_getType(token) == T_ASS)
+                {
+                    // we have not declared all variables properly
+                    if (buffer->position != Vector_Size(buffer->variables))
+                        *return_value = 2;
+                    *state = FSM_VAR_ASSIGN;
+                }
+                else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+                    *return_value = Syntax_SetSemantic(buffer, token);
+                else if (Token_getType(token) != T_COMMA)
+                    // no need to clear vector, gets cleared when in state = FSM_START
+                    *state = FSM_START;
+                break;
+
+            case FSM_VAR_ASSIGN: // unless we get another terminal to pop other than ',' we assign expressions
+                if (Token_getType(token) != T_COMMA)
+                {
+                    *return_value = Syntax_Assign(buffer);
+                    *state = FSM_START;
+                }
+                break;
+
+            case FSM_ID:
+                if (Token_getType(token) == T_ID)
+                {
+                    Element *element = Symtable_GetElement(symtable, (const char*)Token_getData(token));
+
+                    // undeclared
+                    if (element == NULL)
+                    {
+                        *return_value = 3;
+                        break;
+                    }
+
+                    // undefined
+                    if (!Element_IsDefined(element))
+                        *return_value = 3;
+
+                    Vector_PushBack(buffer->variables, element);
+                }
+                else if (Token_getType(token) == T_LEFT)
+                    *state = FSM_FUN_PARAMS;
+                else if (Token_getType(token) != T_COMMA)
+                    *state = FSM_START;
+
+                break;
+
+            case FSM_FUN_CALL:      // if we get ID it's function's ID otherwise with '(' we move to expressions
+                if (Token_getType(token) == T_ID)
+                {
+                    Element *function = Symtable_GetElement(symtable, (const char*)Token_getData(token));
+                    if (function == NULL)
+                        *return_value = 3;
+                    else if (Element_IsDefined(function) == false)
+                        *return_value = 3;
+                    
+                    Vector_PushBack(buffer->variables, function);
+                }
+                else if (Token_getType(token) == T_LEFT)
+                    *state = FSM_FUN_PARAMS;
+                break;
+            
+            case FSM_FUN_PARAMS:        // if we get ')' we end otherwise just add expressions as in FSM_VAR_ASSIGN
+                if (Token_getType(token) == T_RIGHT)
+                {
+                    *return_value = Syntax_FunctionCall(symtable, buffer);
+                    *state = FSM_START;
+                }
+                break;
+
+            case FSM_FUN_DEC:
+                if (Token_getType(token) == T_ID)
+                {
+                    Element *function = Symtable_GetElement(symtable, (const  char*)Token_getData(token));
+                    if (function != NULL)   // redeclaration
+                    {
+                        *return_value = 3;
+                        break;
+                    }
+                    
+                    function = Symtable_CreateElement(symtable, (const char*)Token_getData(token), FUNCTION);
+                    if (function == NULL)
+                        *return_value = 99;
+
+                    Vector_PushBack(buffer->variables, function);
+                }
+                else if (Token_getType(token) == T_LEFT)
+                    *state = FSM_FUN_DEC_PARAMS;
+                break;
+
+            case FSM_FUN_DEC_PARAMS:
+                if (Token_getType(token) == T_RIGHT)
+                    *state = FSM_FUN_DEC_WAIT;
+                else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+                    Element_AddParam((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token), NULL);
+                break;
+
+            case FSM_FUN_DEC_WAIT:
+                if (Token_getType(token) == T_DEF)
+                    *state = FSM_FUN_DEC_RETURNS;
+                else
+                    *state = FSM_START;
+                break;
+
+            case FSM_FUN_DEC_RETURNS:
+                if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+                    Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
+                else if (Token_getType(token) != T_COMMA)
+                    *state = FSM_START;
+                break;
+
+            case FSM_FUN_DEF:
+                if (Token_getType(token) == T_ID)
+                {
+                    Element *function = Symtable_GetElement(symtable, (const char*)Token_getData(token));
+
+                    if (function != NULL)   // is declared
+                    {
+                        buffer->declared = true;
+                        *return_value = Element_IsDefined(function) ? 3 : -1;    // redifinition
+                    }
+                    else
+                        function = Symtable_CreateElement(symtable, (const char*)Token_getData(token), FUNCTION);
+
+                    Vector_PushBack(buffer->variables, function);
+
+                    // define function
+                    Element_Define(function);
+                }
+                else if (Token_getType(token) == T_LEFT)
+                    *state = FSM_FUN_DEF_PARAMS;
+                break;
+
+            case FSM_FUN_DEF_PARAMS:
+                if (Token_getType(token) == T_RIGHT)
+                    *state = FSM_FUN_DEF_WAIT;
+                else if (Token_getType(token) == T_ID)
+                {
+                    if (buffer->declared == true)
+                        Element_FunctionParameter_SetName((Element*)Vector_Back(buffer->variables), buffer->position, (const char*)Token_getData(token));
+                    else
+                        Element_AddParam((Element*)Vector_Back(buffer->variables), SEMANTIC_VOID, (const char*)Token_getData(token));
+                }
+                else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+                {
+                    if (buffer->declared == true)
+                        // semantic types must equal otherwise "redeclaration" of parameter
+                        *return_value = Syntax_GetSemantic(token) == Element_FunctionParameter_GetSemantic((Element*)Vector_Back(buffer->variables), (buffer->position)++) ? -1 : 3;
+                    else
+                        Element_FunctionParameter_SetSemantic((Element*)Vector_Back(buffer->variables), (buffer->position)++, Syntax_GetSemantic(token));
+                }
+                break;
+
+            case FSM_FUN_DEF_WAIT:
+                // reset position for possible returns
+                buffer->position = 0;
+                if (Token_getType(token) == T_DEF)
+                    *state = FSM_FUN_DEF_RETURNS;
+                else
+                    *state = FSM_START;
+                break;
+
+            case FSM_FUN_DEF_RETURNS:
+                if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+                {
+                    if (buffer->declared == true)
+                        *return_value = Syntax_GetSemantic(token) == Element_FunctionReturn_GetSemantic((Element*)Vector_Back(buffer->variables), (buffer->position)++) ? -1 : 3;
+                    else
+                        Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
+                }
+                else if (Token_getType(token) != T_COMMA)
+                    *state = FSM_START;
+                break;
+
+            default:
+                break;
+            }
+}
+
+/**
+ * @brief Adds built-in-functions
+ * @param symtable Symtable
+ * @return 0 on success
+ */
+int Syntax_AddBuiltInFunctions(Symtable *symtable)
+{
+    Element *function = NULL;
+    if ( ( function = Symtable_CreateElement(symtable, "reads", FUNCTION)) == NULL)
+        return -1;
+    Element_AddReturn(function, SEMANTIC_STRING);
+    Element_Define(function);
+
+    if ( ( function = Symtable_CreateElement(symtable, "readi", FUNCTION)) == NULL)
+        return -1;
+    Element_AddReturn(function, SEMANTIC_INTEGER);
+    Element_Define(function);
+
+    if ( ( function = Symtable_CreateElement(symtable, "readn", FUNCTION)) == NULL)
+        return -1;
+    Element_AddReturn(function, SEMANTIC_NUMBER);
+    Element_Define(function);
+
+    if ( ( function = Symtable_CreateElement(symtable, "write", FUNCTION)) == NULL)
+        return -1;
+    Element_Define(function);
+
+    if ( ( function = Symtable_CreateElement(symtable, "tointeger", FUNCTION)) == NULL)
+        return -1;
+    Element_AddParam(function, SEMANTIC_NUMBER, "f");
+    Element_AddReturn(function, SEMANTIC_INTEGER);
+    Element_Define(function);
+
+    if ( ( function = Symtable_CreateElement(symtable, "substr", FUNCTION)) == NULL)
+        return -1;
+    Element_AddParam(function, SEMANTIC_STRING, "s");
+    Element_AddParam(function, SEMANTIC_NUMBER, "i");
+    Element_AddParam(function, SEMANTIC_NUMBER, "j");
+    Element_AddReturn(function, SEMANTIC_STRING);
+    Element_Define(function);
+
+    if ( ( function = Symtable_CreateElement(symtable, "ord", FUNCTION)) == NULL)
+        return -1;
+    Element_AddParam(function, SEMANTIC_STRING, "s");
+    Element_AddParam(function, SEMANTIC_NUMBER, "i");
+    Element_AddReturn(function, SEMANTIC_INTEGER);
+    Element_Define(function);
+
+    if ( ( function = Symtable_CreateElement(symtable, "chr", FUNCTION)) == NULL)
+        return -1;
+    Element_AddParam(function, SEMANTIC_INTEGER, "i");
+    Element_AddReturn(function, SEMANTIC_STRING);
+    Element_Define(function);
+
+    return 0;
 }
 
 /**
@@ -219,12 +478,22 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 
         state = FSM_START;
         buffer->position = 0;
+
+        // built-in-functions
+        if (Syntax_AddBuiltInFunctions(symtable) != 0)
+        {
+            Vector_Destroy(buffer->variables);
+            Vector_Destroy(buffer->expressions);
+            Symtable_Destroy(symtable);
+            return 99;
+        }
     }
 
     Symbol *top = (Symbol *) Stack_Top(topToBottomStack);
 
     #ifdef DEBUG_SYNTAX
         fprintf(error_output, "token [%d], stack top [%d, %d]\n", Token_getType(token), Symbol_IsTerminal(top), Symbol_GetValue(top));
+        fprintf(error_output, "In state: %d\n", state);
     #endif
     
     if (Token_getType(token) == ERROR)
@@ -255,163 +524,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     {
         if (Token_getType(token) == (Terminal) Symbol_GetValue(top))
         {
-            // state variable actions
-            switch (state)
-            {
-            case FSM_VAR_DEC:           // if we ID we add it to the TS otherwise we go to datatypes for our variables
-                // :
-                if (Token_getType(token) == T_DEF)
-                    state = FSM_VAR_DATATYPES;
-                else if (Token_getType(token) == T_ID)
-                    return_value = Syntax_AddToTS(symtable, buffer, token, VARIABLE);
-                break;
-
-            case FSM_VAR_DATATYPES:     // if we get '=' we go to assign, if we get datatype of ',' we stay and update variables otherwise START
-                if (Token_getType(token) == T_ASS)
-                {
-                    // we have not declared all variables properly
-                    if (buffer->position != Vector_Size(buffer->variables) - 1)
-                        return_value = 2;
-                    state = FSM_VAR_ASSIGN;
-                }
-                else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
-                    return_value = Syntax_SetSemantic(buffer, token);
-                else if (Token_getType(token) != T_COMMA)
-                    // no need to clear vector, gets cleared when in state = FSM_START
-                    state = FSM_START;
-                break;
-
-            case FSM_VAR_ASSIGN: // unless we get another terminal to pop other than ',' we assign expressions
-                if (Token_getType(token) != T_COMMA)
-                {
-                    return_value = Syntax_Assign(buffer);
-                    state = FSM_START;
-                }
-                break;
-
-            case FSM_FUN_CALL:      // if we get ID it's function's ID otherwise with '(' we move to expressions
-                if (Token_getType(token) == T_ID)
-                {
-                    Element *function = Symtable_GetElement(symtable, Token_getData(token));
-                    if (function == NULL)
-                        return_value = 3;
-                    else if (Element_IsDefined(function) == false)
-                        return_value = 3;
-                    
-                    Vector_PushBack(buffer->variables, function);
-                }
-                else if (Token_getType(token) == T_LEFT)
-                    state = FSM_FUN_PARAMS;
-                break;
-            
-            case FSM_FUN_PARAMS:        // if we get ')' we end otherwise just add expressions as in FSM_VAR_ASSIGN
-                if (Token_getType(token) == T_RIGHT)
-                {
-                    return_value = Syntax_FunctionCall(buffer);
-                    state = FSM_START;
-                }
-                break;
-
-            case FSM_FUN_DEC:
-                if (Token_getType(token) == T_ID)
-                {
-                    Element *function = Symtable_GetElement(symtable, Token_getData(token));
-                    if (function != NULL)   // redeclaration
-                    {
-                        return_value = 3;
-                        break;
-                    }
-                    
-                    function = Symtable_CreateElement(symtable, Token_getData(token), FUNCTION);
-                    if (function == NULL)
-                        return_value = 99;
-
-                    Vector_PushBack(buffer->variables, function);
-                }
-                else if (Token_getType(token) == T_LEFT)
-                    state = FSM_FUN_DEC_PARAMS;
-                break;
-
-            case FSM_FUN_DEC_PARAMS:
-                if (Token_getType(token) == T_RIGHT)
-                    state = FSM_FUN_DEC_WAIT;
-                else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
-                    Element_AddParam(Vector_Back(buffer->variables), Syntax_GetSemantic(token), NULL);
-                break;
-
-            case FSM_FUN_DEC_WAIT:
-                if (Token_getType(token) == T_DEF)
-                    state = FSM_FUN_DEC_RETURNS;
-                else
-                    state = FSM_START;
-                break;
-
-            case FSM_FUN_DEC_RETURNS:
-                if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
-                    Element_AddReturn(Vector_Back(buffer->variables), Syntax_GetSemantic(token));
-                else if (Token_getType(token) != T_COMMA)
-                    state = FSM_START;
-                break;
-
-            case FSM_FUN_DEF:
-                if (Token_getType(token) == T_ID)
-                {
-                    Element *function = Symtable_GetElement(symtable, Token_getData(token));
-
-                    if (function != NULL)   // is declared
-                    {
-                        buffer->declared = true;
-                        return_value = Element_IsDefined(function) ? 3 : -1;    // redifinition
-                    }
-                }
-                else if (Token_getType(token) == T_LEFT)
-                    state = FSM_FUN_DEF_PARAMS;
-                break;
-
-            case FSM_FUN_DEF_PARAMS:
-                if (Token_getType(token) == T_RIGHT)
-                    state = FSM_FUN_DEF_WAIT;
-                else if (Token_getType(token) == T_ID)
-                {
-                    if (buffer->declared == true)
-                        Element_FunctionParameter_SetName(Vector_Back(buffer->variables), buffer->position, Token_getData(token));
-                    else
-                        Element_AddParam(Vector_Back(buffer->variables), SEMANTIC_VOID, Token_getData(token));
-                }
-                else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
-                {
-                    if (buffer->declared == true)
-                        // semantic types must equal otherwise "redeclaration" of parameter
-                        return_value = Syntax_GetSemantic(token) == Element_FunctionParameter_GetSemantic(Vector_Back(buffer->variables), (buffer->position)++) ? -1 : 3;
-                    else
-                        Element_FunctionParameter_SetSemantic(Vector_Back(buffer->variables), (buffer->position)++, Syntax_GetSemantic(token));
-                }
-                break;
-
-            case FSM_FUN_DEF_WAIT:
-                // reset position for possible returns
-                buffer->position = 0;
-                if (Token_getType(token) == T_DEF)
-                    state = FSM_FUN_DEF_RETURNS;
-                else
-                    state = FSM_START;
-                break;
-
-            case FSM_FUN_DEF_RETURNS:
-                if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
-                {
-                    if (buffer->declared == true)
-                        return_value = Syntax_GetSemantic(token) == Element_FunctionReturn_GetSemantic(Vector_Back(buffer->variables), (buffer->position)++) ? -1 : 3;
-                    else
-                        Element_AddReturn(Vector_Back(buffer->variables), Syntax_GetSemantic(token));
-                }
-                else if (Token_getType(token) != T_COMMA)
-                    state = FSM_START;
-                break;
-
-            default:
-                break;
-            }
+            Syntax_FSM_Action(&state, token, &return_value, symtable, buffer);
 
             Stack_Pop(topToBottomStack);
             Token_Destroy(token);
@@ -426,32 +539,44 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     }
     else
     {
-        // change state variable depending on next state, posible only if FSM_START
-        if (state == FSM_START)
+        bool changed = true;
+        FSM_STATE previous_state = state;
+
+        switch (Symbol_GetValue(top))
         {
-            switch (Symbol_GetValue(top))
+        case NT_DECLARE:
+            state = FSM_VAR_DEC;
+            break;
+        case NT_FUNCTION_DECLARE:
+            state = FSM_FUN_DEC;
+            break;
+        case NT_FUNCTION_DEFINE:
+            state = FSM_FUN_DEF;
+            break;
+        case NT_FUNCTION_CALL:
+            state = FSM_FUN_CALL;
+            break;
+        case NT_ID:
+            state = FSM_ID;
+            break;
+            
+        // do nothing
+        default:
+            changed = false;
+            break;
+        }
+
+        if (changed == true)
+        {
+            switch (previous_state)
             {
-            case NT_DECLARE:
-                state = FSM_VAR_DEC;
-                break;
-            case NT_FUNCTION_DECLARE:
-                state = FSM_FUN_DEC;
-                break;
-            case NT_FUNCTION_DEFINE:
-                state = FSM_FUN_DEF;
-                break;
-            case NT_FUNCTION_CALL:
-                state = FSM_FUN_CALL;
-                break;
-            case NT_ID:
-                state = FSM_ID;
+            case FSM_VAR_ASSIGN:
+                Syntax_Assign(buffer);
                 break;
             
-            // do nothing
             default:
                 break;
             }
-
             // clear Vectors
             Vector_Clear(buffer->variables);
             Vector_Clear(buffer->expressions);
@@ -465,7 +590,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             Stack_Pop(topToBottomStack);
             
             Node* expression = NULL;
-            int ret = BottomToTop(input, output, error_output, &expression);
+            int ret = BottomToTop(input, output, error_output, &expression, symtable);
             
 
             if (state == FSM_VAR_ASSIGN || state == FSM_FUN_PARAMS)
