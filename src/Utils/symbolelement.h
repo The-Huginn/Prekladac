@@ -43,6 +43,12 @@ void Element_Destroy(Element* element);
 const char *Element_GetKey(Element *element);
 
 /**
+ * @param element Element
+ * @return True if Variable otherwise false
+ */
+bool Element_IsVariable(Element *element);
+
+/**
  * @brief
  * @param element Element
  * @return True if element was previously defined otherwise false

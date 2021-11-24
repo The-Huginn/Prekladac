@@ -59,6 +59,11 @@ const char *Element_GetKey(Element *element)
 	return element->key;
 }
 
+bool Element_IsVariable(Element *element)
+{
+	return element->type == VARIABLE;
+}
+
 bool Element_IsDefined(Element *element)
 {
 	return element->isDefined;
