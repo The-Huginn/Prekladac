@@ -106,7 +106,7 @@ TEST_F(SyntaxTests, 1_SimpleWrongTest)
 TEST_F(SyntaxTests, 2_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong3.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 4);    // assignment of integer into number
     fclose(input);
 }
 
