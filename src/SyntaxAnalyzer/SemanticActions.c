@@ -163,7 +163,7 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
     // returns something
     if (Element_FunctionReturns_Size(Node_GetData(root)) > 0)
         // changes semantic to first return value
-        Node_SetSemantic(root, Element_GetFunctionReturn_Semantic(Node_GetData(root), 0));
+        Node_SetSemantic(root, Element_FunctionReturn_GetSemantic(Node_GetData(root), 0));
     
     return -1;
 }

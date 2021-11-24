@@ -133,7 +133,7 @@ SemanticType Element_FunctionParameter_GetSemantic(Element *element, int index);
  * @param index Index of return value
  * @return Semantic type of indexed return value
  */
-SemanticType Element_GetFunctionReturn_Semantic(Element *element, int index);
+SemanticType Element_FunctionReturn_GetSemantic(Element *element, int index);
 
 /**
  * @brief

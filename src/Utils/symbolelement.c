@@ -144,7 +144,7 @@ SemanticType Element_FunctionParameter_GetSemantic(Element *element, int index)
 	return FunctionData_Params_GetSemantic(element->data, index);
 }
 
-SemanticType Element_GetFunctionReturn_Semantic(Element *element, int index)
+SemanticType Element_FunctionReturn_GetSemantic(Element *element, int index)
 {
 	if (element->type != VARIABLE)
 	{
