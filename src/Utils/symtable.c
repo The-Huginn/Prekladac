@@ -32,6 +32,7 @@ Symtable *Symtable_Init()
         ERROR("Allocation failed!");
     
     symtable->table_size = 1000007;
+    symtable->highest = 0;
 
     symtable->table = HashTable_Init(symtable->table_size);
     if (symtable->table == NULL)
