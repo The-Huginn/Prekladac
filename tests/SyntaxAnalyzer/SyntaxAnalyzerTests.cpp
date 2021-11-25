@@ -96,6 +96,20 @@ TEST_F(SyntaxTests, 9_SimpleTest)
     fclose(input);
 }
 
+TEST_F(SyntaxTests, 10_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource10.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 11_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource11.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    fclose(input);
+}
+
 TEST_F(SyntaxTests, 1_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong1.txt", "r");
@@ -105,24 +119,52 @@ TEST_F(SyntaxTests, 1_SimpleWrongTest)
 
 TEST_F(SyntaxTests, 2_SimpleWrongTest)
 {
+    FILE* input = fopen("../../../../tests/files/testSourceWrong2.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 3);    // assignment of integer into number
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 3_SimpleWrongTest)
+{
     FILE* input = fopen("../../../../tests/files/testSourceWrong3.txt", "r");
     EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 4);    // assignment of integer into number
     fclose(input);
 }
 
+TEST_F(SyntaxTests, 4_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong4.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 3);    // assignment of integer into number
+    fclose(input);
+}
+
 // unable to decide correctness of this test, whether it is syntax error or semantic erro
 // but it's an error nonetheless
-TEST_F(SyntaxTests, 3_SimpleWrongTest)
+TEST_F(SyntaxTests, 5_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong5.txt", "r");
     EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
     fclose(input);
 }
 
-TEST_F(SyntaxTests, 4_SimpleWrongTest)
+TEST_F(SyntaxTests, 6_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong6.txt", "r");
     EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 1);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 7_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong7.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 5);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 8_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong8.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 4);
     fclose(input);
 }
 

@@ -93,7 +93,19 @@ int Syntax_Assign(Buffers *buffer)
         Vector_PopBack(buffer->expressions);
 
     // we should fill with nils if we dont have enough
-    while (Vector_Size(buffer->expressions) != Vector_Size(buffer->variables))
+    // first we must check if last parameter is not an function
+    int function_returns = 0;
+    if (Vector_Size(buffer->expressions) > 0)
+        if (Node_GetType(Vector_Back(buffer->expressions)) == NODE_FUNCTION)
+            function_returns = Element_FunctionReturns_Size(Node_GetData(Vector_Back(buffer->expressions))) - 1;
+
+    // so we dont skip unintentionally function returning nothing and then dont evaluate as correct assignment
+    function_returns = function_returns < 0 ? 0 : function_returns;
+    
+    // if last function returns more expressions than needed
+    function_returns = function_returns + Vector_Size(buffer->expressions) > Vector_Size(buffer->variables) ? Vector_Size(buffer->variables) - Vector_Size(buffer->expressions) : function_returns;
+
+    while (Vector_Size(buffer->expressions) + function_returns < Vector_Size(buffer->variables))
     {
         // TODO generate nil assignment
         Vector_PopBack(buffer->variables);
@@ -101,19 +113,48 @@ int Syntax_Assign(Buffers *buffer)
 
     while (!Vector_IsEmpty(buffer->expressions))
     {
-        SemanticType type = Node_GetSemantic(Vector_Back(buffer->expressions));
-        if (Element_GetSemantic(Vector_Back(buffer->variables)) != type)
+        if (function_returns != 0)
         {
-            if (Element_GetSemantic(Vector_Back(buffer->variables)) == SEMANTIC_BOOLEAN)
-                // compare with nil for boolean value
-                AbstractSemanticTree_CompareWithNil(Vector_Back(buffer->expressions));
-            else
-                return 4;
-        }
-        // TODO generate code
+            int current_variable = Vector_Size(buffer->variables) - 1;
+            // TODO generate code for function call
+            while (function_returns >= 0)
+            {
+                SemanticType type = Element_FunctionReturn_GetSemantic(Node_GetData(Vector_Back(buffer->expressions)), function_returns);
+                if (Element_GetSemantic(Vector_GetElement(buffer->variables, current_variable)) != type)
+                {
+                    if (Element_GetSemantic(Vector_GetElement(buffer->variables, current_variable)) == SEMANTIC_BOOLEAN)
+                        // compare with nil for boolean value with specific return value
+                        AbstractSemanticTree_CompareWithNil(Vector_GetElement(Node_GetReturns(Vector_Back(buffer->expressions)), function_returns));
+                    else
+                        return 4;
+                }
 
-        Vector_PopBack(buffer->variables);
-        Vector_PopBack(buffer->expressions);
+                function_returns--;
+                current_variable--;
+
+                Vector_PopBack(buffer->variables);
+            }
+            Vector_PopBack(buffer->expressions);
+
+            function_returns = 0;
+            // TODO generate code
+        }
+        else
+        {
+            SemanticType type = Node_GetSemantic(Vector_Back(buffer->expressions));
+            if (Element_GetSemantic(Vector_Back(buffer->variables)) != type)
+            {
+                if (Element_GetSemantic(Vector_Back(buffer->variables)) == SEMANTIC_BOOLEAN)
+                    // compare with nil for boolean value
+                    AbstractSemanticTree_CompareWithNil(Vector_Back(buffer->expressions));
+                else
+                    return 4;
+            }
+
+            // TODO generate code
+            Vector_PopBack(buffer->variables);
+            Vector_PopBack(buffer->expressions);
+        }
     }
 }
 
