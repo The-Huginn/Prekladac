@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEBUG_SYNTAX
+// #define DEBUG_SYNTAX
 
 typedef struct
 {

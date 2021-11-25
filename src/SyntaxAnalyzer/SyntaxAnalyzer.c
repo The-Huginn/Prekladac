@@ -31,7 +31,7 @@ typedef struct
     Element *current_function;
 }Buffers;
 
-#define DEBUG_SYNTAX
+// #define DEBUG_SYNTAX
 
 
 int Syntax_AddToTS(Symtable *symtable, Buffers *buffer, Token *token, SymbolType type)
@@ -845,7 +845,9 @@ int parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
     LexicalDestroy();
 
     // might move to main later
-    fprintf(error_output, "Exit code: %d\n", return_value);
+    #ifdef SYNTAX_DEBUG
+        fprintf(error_output, "Exit code: %d\n", return_value);
+    #endif
 
     return return_value;
 }

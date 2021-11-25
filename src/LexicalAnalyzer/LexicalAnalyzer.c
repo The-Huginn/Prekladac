@@ -81,7 +81,6 @@ Token *getToken(FILE *input)
     }
 
     token->attribute = strdup(getString(lexeme));
-    fprintf(stderr, "%s\n", getString(lexeme));
     freeLexeme(lexeme);
 
     return token;
