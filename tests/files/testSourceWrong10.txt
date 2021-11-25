@@ -1,0 +1,18 @@
+require "ifj21"
+
+function a(param1: integer):integer
+    return param1
+end
+
+function c(param1: number):number
+    return 2.0*param1
+end
+
+function main()
+    local b, d, e : integer, integer, number = 1, 2, 1.6
+    local result:integer = a(b+d) + a(c(1.5)+e)
+
+    write(result)
+end
+
+main()

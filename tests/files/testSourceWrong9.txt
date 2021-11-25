@@ -1,0 +1,15 @@
+require "ifj21"
+
+function a(param1: integer):integer
+    return param1
+end
+
+function c(param1: integer):number
+    return 2*param1
+end
+
+function main()
+
+end
+
+main()

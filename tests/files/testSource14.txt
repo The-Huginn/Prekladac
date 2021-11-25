@@ -1,0 +1,7 @@
+require "ifj21"
+
+function div(param1:integer, param2:number)
+    return
+end
+
+div(1, 1.0 / 0.0)
