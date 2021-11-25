@@ -116,7 +116,7 @@ TEST_F(LexicalTests, 1_ExpectWrong) {
 TEST_F(LexicalTests, 2_ExpectWrong) {
     input = fopen("../../../../tests/files/testSourceWrong2.txt", "r");
 
-    std::vector<Terminal> lexemes = {T_ID, T_ID};
+    std::vector<Terminal> lexemes = {K_REQUIRE, T_STRING, T_ID, T_ID};
 
     for (auto lexeme : lexemes)
         TestToken(lexeme);
