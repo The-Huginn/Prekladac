@@ -114,7 +114,7 @@ bool Node_CompareWithNil(Node *old)
     }
 
     Node_AppendSon(old, node);
-    Node_AppendSon(old, Node_Init(NODE_NIL, NULL, SEMANTIC_VOID, (void(*)(void*))NULL, P_VOID));
+    Node_AppendSon(old, Node_Init(NODE_NIL, NULL, SEMANTIC_NIL, (void(*)(void*))NULL, P_VOID));
 }
 
 void Node_Destroy(Node *node, bool destroy)

@@ -201,8 +201,10 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     switch (Node_GetOperation(root))
     {
     case P_DIV:
-        if (Node_GetType(Vector_GetElement(Node_GetSons(root), 1)) == NODE_VALUE && strcmp(Node_GetData(Vector_GetElement(Node_GetSons(root), 1)), "0") != 0)
-            return 9;
+        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER)
+            return 6;
+        first = SEMANTIC_NUMBER;
+        break;
     case P_MUL:
     case P_PLUS:
     case P_MINUS:
