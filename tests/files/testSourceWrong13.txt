@@ -7,5 +7,5 @@ end
 function main()
     local a, b:integer, integer = values()
     a = values()
-    local c, d, e, f, g :integer, integer, integer, integer, number = values()
+    local c, d, e, f, g :integer, integer, integer, number, number = values()
 end
