@@ -6,6 +6,8 @@ SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 
 set(SYNTAX_FILES
+    SyntaxFunctions.h
+    SyntaxFunctions.c
     SyntaxAnalyzer.c
     SyntaxAnalyzer.h
     LLTable.c

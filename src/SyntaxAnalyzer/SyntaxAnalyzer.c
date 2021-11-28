@@ -9,6 +9,7 @@
 #include "LLTable.h"
 #include "BottomToTop.h"
 #include "SemanticActions.h"
+#include "SyntaxFunctions.h"
 
 #include "../Utils/stack.h"
 #include "../Utils/list.h"
@@ -22,237 +23,18 @@
 
 typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS}FSM_STATE;
 
-typedef struct
-{
-    Vector *variables;
-    Vector *expressions;
-    int position;
-    bool declared;
-    Element *current_function;
-}Buffers;
-
 // #define DEBUG_SYNTAX
 
-
-int Syntax_AddToTS(Symtable *symtable, Buffers *buffer, Token *token, SymbolType type)
-{
-    Element *previous = Symtable_GetElement(symtable, (const char*)Token_getData(token));
-
-    Element *new_element = Symtable_CreateElement(symtable, (const char*)Token_getData(token), type);
-
-    if (new_element == NULL)
-        return 99;
-
-    if (previous != NULL)
-        if (Element_GetID(previous) == Element_GetID(new_element))
-            return 3;
-
-    Vector_PushBack(buffer->variables, new_element);
-    buffer->position++;
-
-    return -1;
-}
-
-SemanticType Syntax_GetSemantic(Token *token)
-{
-    switch (Token_getType(token))
-    {
-    case K_BOOLEAN:
-        return SEMANTIC_BOOLEAN;
-        break;
-    case K_INTEGER:
-        return SEMANTIC_INTEGER;
-        break;
-    case K_NUMBER:
-        return SEMANTIC_NUMBER;
-        break;
-    case K_STRING:
-        return SEMANTIC_STRING;
-        break;
-    
-    default:
-        break;
-    }
-    return SEMANTIC_VOID;
-}
-
-int Syntax_SetSemantic(Buffers *buffer, Token *token)
-{
-    if (Vector_Size(buffer->variables) <= buffer->position)
-        return 2;
-
-    Element_SetSemantic((Element*)Vector_GetElement(buffer->variables, (buffer->position)), Syntax_GetSemantic(token));
-    Element_Define((Element*)Vector_GetElement(buffer->variables, (buffer->position)++));
-    return -1;
-}
-
-int Syntax_Assign(Buffers *buffer)
-{
-    // we should get rid of extra expressions
-    while (Vector_Size(buffer->expressions) > Vector_Size(buffer->variables))
-        Vector_PopBack(buffer->expressions);
-
-    // we should fill with nils if we dont have enough
-    // first we must check if last parameter is not an function
-    int function_returns = 0;
-    if (Vector_Size(buffer->expressions) > 0)
-        if (Node_GetType((Node*)Vector_Back(buffer->expressions)) == NODE_FUNCTION)
-            function_returns = Element_FunctionReturns_Size((Element*)Node_GetData((Node*)Vector_Back(buffer->expressions))) - 1;
-
-    // so we dont skip unintentionally function returning nothing and then dont evaluate as correct assignment
-    function_returns = function_returns < 0 ? 0 : function_returns;
-
-    // if last function returns more expressions than needed
-    function_returns = function_returns + Vector_Size(buffer->expressions) > Vector_Size(buffer->variables) ? Vector_Size(buffer->variables) - Vector_Size(buffer->expressions) : function_returns;
-
-    while (Vector_Size(buffer->expressions) + function_returns < Vector_Size(buffer->variables))
-    {
-        // TODO generate nil assignment
-        Vector_PopBack(buffer->variables);
-    }
-
-    while (!Vector_IsEmpty(buffer->expressions))
-    {
-        if (function_returns != 0)
-        {
-            int current_variable = Vector_Size(buffer->variables) - 1;
-            // TODO generate code for function call
-            while (function_returns >= 0)
-            {
-                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_Back(buffer->expressions)), function_returns);
-                if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) != type)
-                {
-                    if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) == SEMANTIC_BOOLEAN)
-                        // compare with nil for boolean value with specific return value
-                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(Node_GetReturns((Node*)Vector_Back(buffer->expressions)), function_returns));
-                    else
-                        return 4;
-                }
-
-                function_returns--;
-                current_variable--;
-
-                Vector_PopBack(buffer->variables);
-            }
-            Vector_PopBack(buffer->expressions);
-
-            function_returns = 0;
-            // TODO generate code
-        }
-        else
-        {
-            SemanticType type = Node_GetSemantic((Node*)Vector_Back(buffer->expressions));
-            if (Element_GetSemantic((Element*)Vector_Back(buffer->variables)) != type)
-            {
-                if (Element_GetSemantic((Element*)Vector_Back(buffer->variables)) == SEMANTIC_BOOLEAN)
-                    // compare with nil for boolean value
-                    AbstractSemanticTree_CompareWithNil((Node*)Vector_Back(buffer->expressions));
-                else
-                    return 4;
-            }
-
-            // TODO generate code
-            Vector_PopBack(buffer->variables);
-            Vector_PopBack(buffer->expressions);
-        }
-    }
-    return -1;
-}
-
-int Syntax_Return(Buffers *buffer)
-{
-    // we should get rid of extra expressions
-    while (Vector_Size(buffer->expressions) > Element_FunctionReturns_Size(buffer->current_function))
-        Vector_PopBack(buffer->expressions);
-
-    // we should fill with nils if we dont have enough
-    // first we must check if last parameter is not an function
-    int function_returns = 0;
-    if (Vector_Size(buffer->expressions) > 0)
-        if (Node_GetType((Node*)Vector_Back(buffer->expressions)) == NODE_FUNCTION)
-            function_returns = Element_FunctionReturns_Size((Element*)Node_GetData((Node*)Vector_Back(buffer->expressions))) - 1;
-
-    // so we dont skip unintentionally function returning nothing and then dont evaluate as correct assignment
-    function_returns = function_returns < 0 ? 0 : function_returns;
-
-    // if last function returns more expressions than needed
-    function_returns = function_returns + Vector_Size(buffer->expressions) > Element_FunctionReturns_Size(buffer->current_function)
-                            ? Element_FunctionReturns_Size(buffer->current_function) - Vector_Size(buffer->expressions)
-                            : function_returns;
-
-    // we fill last with nils
-    int current_variable = Element_FunctionReturns_Size(buffer->current_function) - 1;
-    while (Vector_Size(buffer->expressions) + function_returns < current_variable)
-    {
-        // TODO generate nil assignment to return variable
-        current_variable--;
-    }
-
-    while (!Vector_IsEmpty(buffer->expressions))
-    {
-        if (function_returns != 0)
-        {
-            // TODO generate code for function call
-            while (function_returns >= 0)
-            {
-                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_Back(buffer->expressions)), function_returns);
-                if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) != type)
-                {
-                    if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) == SEMANTIC_BOOLEAN)
-                        // compare with nil for boolean value with specific return value
-                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement((Vector*)Node_GetReturns((Node*)Vector_Back(buffer->expressions)), function_returns));
-                    else
-                        return 5;
-                }
-
-                function_returns--;
-                current_variable--;
-            }
-            Vector_PopBack(buffer->expressions);
-
-            function_returns = 0;
-            // TODO generate code
-        }
-        else
-        {
-            SemanticType type = Node_GetSemantic((Node*)Vector_Back(buffer->expressions));
-            if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) != type)
-            {
-                if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) == SEMANTIC_BOOLEAN)
-                    // compare with nil for boolean value
-                    AbstractSemanticTree_CompareWithNil((Node*)Vector_Back(buffer->expressions));
-                else
-                    return 5;
-            }
-
-            // TODO generate code
-            current_variable--;
-            Vector_PopBack(buffer->expressions);
-        }
-    }
-    return -1;
-}
-
-int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer)
-{
-    Element *function = Symtable_GetElement(symtable, Element_GetKey((Element*)Vector_Back(buffer->variables)));
-
-    // calling undefined function
-    if (function == NULL)
-        return 3;
-
-    Node *function_call = Node_Init(NODE_FUNCTION, Vector_Back(buffer->variables), SEMANTIC_VOID, NULL, P_FUNCTION);
-
-    // create a function call node with all expressions as parameters, they are normalized no need for AST_UpdateFunctionCalls
-    while (!Vector_IsEmpty(buffer->expressions))
-    {
-        Node_AppendSon(function_call, (Node*)Vector_GetElement(buffer->expressions, 0));
-        Vector_RemoveElement(buffer->expressions, 0);
-    }
-
-    return AbstractSemanticTree_VerifyFunctionCall(function_call);
-}
-
+/**
+ * @brief Decides what is our next internal state of FSM about Syntax and Semantic validation with code generation combined
+ * @note we rely on LL-grammar so we dont need to be deterministic so in case of validating wrong code LL-grammar will end SyntaxAnalyzer
+ * @param state FSM_STATE pointer
+ * @param token Token
+ * @param return_value return_value int pointer
+ * @param symtable Symtable
+ * @param buffer Buffers
+ * @return -1 upon success otherwise error code
+ */
 int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtable *symtable, Buffers *buffer)
 {
     // state variable actions
@@ -269,7 +51,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
             *return_value = Syntax_AddToTS(symtable, buffer, token, VARIABLE);
         break;
 
-    case FSM_VAR_DATATYPES:     // if we get '=' we go to assign, if we get datatype of ',' we stay and update variables otherwise START
+    case FSM_VAR_DATATYPES:     // if we get '=' we go to assign, if we get datatype or ',' we stay and update variables otherwise START
         if (Token_getType(token) == T_ASS)
         {
             // we have not declared all variables properly
@@ -277,17 +59,17 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
                 *return_value = 2;
             *state = FSM_VAR_ASSIGN;
         }
-        else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
-            *return_value = Syntax_SetSemantic(buffer, token);
+        else if (Syntax_IsDatatype(token))
+            *return_value = Syntax_Variable_SetSemantic(buffer, token);
         else if (Token_getType(token) != T_COMMA)
             // no need to clear vector, gets cleared when in state = FSM_START
             *state = FSM_START;
         break;
 
-    case FSM_VAR_ASSIGN: // unless we get another terminal to pop other than ',' we assign expressions
+    case FSM_VAR_ASSIGN: // unless we get another terminal to pop other than ',' we assign expressions, we should not get into this state when in expression
         if (Token_getType(token) != T_COMMA)
         {
-            *return_value = Syntax_Assign(buffer);
+            *return_value = Syntax_Variable_Assign(buffer);
             *state = FSM_START;
         }
         break;
@@ -351,6 +133,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
             function = Symtable_CreateElement(symtable, (const char*)Token_getData(token), FUNCTION);
             if (function == NULL)
                 *return_value = 99;
+
             Vector_PushBack(buffer->variables, function);
         }
         else if (Token_getType(token) == T_LEFT)
@@ -360,7 +143,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
     case FSM_FUN_DEC_PARAMS:
         if (Token_getType(token) == T_RIGHT)
             *state = FSM_FUN_DEC_WAIT;
-        else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+        else if (Syntax_IsDatatype(token))
             Element_AddParam((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token), NULL);
         break;
 
@@ -372,7 +155,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         break;
 
     case FSM_FUN_DEC_RETURNS:
-        if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+        if (Syntax_IsDatatype(token))
             Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
         else if (Token_getType(token) != T_COMMA)
             *state = FSM_START;
@@ -407,14 +190,14 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
     case FSM_FUN_DEF_PARAMS:
         if (Token_getType(token) == T_RIGHT)
             *state = FSM_FUN_DEF_WAIT;
-        else if (Token_getType(token) == T_ID)
+        else if (Token_getType(token) == T_ID) // we increment buffer->position when we check Semantic type
         {
             if (buffer->declared == true)
                 Element_FunctionParameter_SetName((Element*)Vector_Back(buffer->variables), buffer->position, (const char*)Token_getData(token));
             else
                 Element_AddParam((Element*)Vector_Back(buffer->variables), SEMANTIC_VOID, (const char*)Token_getData(token));
         }
-        else if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+        else if (Syntax_IsDatatype(token))
         {
             if (buffer->declared == true)
                 // semantic types must equal otherwise "redeclaration" of parameter
@@ -437,7 +220,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         break;
 
     case FSM_FUN_DEF_RETURNS:
-        if (Token_getType(token) == K_BOOLEAN || Token_getType(token) == K_INTEGER || Token_getType(token) == K_NUMBER || Token_getType(token) == K_STRING)
+        if (Syntax_IsDatatype(token))
         {
             if (buffer->declared == true)
                 *return_value = Syntax_GetSemantic(token) == Element_FunctionReturn_GetSemantic((Element*)Vector_Back(buffer->variables), (buffer->position)++) ? -1 : 3;
@@ -537,24 +320,17 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         Stack_Destroy(topToBottomStack);
         topToBottomStack = NULL;
 
-        // maybe Token_Destroy in the future
         if (token != NULL)
             Token_Destroy(token);
         token = NULL;
 
-        Vector_Destroy(buffer->variables);
-        buffer->variables = NULL;
-
-        Vector_Destroy(buffer->expressions);
-        buffer->expressions = NULL;
+        Buffers_Destroy(buffer);
+        buffer = NULL;
 
         Symtable_Destroy(symtable);
         symtable = NULL;
 
         state = FSM_START;
-        buffer->position = 0;
-        buffer->declared = false;
-        buffer->current_function = NULL;
 
         return 0;
     }
@@ -562,34 +338,19 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     // token and stack are NULLs
     if (topToBottomStack == NULL)
     {
-        buffer = (Buffers*)malloc(sizeof(Buffers));
-        if (buffer == NULL)
-            return 99;
-
-        buffer->variables = Vector_Init((void (*)(void*)) NULL);
-        if (buffer->variables == NULL)
-            return 99;
-
-        buffer->expressions = Vector_Init((void (*)(void*)) NULL);
-        if (buffer->expressions == NULL)
-        {
-            Vector_Destroy(buffer->variables);
-            return 99;
-        }
+        buffer = Buffers_Init();
 
         symtable = Symtable_Init();
         if (symtable == NULL)
         {
-            Vector_Destroy(buffer->variables);
-            Vector_Destroy(buffer->expressions);
+            Buffers_Destroy(buffer);
             return 99;
         }
         
         topToBottomStack = Stack_Init((void (*)(void*)) Symbol_Destroy);
         if (topToBottomStack == NULL)
         {
-            Vector_Destroy(buffer->variables);
-            Vector_Destroy(buffer->expressions);
+            Buffers_Destroy(buffer);
             Symtable_Destroy(symtable);
             return 99;
         }
@@ -604,15 +365,11 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         token = getToken(input);
 
         state = FSM_START;
-        buffer->position = 0;
-        buffer->declared = false;
-        buffer->current_function = NULL;
 
         // built-in-functions
         if (Syntax_AddBuiltInFunctions(symtable) != 0)
         {
-            Vector_Destroy(buffer->variables);
-            Vector_Destroy(buffer->expressions);
+            Buffers_Destroy(buffer);
             Symtable_Destroy(symtable);
             return 99;
         }
@@ -713,10 +470,10 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             switch (previous_state)
             {
             case FSM_VAR_ASSIGN:
-                return_value = Syntax_Assign(buffer);
+                return_value = Syntax_Variable_Assign(buffer);
                 break;
             case FSM_RETURNS:
-                return_value = Syntax_Return(buffer);
+                return_value = Syntax_Return_Assign(buffer);
                 break;
 
             // add scope for current function
