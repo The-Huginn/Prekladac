@@ -146,6 +146,13 @@ TEST_F(SyntaxTests, 16_SimpleTest)
     fclose(input);
 }
 
+TEST_F(SyntaxTests, 17_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource17.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
 TEST_F(SyntaxTests, 1_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong1.txt", "r");
