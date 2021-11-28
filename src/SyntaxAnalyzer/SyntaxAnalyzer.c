@@ -229,7 +229,8 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         }
         else if (Token_getType(token) != T_COMMA)
         {
-            Symtable_AddScope(symtable);
+            // Most likely this is a wrong part as this is done in TopToBottom parser when switching states!
+            // Symtable_AddScope(symtable);
             *state = FSM_START;
         }
         break;
