@@ -3,14 +3,16 @@
  * @author Rastislav Budinsky
  * @brief This file contains struct Node and interface for working with this structure
  */
+#ifndef __NODE_H__
+#define __NODE_H__
+
 #include "vector.h"
+#include "semantictype.h"
 #include "../SyntaxAnalyzer/PrecedenceTable.h"
 
 #include <stdbool.h>
 
-typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID}NodeType;
-
-typedef enum {SEMANTIC_INTEGER, SEMANTIC_NUMBER, SEMANTIC_BOOLEAN, SEMANTIC_STRING, SEMANTIC_VOID}SemanticType;
+typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP}NodeType;
 
 typedef struct Node_t Node;
 
@@ -24,7 +26,15 @@ typedef struct Node_t Node;
 Node *Node_Init(NodeType NodeType, void *data, SemanticType semanticType, void (*DataDtor)(void *), PrecedenceItemType operation);
 
 /**
- * @brief Destroys Node
+ * @brief New node is created (pointer is preserved) and this node compares previous old Node with nil
+ *      @note Pointer is preserved and original Node is being pointed to by the same pointer
+ * @param old Node
+ * @return new node
+ */
+bool Node_CompareWithNil(Node *old);
+
+/**
+ * @brief Destroys Node and it's returns
  * @param node Node
  * @param destroy To destroy all sons as well
  */
@@ -39,10 +49,62 @@ void Node_Destroy(Node* node, bool destroy);
 bool Node_AppendSon(Node* parent, Node *son);
 
 /**
+ * @brief Appends new return to parent node
+ * @param parent 
+ * @param semanticType 
+ * @return True upon success otherwise false
+ */
+bool Node_AppendReturn(Node *parent, SemanticType semanticType);
+
+/**
+ * @param node Node
+ * @return data
+ */
+void *Node_GetData(Node *node);
+
+/**
+ * @brief Sets how many times use the last expression @note It is expected this parameter is function call and has enough return values, otherwise unexpected behaviour
+ * @param node Function call
+ * @param count How many times use the last param explicitly @note It is already by default used once, default value is 0
+ */
+void Node_SetParamCount(Node *node, int count);
+
+/**
+ * @brief Getter for @see Node_SetParamCount
+ * @param node Function call
+ * @return default 0 unless change by @see Node_SetParamCount
+ */
+int Node_GetParamCount(Node *node);
+
+/**
  * @param parent Node
  * @return Vector of sons
  */
 Vector *Node_GetSons(Node *parent);
+
+/**
+ * @param parent 
+ * @return Vector of returns 
+ */
+Vector *Node_GetReturns(Node *parent);
+
+/**
+ * @param root Node
+ * @return Semantic type of Node 
+ */
+SemanticType Node_GetSemantic(Node *root);
+
+/**
+ * @param root Node
+ * @param semanticType new SemanticType
+ */
+void Node_SetSemantic(Node *root, SemanticType semanticType);
+
+/**
+ * @param root Node
+ * @return Type of Node 
+ */
+NodeType Node_GetType(Node *root);
 
 /**
  * @param node Node
@@ -63,3 +125,5 @@ bool Node_IsOperation(Node *node);
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
 Vector* Node_PostOrder(Node* node, bool destroy);
+
+#endif //!__NODE_H__

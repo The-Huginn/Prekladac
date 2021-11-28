@@ -37,6 +37,8 @@ Vector *Vector_Init(void (*VectorElementDtor)(void*))
     vector->maxSize = VECTOR_INIT_SIZE;
     vector->index = -1;
     vector->VectorElementDtor = VectorElementDtor;
+
+    return vector;
 }
 
 void Vector_Destroy(Vector *vector)

@@ -29,208 +29,263 @@ class SyntaxTests : public ::testing::Test
 TEST_F(SyntaxTests, 0_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource0.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 1_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource1.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 2_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource2.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 3_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource3.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 4_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource4.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 5_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource5.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 6_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource6.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 7_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource7.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 8_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource8.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 9_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource9.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 0);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 10_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource10.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 11_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource11.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 12_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource12.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 13_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource13.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
+
+TEST_F(SyntaxTests, 14_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource14.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 15_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource15.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 16_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource16.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 1_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong1.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 1);
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 1);
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 2_SimpleWrongTest)
 {
-    FILE* input = fopen("../../../../tests/files/testSourceWrong3.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong2.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 3);    // assignment of integer into number
     fclose(input);
 }
 
-// unable to decide correctness of this test, whether it is syntax error or semantic erro
-// but it's an error nonetheless
 TEST_F(SyntaxTests, 3_SimpleWrongTest)
 {
-    FILE* input = fopen("../../../../tests/files/testSourceWrong5.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 2);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong3.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 4);    // assignment of integer into number
     fclose(input);
 }
 
 TEST_F(SyntaxTests, 4_SimpleWrongTest)
 {
-    FILE* input = fopen("../../../../tests/files/testSourceWrong6.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, NULL, stderr), 1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong4.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 3);    // assignment of integer into number
     fclose(input);
 }
 
-class BottomToTopTests : public ::testing::Test
+// unable to decide correctness of this test, whether it is syntax error or semantic erro
+// but it's an error nonetheless
+TEST_F(SyntaxTests, 5_SimpleWrongTest)
 {
-    public:
-
-    FILE *input;
-    Node *result;
-    void SetUp() override
-    {
-        input = NULL;
-        result = NULL;
-    }
-
-    void TearDown() override
-    {
-        if (result != NULL)
-            Node_PostOrder(result, true);
-        fclose(input);
-        LexicalDestroy();
-    }
-};
-
-TEST_F(BottomToTopTests, 1_SimpleTest)
-{
-    input = fopen("../../../../tests/files/testExpression1.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong5.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 2);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 2_SimpleTest)
+TEST_F(SyntaxTests, 6_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testExpression2.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong6.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 1);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 3_SimpleTest)
+TEST_F(SyntaxTests, 7_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testExpression3.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong7.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 5);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 4_SimpleTest)
+TEST_F(SyntaxTests, 8_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testExpression4.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong8.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 4);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 5_SimpleTest)
+TEST_F(SyntaxTests, 9_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testExpression5.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong9.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 5);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 6_SimpleTest)
+TEST_F(SyntaxTests, 10_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testExpression6.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong10.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 5);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 7_SimpleTest)
+TEST_F(SyntaxTests, 11_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testExpression7.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong11.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 3);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 8_SimpleTest)
+TEST_F(SyntaxTests, 12_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testExpression8.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong12.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 9);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 1_SimpleWrongTest)
+TEST_F(SyntaxTests, 13_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testWrongExpression1.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), 2);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong13.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 4);
+    fclose(input);
 }
 
-// should parse as 2 separate expressions when expecting only one, Precedence table does not know this exactly
-TEST_F(BottomToTopTests, 2_SimpleWrongTest)
+TEST_F(SyntaxTests, 14_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testWrongExpression2.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), -1);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong14.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 9);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 3_SimpleWrongTest)
+TEST_F(SyntaxTests, 15_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testWrongExpression3.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), 2);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong15.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 7);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 4_SimpleWrongTest)
+TEST_F(SyntaxTests, 16_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testWrongExpression4.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), 2);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong16.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 5);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 5_SimpleWrongTest)
+TEST_F(SyntaxTests, 17_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testWrongExpression5.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), 2);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong17.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 3);
+    fclose(input);
 }
 
-TEST_F(BottomToTopTests, 6_SimpleWrongTest)
+TEST_F(SyntaxTests, 18_SimpleWrongTest)
 {
-    input = fopen("../../../../tests/files/testWrongExpression6.txt", "r");
-    EXPECT_EQ(BottomToTop(input, stderr, NULL, &result), 2);
+    FILE* input = fopen("../../../../tests/files/testSourceWrong18.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 3);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 19_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong19.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 3);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 20_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong20.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 3);
+    fclose(input);
 }
 
 int main(int argc, char **argv) {
@@ -245,6 +300,7 @@ int main(int argc, char **argv) {
         tests += ":Test1.2*";
         ::testing::GTEST_FLAG(filter) = tests;
     }*/
+    // ::testing::GTEST_FLAG(filter) = "SyntaxTests.17_SimpleWrongTest";
     return RUN_ALL_TESTS();
 }
 

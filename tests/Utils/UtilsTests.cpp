@@ -252,7 +252,7 @@ TEST_F(SymbolTableTests, 1_Init)
 
 TEST_F(SymbolTableTests, 2_Add)
 {
-    Element *element = Symtable_CreateElement(symtable->symtable, "ID1", 10);
+    Element *element = Symtable_CreateElement(symtable->symtable, "ID1", FUNCTION);
 
     EXPECT_FALSE(element == nullptr);
 
@@ -265,7 +265,7 @@ TEST_F(SymbolTableTests, 3_ScopeFunctions1)
 {
     Symtable_AddScope(symtable->symtable);
 
-    Element *element = Symtable_CreateElement(symtable->symtable, "ID1", 10);
+    Element *element = Symtable_CreateElement(symtable->symtable, "ID1", FUNCTION);
 
     Symtable_PopScopeToBuffer(symtable->symtable);
 
@@ -276,11 +276,11 @@ TEST_F(SymbolTableTests, 3_ScopeFunctions1)
 
 TEST_F(SymbolTableTests, 4_MultipleScopesWithSameName)
 {
-    Element *global = Symtable_CreateElement(symtable->symtable, "global", 1);
+    Element *global = Symtable_CreateElement(symtable->symtable, "global", FUNCTION);
     Symtable_AddScope(symtable->symtable);
-    Element *local_1_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *local_1_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
     Symtable_AddScope(symtable->symtable);
-    Element *local_2_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *local_2_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     EXPECT_EQ(local_2_1, Symtable_GetElement(symtable->symtable, "local"));
 
@@ -291,11 +291,11 @@ TEST_F(SymbolTableTests, 4_MultipleScopesWithSameName)
 
 TEST_F(SymbolTableTests, 5_MultipleScopesWithSameNamePoping)
 {
-    Element *global = Symtable_CreateElement(symtable->symtable, "global", 1);
+    Element *global = Symtable_CreateElement(symtable->symtable, "global", FUNCTION);
     Symtable_AddScope(symtable->symtable);
-    Element *local_1_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *local_1_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
     Symtable_AddScope(symtable->symtable);
-    Element *local_2_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *local_2_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     EXPECT_EQ(local_2_1, Symtable_GetElement(symtable->symtable, "local"));
 
@@ -304,7 +304,7 @@ TEST_F(SymbolTableTests, 5_MultipleScopesWithSameNamePoping)
     EXPECT_EQ(local_1_1, Symtable_GetElement(symtable->symtable, "local"));
 
     Symtable_AddScope(symtable->symtable);
-    local_2_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    local_2_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     EXPECT_EQ(local_2_1, Symtable_GetElement(symtable->symtable, "local"));
 
@@ -315,8 +315,8 @@ TEST_F(SymbolTableTests, 5_MultipleScopesWithSameNamePoping)
 TEST_F(SymbolTableTests, 6_MultipleVarsInScope)
 {
     Symtable_AddScope(symtable->symtable);
-    Element *local1 = Symtable_CreateElement(symtable->symtable, "local", 1);
-    Element *local2 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *local1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
+    Element *local2 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     EXPECT_TRUE(local1 == Symtable_GetElement(symtable->symtable, "local") || local2 == Symtable_GetElement(symtable->symtable, "local"));
 }
@@ -329,25 +329,25 @@ TEST_F(SymbolTableTests, 7_FindingNonExisting)
 
 TEST_F(SymbolTableTests, 8_FindingOlderScopes)
 {
-    Element *global = Symtable_CreateElement(symtable->symtable, "global", 1);
+    Element *global = Symtable_CreateElement(symtable->symtable, "global", FUNCTION);
     Symtable_AddScope(symtable->symtable);
-    Element *local_1_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *local_1_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
     Symtable_AddScope(symtable->symtable);
 
     EXPECT_EQ(global, Symtable_GetElement(symtable->symtable, "global"));
 
-    Element *local_2_1 = Symtable_CreateElement(symtable->symtable, "new local", 1);
+    Element *local_2_1 = Symtable_CreateElement(symtable->symtable, "new local", FUNCTION);
 
     EXPECT_EQ(local_1_1, Symtable_GetElement(symtable->symtable, "local"));
 }
 
 TEST_F(SymbolTableTests, 9_AdvancedCombinations1)
 {
-    Element *global = Symtable_CreateElement(symtable->symtable, "global", 1);
+    Element *global = Symtable_CreateElement(symtable->symtable, "global", FUNCTION);
     Symtable_AddScope(symtable->symtable);
-    Element *local_1_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *local_1_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
     Symtable_AddScope(symtable->symtable);
-    Element *local_2_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *local_2_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     EXPECT_EQ(local_2_1, Symtable_GetElement(symtable->symtable, "local"));
 
@@ -356,7 +356,7 @@ TEST_F(SymbolTableTests, 9_AdvancedCombinations1)
     EXPECT_EQ(local_1_1, Symtable_GetElement(symtable->symtable, "local"));
 
     Symtable_AddScope(symtable->symtable);
-    local_2_1 = Symtable_CreateElement(symtable->symtable, "local", 1);
+    local_2_1 = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     EXPECT_EQ(local_2_1, Symtable_GetElement(symtable->symtable, "local"));
 
@@ -372,12 +372,12 @@ TEST_F(SymbolTableTests, 9_AdvancedCombinations1)
 TEST_F(SymbolTableTests, 10_AdvancedCombinations2)
 {
     Symtable_AddScope(symtable->symtable);
-    Element *local_1 = Symtable_CreateElement(symtable->symtable, "local1", 1);
+    Element *local_1 = Symtable_CreateElement(symtable->symtable, "local1", FUNCTION);
 
     Symtable_PopScopeToBuffer(symtable->symtable);
     Symtable_AddScope(symtable->symtable);
 
-    Element *local_2 = Symtable_CreateElement(symtable->symtable, "local2", 1);
+    Element *local_2 = Symtable_CreateElement(symtable->symtable, "local2", FUNCTION);
 
     Symtable_PopScopeToBuffer(symtable->symtable);
 
@@ -388,11 +388,11 @@ TEST_F(SymbolTableTests, 10_AdvancedCombinations2)
 TEST_F(SymbolTableTests, 11_AdvancedCombinations3)
 {
     Symtable_AddScope(symtable->symtable);
-    Element *local_1 = Symtable_CreateElement(symtable->symtable, "local1", 1);
+    Element *local_1 = Symtable_CreateElement(symtable->symtable, "local1", FUNCTION);
 
     Symtable_AddScope(symtable->symtable);
 
-    Element *local_2 = Symtable_CreateElement(symtable->symtable, "local2", 1);
+    Element *local_2 = Symtable_CreateElement(symtable->symtable, "local2", FUNCTION);
 
     Symtable_PopScopeToBuffer(symtable->symtable);
     Symtable_PopScopeToBuffer(symtable->symtable);
@@ -405,13 +405,13 @@ TEST_F(SymbolTableTests, 12_AdvancedCombinations4)
 {
     Symtable_AddScope(symtable->symtable);
 
-    Element *element = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *element = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     Symtable_PopScope(symtable->symtable);
 
     EXPECT_EQ(nullptr, Symtable_GetElement(symtable->symtable, "local"));
 
-    element = Symtable_CreateElement(symtable->symtable, "local", 1);
+    element = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     EXPECT_EQ(element, Symtable_GetElement(symtable->symtable, "local"));
 }
@@ -420,19 +420,19 @@ TEST_F(SymbolTableTests, 13_ClearingBuffer)
 {
     Symtable_AddScope(symtable->symtable);
 
-    Element *element = Symtable_CreateElement(symtable->symtable, "local", 1);
+    Element *element = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     Symtable_PopScopeToBuffer(symtable->symtable);
     Symtable_ClearBuffer(symtable->symtable);
 
-    element = Symtable_CreateElement(symtable->symtable, "local", 1);
+    element = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
 
     Symtable_PopScopeToBuffer(symtable->symtable);
 
     EXPECT_EQ(element, Symtable_GetElementFromBuffer(symtable->symtable, "local"));
 
     Symtable_AddScope(symtable->symtable);
-    element = Symtable_CreateElement(symtable->symtable, "local", 1);
+    element = Symtable_CreateElement(symtable->symtable, "local", FUNCTION);
     Symtable_ClearBuffer(symtable->symtable);
 
     EXPECT_EQ(element, Symtable_GetElement(symtable->symtable, "local"));

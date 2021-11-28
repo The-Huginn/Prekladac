@@ -1,0 +1,12 @@
+require "ifj21"
+
+function numbers() : integer, integer
+    return 1, 1
+end
+
+function main()
+    local a, b: integer, number = numbers()
+    write(a, b)
+end
+
+main()

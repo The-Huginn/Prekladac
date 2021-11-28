@@ -58,7 +58,7 @@ Token *getToken(FILE *input)
     LexicalOutput *lexeme = getLexeme(input);
     if (lexeme == NULL)
     {
-        free(token);
+        Token_Destroy(token);
         return NULL;
     }
 
@@ -77,20 +77,10 @@ Token *getToken(FILE *input)
         {
             // needs to be redone, one enum has to be renamed
             token->type = T_ASS + getFinalState(lexeme) - F_ASS;
-
-            // need to send value
-            if (getFinalState(lexeme) == F_ID ||
-                getFinalState(lexeme) == F_INTEGER ||
-                getFinalState(lexeme) == F_NUMBER ||
-                getFinalState(lexeme) == F_STRING)
-            {
-                // token->attribute = strdup(getString(lexeme));
-                // token->attribute = symtable.getElement(getString(lexeme));
-            }
         }
     }
 
-    fprintf(stderr, "%s\n", getString(lexeme));
+    token->attribute = strdup(getString(lexeme));
     freeLexeme(lexeme);
 
     return token;
@@ -113,7 +103,7 @@ void LexicalDestroy()
     {
         Token *token = Stack_Top(stack);
         // token free function
-        free(token);
+        Token_Destroy(token);
         Stack_Pop(stack);
     }
     Stack_Destroy(stack);    

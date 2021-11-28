@@ -1,0 +1,7 @@
+require "ifj21"
+
+function foo(param1: string) : string
+    return "ahoj"
+end
+
+global foo : function(string) : string

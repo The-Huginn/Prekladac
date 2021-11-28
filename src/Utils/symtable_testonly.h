@@ -33,13 +33,14 @@ void Symtable_Destroy(Symtable *symtable);
 Element *Symtable_GetElement(Symtable *symtable, const char* id);
 
 /**
- * @brief creates the Element, saves it into the Symbol table and returns pointer to Element
- * @param symtable pointer to the Symbol table
+ * @brief Creates an Element, saves it into the Symbol table and returns pointer to Element
+ *      For further definition of Element symbolelement.h interface should be used
+ * @param symtable Symbol table
  * @param id the identifier
- * @param flags the flags for initial setup
- * @return pointer to the newly created Element
+ * @param type The type of variable
+ * @return Pointer to the newly created Element
  */
-Element *Symtable_CreateElement(Symtable *symtable, const char* id, int flags);
+Element *Symtable_CreateElement(Symtable *symtable, const char* id, SymbolType type);
 
 /**
  * @brief finds the Element in the buffer i.e. Element that is not visible from this scope but was above

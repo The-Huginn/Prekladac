@@ -24,8 +24,14 @@ Terminal Token_getType(Token *token);
 
 /**
  * @param token
- * @return data of token
+ * @return string of token
  */
-void *Token_getData(Token *token);
+const char*Token_getData(Token *token);
+
+/**
+ * @brief Destroys token and attribute
+ * @param token Token
+ */
+void Token_Destroy(Token *token);
 
 #endif // !TOKEN_H

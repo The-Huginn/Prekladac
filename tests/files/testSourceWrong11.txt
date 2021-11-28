@@ -1,0 +1,7 @@
+require "ifj21"
+
+function add(param1:number, param1:number)
+    return param1 + param1
+end
+
+add(1.5, 2.5)

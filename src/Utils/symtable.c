@@ -16,7 +16,14 @@ struct SymbolTable
     Stack *scopes;
     LList *buffer;
     int32_t table_size; // size is already stored in HTable
+    int highest;        // if added new scope for unique ID
+    Vector *current_scope;      // saving old scope number
 };
+
+void Symtable_FreeNumber(void *number)
+{
+    free(number);
+}
 
 Symtable *Symtable_Init()
 {
@@ -25,6 +32,7 @@ Symtable *Symtable_Init()
         ERROR("Allocation failed!");
     
     symtable->table_size = 1000007;
+    symtable->highest = 0;
 
     symtable->table = HashTable_Init(symtable->table_size);
     if (symtable->table == NULL)
@@ -47,23 +55,36 @@ Symtable *Symtable_Init()
         goto scopes;
     }
 
+    symtable->current_scope = Vector_Init((void (*)(void*))Symtable_FreeNumber);
+    if (symtable->current_scope == NULL)
+    {
+        WARNING("Allocation failed");
+        goto buffer;
+    }
+
     // create global scope
     Symtable_AddScope(symtable);
 
     // creating global scope failed
     if (Stack_Top(symtable->scopes) == NULL)
-        goto scopes;
+        goto current_scope;
 
     // here is succesful return
     return symtable;
 
 
     // freeing functions for partially successful allocs
+    current_scope:
+    Vector_Destroy(symtable->current_scope);
+
+    buffer:
+    List_Destroy(symtable->buffer);
+
     scopes:
-    free(symtable->scopes);
+    Stack_Destroy(symtable->scopes);
 
     hashtable:
-    free(symtable->table);
+    HashTable_Destroy(symtable->table);
 
     symtable:
     free(symtable);
@@ -114,7 +135,7 @@ Element *Symtable_GetElement(Symtable *symtable, const char *id)
     return (Element*) Stack_Top(stack);    
 }
 
-Element *Symtable_CreateElement(Symtable *symtable, const char *id, int flags)
+Element *Symtable_CreateElement(Symtable *symtable, const char *id, SymbolType type)
 {
     if (id == NULL)
         ERROR("Invalid parameter!");
@@ -133,7 +154,7 @@ Element *Symtable_CreateElement(Symtable *symtable, const char *id, int flags)
     if (stack == NULL)
         return NULL;
 
-    Element *element = Element_Init(Jesus_GetKey(jesus), FUNCTION, false, NULL);
+    Element *element = Element_Init(Jesus_GetKey(jesus), type, *((int*)Vector_Back(symtable->current_scope)));
     if (element == NULL)
         return NULL;
 
@@ -219,6 +240,13 @@ void Symtable_AddScope(Symtable *symtable)
         ERROR_VOID("Allocation failed");
     
     Stack_Push(symtable->scopes, (void*) list);
+
+    int *new_scope = (int*) malloc(sizeof(int));
+    if (new_scope == NULL)
+        ERROR_VOID("Allocation failed");
+
+    *new_scope = ++(symtable->highest);
+    Vector_PushBack(symtable->current_scope, new_scope);
 }
 
 /**
@@ -256,6 +284,8 @@ void Symtable_RemoveScope(Symtable *symtable, bool destroy)
 
     if (destroy)
         List_Destroy(list);
+
+    Vector_PopBack(symtable->current_scope);
     return;
 }
 
