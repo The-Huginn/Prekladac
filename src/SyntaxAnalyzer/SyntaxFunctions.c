@@ -115,11 +115,8 @@ int Syntax_Variable_Assign(Buffers *buffer)
     // if last function returns more expressions than needed
     function_returns = function_returns + Vector_Size(buffer->expressions) > Vector_Size(buffer->variables) ? Vector_Size(buffer->variables) - Vector_Size(buffer->expressions) : function_returns;
 
-    while (Vector_Size(buffer->expressions) + function_returns < Vector_Size(buffer->variables))
-    {
-        // TODO generate nil assignment
-        Vector_PopBack(buffer->variables);
-    }
+    if (Vector_Size(buffer->expressions) + function_returns < Vector_Size(buffer->variables))
+        return 7;
 
     while (!Vector_IsEmpty(buffer->expressions))
     {
@@ -192,11 +189,9 @@ int Syntax_Return_Assign(Buffers *buffer)
 
     // we fill last with nils
     int current_variable = Element_FunctionReturns_Size(buffer->current_function) - 1;
-    while (Vector_Size(buffer->expressions) + function_returns < current_variable)
-    {
-        // TODO generate nil assignment to return variable
-        current_variable--;
-    }
+
+    if (Vector_Size(buffer->expressions) + function_returns < current_variable)
+        return 7;
 
     while (!Vector_IsEmpty(buffer->expressions))
     {

@@ -246,6 +246,13 @@ TEST_F(SyntaxTests, 14_SimpleWrongTest)
     fclose(input);
 }
 
+TEST_F(SyntaxTests, 15_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong15.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 7);
+    fclose(input);
+}
+
 // class BottomToTopTests : public ::testing::Test
 // {
 //     public:

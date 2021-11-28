@@ -6,7 +6,7 @@ function main (    )
     local y : integer = 10
     local z : integer = x + y
     local a, b : integer, number = 10, 10.1
-    local c, d : integer, integer = 10
+    local c, d : integer, integer = 10, 0
     d = a
     return
 end

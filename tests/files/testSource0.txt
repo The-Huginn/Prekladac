@@ -1,7 +1,7 @@
 require "ifj21"
 
 function main()
-    local a,b,c : integer, number, integer = 1,2.6
+    local a,b,c : integer, number, integer = 1, 2.6, 3
 end
 
 main()
