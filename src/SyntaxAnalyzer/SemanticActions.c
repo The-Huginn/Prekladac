@@ -108,8 +108,10 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
     // we dont have same count of parameters, re-adjustments needed
     if (Element_FunctionParameters_Size(Node_GetData(root)) > Vector_Size(Node_GetSons(root)))
     {
-        // at least one param is here
         Node *last_param = Vector_Back(Node_GetSons(root));
+
+        if (last_param == NULL)
+            return 5;
 
         // last is not function so params missing
         if (Node_GetType(last_param) != FUNCTION)

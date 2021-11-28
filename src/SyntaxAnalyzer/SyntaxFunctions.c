@@ -16,14 +16,28 @@ Buffers *Buffers_Init()
 
     buffer->variables = Vector_Init((void (*)(void*)) NULL);
     if (buffer->variables == NULL)
+    {
+        free(buffer);
         return NULL;
+    }
 
     buffer->expressions = Vector_Init((void (*)(void*)) NULL);
     if (buffer->expressions == NULL)
     {
         Vector_Destroy(buffer->variables);
+        free(buffer);
         return NULL;
     }
+
+    buffer->only_declared = Vector_Init((void (*)(void *))NULL);
+    if (buffer->only_declared == NULL)
+    {
+        Vector_Destroy(buffer->variables);
+        Vector_Destroy(buffer->expressions);
+        free(buffer);
+        return NULL;
+    }
+
     buffer->position = 0;
     buffer->declared = false;
     buffer->current_function = NULL;
@@ -35,6 +49,7 @@ void Buffers_Destroy(Buffers *buffer)
 {
     Vector_Destroy(buffer->variables);
     Vector_Destroy(buffer->expressions);
+    Vector_Destroy(buffer->only_declared);
     free(buffer);
 }
 

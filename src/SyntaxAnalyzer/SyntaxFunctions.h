@@ -16,6 +16,7 @@ typedef struct Buffers_t
 {
     Vector *variables;
     Vector *expressions;
+    Vector *only_declared;
     int position;
     bool declared;
     Element *current_function;

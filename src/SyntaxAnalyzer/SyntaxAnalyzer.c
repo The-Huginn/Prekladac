@@ -135,6 +135,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
                 *return_value = 99;
 
             Vector_PushBack(buffer->variables, function);
+            Vector_PushBack(buffer->only_declared, function);
         }
         else if (Token_getType(token) == T_LEFT)
             *state = FSM_FUN_DEC_PARAMS;
@@ -318,12 +319,23 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 
     if (clear)
     {
+        int return_value = 0;
+
         Stack_Destroy(topToBottomStack);
         topToBottomStack = NULL;
 
         if (token != NULL)
             Token_Destroy(token);
         token = NULL;
+
+        // we first check if all declared function have been defined as well
+        while (!Vector_IsEmpty(buffer->only_declared))
+        {
+            if (Element_IsDefined((Element*)Vector_Back(buffer->only_declared)) == false)
+                return_value = 3;
+
+            Vector_PopBack(buffer->only_declared);
+        }
 
         Buffers_Destroy(buffer);
         buffer = NULL;
@@ -333,7 +345,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 
         state = FSM_START;
 
-        return 0;
+        return return_value;
     }
 
     // token and stack are NULLs
@@ -599,7 +611,10 @@ int parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
             break;
         }
     }
-    TopToBottom(NULL, NULL, NULL, true);
+    int ret = TopToBottom(NULL, NULL, NULL, true);
+    if (return_value == 0)
+        return_value = ret;
+
     LexicalDestroy();
 
     // might move to main later
