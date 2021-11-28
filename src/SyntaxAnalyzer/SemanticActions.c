@@ -175,6 +175,27 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
     return -1;
 }
 
+bool AbstractSemanticTree_IsZero(Node *node)
+{
+    if (Node_GetType(node) != NODE_VALUE)
+        return false;
+
+    bool isZero = true;
+    char *string = Node_GetData(node);
+
+    while (*string != '\0' && isZero)
+    {
+        // we expect valid token so we dont consider 0.0.0 as a problem, should be detected by LexicalAnalyzer
+        isZero = (*string) == '0' || (*string) == '.';
+        string++;
+    }
+
+    return isZero;
+}
+
+/**
+ * @note parameters are in reverse order
+ */
 int AbstractSemanticTree_BinaryOperator(Node *root)
 {    
     if (!Node_IsOperation(root))
@@ -201,6 +222,9 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     switch (Node_GetOperation(root))
     {
     case P_DIV:
+        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 0)) == true)
+            return 9;
+
         if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER)
             return 6;
         first = SEMANTIC_NUMBER;
@@ -213,7 +237,7 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
         break;
     
     case P_INT_DIV:
-        if (Node_GetType(Vector_GetElement(Node_GetSons(root), 1)) == NODE_VALUE && strcmp(Node_GetData(Vector_GetElement(Node_GetSons(root), 1)), "0") != 0)
+        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 0)) == true)
             return 9;
 
         if (first != SEMANTIC_INTEGER)
