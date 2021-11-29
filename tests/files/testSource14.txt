@@ -1,11 +1,25 @@
 require "ifj21"
 
-function values():integer, integer, integer, integer
-    return 1, 2, 3
+function equal(a:integer, b:integer):boolean
+    return a == b
+end
+
+function foo():boolean
+    return nil
 end
 
 function main()
-    local a, b:integer, integer = values()
-    a = values()
-    local c, d, e, f, g :number, integer, integer, integer, integer = 1.0, values()
+    if equal(1, 1) then
+        write("1 a 1 sa rovnaju!")
+    else
+        write("1 a 1 sa nerovnaju :(")
+    end
+
+    if foo() then
+        write("foo je nil!")
+    else
+        write("foo nie je nil :(")
+    end
 end
+
+main()

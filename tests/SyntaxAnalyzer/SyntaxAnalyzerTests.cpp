@@ -139,13 +139,6 @@ TEST_F(SyntaxTests, 15_SimpleTest)
     fclose(input);
 }
 
-TEST_F(SyntaxTests, 16_SimpleTest)
-{
-    FILE* input = fopen("../../../../tests/files/testSource16.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
-    fclose(input);
-}
-
 TEST_F(SyntaxTests, 1_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong1.txt", "r");
@@ -299,6 +292,13 @@ TEST_F(SyntaxTests, 22_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong22.txt", "r");
     EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 8);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 23_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong23.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 5);
     fclose(input);
 }
 

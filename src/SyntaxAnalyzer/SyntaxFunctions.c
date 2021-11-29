@@ -70,7 +70,10 @@ int Syntax_Variable_Assign(Buffers *buffer)
 {
     // we should get rid of extra expressions
     while (Vector_Size(buffer->expressions) > Vector_Size(buffer->variables))
+    {
+        Node_Destroy((Node*)Vector_Back(buffer->expressions), true);
         Vector_PopBack(buffer->expressions);
+    }
 
     // we should fill with nils if we dont have enough
     // first we must check if last parameter is not an function
@@ -88,49 +91,42 @@ int Syntax_Variable_Assign(Buffers *buffer)
     if (Vector_Size(buffer->expressions) + function_returns < Vector_Size(buffer->variables))
         return 7;
 
-    while (!Vector_IsEmpty(buffer->expressions))
+    int current_variable = Vector_Size(buffer->variables) - 1;
+    for (int i = Vector_Size(buffer->expressions) - 1; i >= 0; i--)
     {
         if (function_returns != 0)
         {
-            int current_variable = Vector_Size(buffer->variables) - 1;
-            // TODO generate code for function call
             while (function_returns >= 0)
             {
-                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_Back(buffer->expressions)), function_returns);
+                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_GetElement(buffer->expressions, i)), function_returns);
                 if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) != type)
                 {
                     if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) == SEMANTIC_BOOLEAN)
                         // compare with nil for boolean value with specific return value
-                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(Node_GetReturns((Node*)Vector_Back(buffer->expressions)), function_returns));
+                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(Node_GetReturns((Node*)Vector_GetElement(buffer->expressions, i)), function_returns));
                     else
                         return 4;
                 }
 
                 function_returns--;
                 current_variable--;
-
-                Vector_PopBack(buffer->variables);
             }
-            Vector_PopBack(buffer->expressions);
 
             function_returns = 0;
-            // TODO generate code
         }
         else
         {
-            SemanticType type = Node_GetSemantic((Node*)Vector_Back(buffer->expressions));
-            if (Element_GetSemantic((Element*)Vector_Back(buffer->variables)) != type)
+            SemanticType type = Node_GetSemantic((Node*)Vector_GetElement(buffer->expressions, i));
+            if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) != type)
             {
-                if (Element_GetSemantic((Element*)Vector_Back(buffer->variables)) == SEMANTIC_BOOLEAN)
+                if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) == SEMANTIC_BOOLEAN)
                     // compare with nil for boolean value
-                    AbstractSemanticTree_CompareWithNil((Node*)Vector_Back(buffer->expressions));
+                    AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(buffer->expressions, i));
                 else
                     return 4;
             }
 
-            // TODO generate code
-            Vector_PopBack(buffer->variables);
-            Vector_PopBack(buffer->expressions);
+            current_variable--;
         }
     }
     return -1;
@@ -140,7 +136,10 @@ int Syntax_Return_Assign(Buffers *buffer)
 {
     // we should get rid of extra expressions
     while (Vector_Size(buffer->expressions) > Element_FunctionReturns_Size(buffer->current_function))
+    {
+        Node_Destroy((Node*)Vector_Back(buffer->expressions), true);
         Vector_PopBack(buffer->expressions);
+    }
 
     // we should fill with nils if we dont have enough
     // first we must check if last parameter is not an function
@@ -157,11 +156,10 @@ int Syntax_Return_Assign(Buffers *buffer)
                             ? Element_FunctionReturns_Size(buffer->current_function) - Vector_Size(buffer->expressions)
                             : function_returns;
 
-    // we fill last with nils
     int current_variable = Element_FunctionReturns_Size(buffer->current_function) - 1;
 
-    if (Vector_Size(buffer->expressions) + function_returns < current_variable)
-        return 7;
+    if (Vector_Size(buffer->expressions) + function_returns <= current_variable)
+        return 5;
 
     while (!Vector_IsEmpty(buffer->expressions))
     {
