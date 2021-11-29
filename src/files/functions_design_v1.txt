@@ -1,6 +1,6 @@
 ----------------------------------------------
 
-LABEL GF@_substr
+LABEL _substr
 	
 	CREATEFRAME
 	PUSHFRAME
@@ -10,55 +10,53 @@ LABEL GF@_substr
 	POPS LF@n
 	DEFVAR LF@m
 	POPS LF@m
-	DEFVAR LF@temp
-	MOVE LF@temp "nil"
 	DEFVAR LF@temp1
 	TYPE LF@temp1 LF@string
-	JUMPIFEQ LF@_str_error LF@temp LF@temp1
+	JUMPIFEQ LF@_str_error string@nil LF@temp1
 	TYPE LF@temp1 LF@n
-	JUMPIFEQ LF@_str_error LF@temp LF@temp1
+	JUMPIFEQ LF@_str_error string@nil LF@temp1
 	TYPE LF@temp1 LF@m
-	JUMPIFEQ LF@_str_error LF@temp LF@temp1
+	JUMPIFEQ LF@_str_error string@nil LF@temp1
 	DEFVAR LF@check
 	DEFVAR LF@len
 	STRLEN LF@len LF@string
-	LT LF@check LF@n 1
-	JUMPIFEQ LF@_str_empty LF@check true
-	LT LF@check LF@m 1
-	JUMPIFEQ LF@_str_empty LF@check true
+	LT LF@check LF@n int@1
+	JUMPIFEQ LF@_str_empty LF@check bool@true
+	LT LF@check LF@m int@1
+	JUMPIFEQ LF@_str_empty LF@check bool@true
 	GT LF@check LF@n LF@len
-	JUMPIFEQ LF@_str_empty LF@check true
+	JUMPIFEQ LF@_str_empty LF@check bool@true
 	GT LF@check LF@m LF@len
-	JUMPIFEQ LF@_str_empty LF@check true
+	JUMPIFEQ LF@_str_empty LF@check bool@true
 	GT LF@check LF@n LF@m
-	JUMPIFEQ LF@_str_empty LF@check true
+	JUMPIFEQ LF@_str_empty LF@check bool@true
 	MOVE LF@len LF@n
-	SUB LF@len 1
+	SUB LF@len int@1
 	
-LABEL LF@_str_loop
+LABEL _str_loop
 	GETCHAR LF@temp LF@string LF@len
 	CONCAT LF@s LF@s LF@temp
-	ADD LF@len 1
-	JUMPIFEQ LF@_str_push LF@temp LF@m
-	JUMP LF@_str_loop
+	ADD LF@len int@1
+	JUMPIFEQ _str_push LF@temp LF@m
+	JUMP _str_loop
 
-LABEL LF@_str_error
-	EXIT 8
-	JUMP LF@_str_end
+LABEL _str_error
+	EXIT int@8
+	JUMP _str_end
 	
-LABEL LF@_str_empty
-	MOVE LF@s ""
+LABEL _str_empty
+	MOVE LF@s string@\000
 	
-LABEL LF@_str_push
+LABEL _str_push
 	PUSHS LF@s
 
-LABEL LF@_str_end
+LABEL _str_end
 	POPFRAME
 	RETURN
 
 ----------------------------------------------
 
-LABEL GF@_write
+LABEL _write
 
 	CREATEFRAME
 	PUSHFRAME
@@ -67,11 +65,11 @@ LABEL GF@_write
 	POPS LF@n
 	DEFVAR LF@term
 	
-LABEL LF@_write_loop	
+LABEL _write_loop	
 	POPS LF@term
 	WRITE LF@term
-	SUB LF@n 1
-	JUMPIFNEQ LF@_write_loop LF@n 0
+	SUB LF@n int@1
+	JUMPIFNEQ _write_loop LF@n int@0
 
 	POPFRAME
 	RETURN
@@ -84,7 +82,7 @@ write(t0, t1, ... , tn-1) ->
 		PUSHS LF@t[i]
 	}
 	PUSHS LF@n
-	CALL LF@_write
+	CALL _write
 
 
 s = reads() -> READ LF@s string
@@ -93,7 +91,7 @@ n = readn() -> READ LF@n float
 
 i = tointeger(n) -> FLOAT2INT LF@i LF@n // var = integer, symb = number
 i = ord(string, int) -> STRI2INT LF@i GF@string LF@int
-s = chr(i) -> INT2CHAR LF@s LF@i
+s = chr(i) -> INT2CHAR LF@string LF@int
 
 s = substr(string, n ,m) ->
 	PUSHS LF@m
