@@ -222,6 +222,12 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
     PrecedenceItem* top = (PrecedenceItem*)List_GetData(bottomToTopList, NULL);
     while ((Token_ToPrecedenceItemType(token) != P_$ || PrecedenceItem_GetType(top) != P_$) && ret == -1)
     {
+        if (Token_getType(token) == ERROR)
+        {
+            ret = 1;
+            break;
+        }
+
         PrecedenceItemType token_type = Token_ToPrecedenceItemType(token);
 
                                                                             // P_FUNCTION is not valid token, so we want to skip this as it is in the order the table
