@@ -300,7 +300,7 @@ int main(int argc, char **argv) {
         tests += ":Test1.2*";
         ::testing::GTEST_FLAG(filter) = tests;
     }*/
-    // ::testing::GTEST_FLAG(filter) = "SyntaxTests.17_SimpleWrongTest";
+    // ::testing::GTEST_FLAG(filter) = "SyntaxTests.3_SimpleWrongTest";
     return RUN_ALL_TESTS();
 }
 

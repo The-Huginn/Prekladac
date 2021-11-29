@@ -6,6 +6,12 @@
 #include "Buffers.h"
 
 #include <stdlib.h>
+#include <stdbool.h>
+
+void ScopeDtor(void *data)
+{
+    free(data);
+}
 
 Buffers *Buffers_Init()
 {
@@ -37,6 +43,17 @@ Buffers *Buffers_Init()
         return NULL;
     }
 
+    // See ../SyntaxAnalyzer/CodeGeneration needs free-ing function
+    buffer->scopes = Stack_Init(ScopeDtor);
+    if (buffer->scopes == NULL)
+    {
+        Vector_Destroy(buffer->variables);
+        Vector_Destroy(buffer->expressions);
+        Vector_Destroy(buffer->only_declared);
+        free(buffer);
+        return NULL;
+    }
+
     buffer->position = 0;
     buffer->declared = false;
     buffer->current_function = NULL;
@@ -49,5 +66,6 @@ void Buffers_Destroy(Buffers *buffer)
     Vector_Destroy(buffer->variables);
     Vector_Destroy(buffer->expressions);
     Vector_Destroy(buffer->only_declared);
+    Stack_Destroy(buffer->scopes);
     free(buffer);
 }

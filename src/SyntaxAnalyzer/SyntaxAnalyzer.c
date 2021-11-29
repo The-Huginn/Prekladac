@@ -10,6 +10,7 @@
 #include "BottomToTop.h"
 #include "SemanticActions.h"
 #include "SyntaxFunctions.h"
+#include "CodeGeneration.h"
 
 #include "../Utils/stack.h"
 #include "../Utils/list.h"
@@ -63,8 +64,11 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         else if (Syntax_IsDatatype(token))
             *return_value = Syntax_Variable_SetSemantic(buffer, token);
         else if (Token_getType(token) != T_COMMA)
-            // no need to clear vector, gets cleared when in state = FSM_START
+        {
             *state = FSM_START;
+            Code_DeclareVariables(buffer);
+            // no need to clear vector, gets cleared when in state = FSM_START
+        }
         break;
 
     case FSM_VAR_ASSIGN: // unless we get another terminal to pop other than ',' we assign expressions, we should not get into this state when in expression
@@ -72,6 +76,8 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         {
             *return_value = Syntax_Variable_Assign(buffer);
             *state = FSM_START;
+            if (*return_value == -1)
+                Code_GenerateAssign(buffer);
         }
         break;
 
@@ -94,7 +100,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
             *state = FSM_FUN_PARAMS;
         else if (Token_getType(token) == T_ASS)
             *state = FSM_VAR_ASSIGN;
-        else if (Token_getType(token) != T_COMMA)
+        else if (Token_getType(token) != T_COMMA)   // should be detected as syntax error
             *state = FSM_START;
         break;
 
@@ -118,6 +124,8 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         {
             *return_value = Syntax_FunctionCall(symtable, buffer);
             *state = FSM_START;
+            if (*return_value == -1)
+                Code_GenerateFunctionCall(buffer);
         }
         break;
 
@@ -160,7 +168,10 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         if (Syntax_IsDatatype(token))
             Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
         else if (Token_getType(token) != T_COMMA)
+        {
             *state = FSM_START;
+            Code_GenerateFunctionReturn(buffer);
+        }
         break;
 
     case FSM_FUN_DEF:
@@ -214,11 +225,6 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         buffer->position = 0;
         if (Token_getType(token) == T_DEF)
             *state = FSM_FUN_DEF_RETURNS;
-        else
-        {
-            Symtable_AddScope(symtable);
-            *state = FSM_START;
-        }
         break;
 
     case FSM_FUN_DEF_RETURNS:
@@ -237,8 +243,37 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         }
         break;
 
+    case FSM_RETURNS:
+
+        // ignore 'return'
+        if (Token_getType(token) == K_RETURN)
+            break;
+        if (Token_getType(token) != T_COMMA)
+        {
+            *return_value = Syntax_Return_Assign(buffer);
+            Code_GenerateFunctionReturn(buffer);
+            *state = FSM_START;
+        }
+        break;
+
 
     default:
+
+        switch (Token_getType(token))
+        {
+        case K_IF:
+            Code_AddCondition(buffer, NULL);
+            break;
+        case K_WHILE:
+            Code_AddWhile(buffer, NULL);
+            break;
+        case K_END:
+            Code_PopEnd(buffer);
+            break;
+        
+        default:
+            break;
+        }
         break;
     }
 }
@@ -485,14 +520,22 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             {
             case FSM_VAR_ASSIGN:
                 return_value = Syntax_Variable_Assign(buffer);
+                Code_GenerateAssign(buffer);
                 break;
             case FSM_RETURNS:
-                return_value = Syntax_Return_Assign(buffer);
+                if (buffer->current_function != NULL)
+                {
+                    return_value = Syntax_Return_Assign(buffer);
+                    Code_GenerateFunctionReturn(buffer);
+                }
                 break;
 
             // add scope for current function
             case FSM_FUN_DEF_WAIT:
             case FSM_FUN_DEF_RETURNS:
+                // generate code for function label
+                Code_AddFunction(buffer);
+
                 Symtable_AddScope(symtable);
 
                 // add all parameters from current function to TS
