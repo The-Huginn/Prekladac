@@ -288,6 +288,20 @@ TEST_F(SyntaxTests, 20_SimpleWrongTest)
     fclose(input);
 }
 
+TEST_F(SyntaxTests, 21_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong21.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 8);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 22_SimpleWrongTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSourceWrong22.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 8);
+    fclose(input);
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     /*if (argc == 1)

@@ -219,6 +219,9 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     {
         if (first != SEMANTIC_NIL && second != SEMANTIC_NIL)
             return 6;
+        // one of them at least is nil, we can only EQ / NEQ with nil
+        if (Node_GetOperation(root) != P_EQ && Node_GetOperation(root) != P_NEQ)
+            return 8;
     }
 
     switch (Node_GetOperation(root))
@@ -308,6 +311,9 @@ int AbstractSemanticTree_UnaryOperator(Node *root)
     }
 
     SemanticType first = Node_GetSemantic(Vector_GetElement(Node_GetSons(root), 0));
+    
+    if (first == SEMANTIC_NIL)
+        return 8;
 
     switch (Node_GetOperation(root))
     {
