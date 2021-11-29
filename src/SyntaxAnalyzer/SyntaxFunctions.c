@@ -5,6 +5,7 @@
  */
 #include "SyntaxFunctions.h"
 #include "SemanticActions.h"
+#include "CodeGeneration.h"
 
 #include <stdlib.h>
 
@@ -129,6 +130,9 @@ int Syntax_Variable_Assign(Buffers *buffer)
             current_variable--;
         }
     }
+
+    Code_GenerateAssign(buffer);
+
     return -1;
 }
 
@@ -141,7 +145,6 @@ int Syntax_Return_Assign(Buffers *buffer)
         Vector_PopBack(buffer->expressions);
     }
 
-    // we should fill with nils if we dont have enough
     // first we must check if last parameter is not an function
     int function_returns = 0;
     if (Vector_Size(buffer->expressions) > 0)
@@ -161,19 +164,19 @@ int Syntax_Return_Assign(Buffers *buffer)
     if (Vector_Size(buffer->expressions) + function_returns <= current_variable)
         return 5;
 
-    while (!Vector_IsEmpty(buffer->expressions))
+    for (int i = Vector_Size(buffer->expressions) - 1; i >= 0; i--)
     {
         if (function_returns != 0)
         {
             // TODO generate code for function call
             while (function_returns >= 0)
             {
-                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_Back(buffer->expressions)), function_returns);
+                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_GetElement(buffer->expressions, i)), function_returns);
                 if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) != type)
                 {
                     if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) == SEMANTIC_BOOLEAN)
                         // compare with nil for boolean value with specific return value
-                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement((Vector*)Node_GetReturns((Node*)Vector_Back(buffer->expressions)), function_returns));
+                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement((Vector*)Node_GetReturns((Node*)Vector_GetElement(buffer->expressions, i)), function_returns));
                     else
                         return 5;
                 }
@@ -181,28 +184,27 @@ int Syntax_Return_Assign(Buffers *buffer)
                 function_returns--;
                 current_variable--;
             }
-            Vector_PopBack(buffer->expressions);
 
             function_returns = 0;
-            // TODO generate code
         }
         else
         {
-            SemanticType type = Node_GetSemantic((Node*)Vector_Back(buffer->expressions));
+            SemanticType type = Node_GetSemantic((Node*)Vector_GetElement(buffer->expressions, i));
             if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) != type)
             {
                 if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) == SEMANTIC_BOOLEAN)
                     // compare with nil for boolean value
-                    AbstractSemanticTree_CompareWithNil((Node*)Vector_Back(buffer->expressions));
+                    AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(buffer->expressions, i));
                 else
                     return 5;
             }
 
-            // TODO generate code
             current_variable--;
-            Vector_PopBack(buffer->expressions);
         }
     }
+
+    Code_GenerateFunctionReturn(buffer);
+
     return -1;
 }
 
@@ -222,6 +224,8 @@ int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer)
         Node_AppendSon(function_call, (Node*)Vector_GetElement(buffer->expressions, 0));
         Vector_RemoveElement(buffer->expressions, 0);
     }
+
+    Code_GenerateFunctionCall(buffer);
 
     return AbstractSemanticTree_VerifyFunctionCall(function_call);
 }

@@ -45,6 +45,7 @@ int Syntax_Variable_SetSemantic(Buffers *buffer, Token *token);
 
 /**
  * @brief Assigns all expressions to variables, missing expressions are filled with last function call or nils (depending on amount of returns from function) or removes extraneous
+ *      @note Generates code
  * @param buffer Buffers
  * @return -1 upon success otherwise error code
  */
@@ -52,6 +53,7 @@ int Syntax_Variable_Assign(Buffers *buffer);
 
 /**
  * @brief Assigns all expressions to returns of function missing expressions are filled with last function call of nils (depending on amount of returns from function) or removes extraneous
+ *      @note Generates code
  * @param buffer Buffers
  * @return -1 upon success otherwise error code
  */
@@ -59,6 +61,7 @@ int Syntax_Return_Assign(Buffers *buffer);
 
 /**
  * @brief Creates Node of function call and checks correctness of this function call
+ *      @note Generates code
  * @param symtable Symtable
  * @param buffer Buffers
  * @return -1 upon success otherwise error code

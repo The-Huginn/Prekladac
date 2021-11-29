@@ -76,8 +76,6 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         {
             *return_value = Syntax_Variable_Assign(buffer);
             *state = FSM_START;
-            if (*return_value == -1)
-                Code_GenerateAssign(buffer);
         }
         break;
 
@@ -124,8 +122,6 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         {
             *return_value = Syntax_FunctionCall(symtable, buffer);
             *state = FSM_START;
-            if (*return_value == -1)
-                Code_GenerateFunctionCall(buffer);
         }
         break;
 
@@ -170,7 +166,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         else if (Token_getType(token) != T_COMMA)
         {
             *state = FSM_START;
-            Code_GenerateFunctionReturn(buffer);
+            Syntax_Return_Assign(buffer);
         }
         break;
 
@@ -251,7 +247,6 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         if (Token_getType(token) != T_COMMA)
         {
             *return_value = Syntax_Return_Assign(buffer);
-            Code_GenerateFunctionReturn(buffer);
             *state = FSM_START;
         }
         break;
@@ -387,7 +382,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     // token and stack are NULLs
     if (topToBottomStack == NULL)
     {
-        buffer = Buffers_Init();
+        buffer = Buffers_Init(output);
 
         symtable = Symtable_Init();
         if (symtable == NULL)
@@ -520,14 +515,10 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             {
             case FSM_VAR_ASSIGN:
                 return_value = Syntax_Variable_Assign(buffer);
-                Code_GenerateAssign(buffer);
                 break;
             case FSM_RETURNS:
                 if (buffer->current_function != NULL)
-                {
                     return_value = Syntax_Return_Assign(buffer);
-                    Code_GenerateFunctionReturn(buffer);
-                }
                 break;
 
             // add scope for current function
