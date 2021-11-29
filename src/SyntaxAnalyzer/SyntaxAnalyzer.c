@@ -15,6 +15,7 @@
 #include "../Utils/list.h"
 #include "../Utils/vector.h"
 #include "../Utils/symtable.h"
+#include "../Utils/Buffers.h"
 
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
 

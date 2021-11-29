@@ -11,28 +11,7 @@
 #include "../Utils/vector.h"
 #include "../Utils/node.h"
 #include "../Utils/symbolelement.h"
-
-typedef struct Buffers_t
-{
-    Vector *variables;
-    Vector *expressions;
-    Vector *only_declared;
-    int position;
-    bool declared;
-    Element *current_function;
-}Buffers;
-
-/**
- * @brief Constructor for Buffers
- * @return Valid pointer upon success otherwise NULL
- */
-Buffers *Buffers_Init();
-
-/**
- * @brief Destructor for Buffers
- * @param buffer Buffers
- */
-void Buffers_Destroy(Buffers *buffer);
+#include "../Utils/Buffers.h"
 
 /**
  * @param token Token
