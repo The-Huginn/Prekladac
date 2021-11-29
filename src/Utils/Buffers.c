@@ -13,7 +13,7 @@ void ScopeDtor(void *data)
     free(data);
 }
 
-Buffers *Buffers_Init()
+Buffers *Buffers_Init(FILE *output)
 {
     Buffers *buffer = (Buffers*)malloc(sizeof(Buffers));
     if (buffer == NULL)
@@ -57,6 +57,9 @@ Buffers *Buffers_Init()
     buffer->position = 0;
     buffer->declared = false;
     buffer->current_function = NULL;
+    buffer->top_id = 0;
+    buffer->tmp_offset = 0;
+    buffer->output = output;
 
     return buffer;
 }

@@ -11,6 +11,7 @@
 #include "../SyntaxAnalyzer/PrecedenceTable.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 
 typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP}NodeType;
 
@@ -122,8 +123,10 @@ bool Node_IsOperation(Node *node);
  * @brief Iterates in post-order for code-generation
  * @param node Node
  * @param destroy Set to true to call destructor upon all Nodes
+ * @param offset From which id we should start to generate variables to keep them unique
+ * @param output Where to print code
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
-Vector* Node_PostOrder(Node* node, bool destroy);
+Vector* Node_PostOrder(Node* node, bool destroy, int offset, FILE *output);
 
 #endif //!__NODE_H__

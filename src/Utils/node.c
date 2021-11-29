@@ -5,8 +5,11 @@
  */
 #include "node.h"
 #include "logger.h"
+#include "symbolelement.h"
 
 #include <stdlib.h>
+
+#define TMP "1tmp"
 
 struct Node_t
 {
@@ -183,29 +186,61 @@ void *CreateNumber(int number)
     return createdNumber;
 }
 
-Vector* Node_PostOrder(Node *node, bool destroy)
+Vector* Node_PostOrder(Node *node, bool destroy, int offset, FILE *output)
 {
-    fprintf(stderr, "Node [%d, %d, %d] was called\n", node->nodeType, node->operation, node->semanticType);
+    Vector *sons = Vector_Init(DataDtor);
+    if (sons == NULL)
+        return NULL;
+    
     for (int i = 0; i < Vector_Size(node->sons); i++)
     {
-        fprintf(stderr, "Node [%d, %d, %d] calling son...\n", node->nodeType, node->operation, node->semanticType);
-        Vector *returned_values = Node_PostOrder((Node*)Vector_GetElement(node->sons, i), destroy);
+        // should increase offset
+        Vector *returned_values = Node_PostOrder((Node*)Vector_GetElement(node->sons, i), destroy, offset, output);
         if (returned_values == NULL)
             break;
         
-        // TODO
+        for (int j = 0; j < Vector_Size(returned_values); j++)
+            Vector_PushBack(sons, Vector_GetElement(returned_values, j));
+
+        // increase offset for net declared variable
+        if (!Vector_IsEmpty(returned_values))
+            offset = *((int*)Vector_Back(returned_values)) + 1;
+
         Vector_Destroy(returned_values);
     }
 
-    if (destroy)
-        Node_Destroy(node, false);
-
-    // TODO
     Vector *return_values = Vector_Init(DataDtor);
     if (return_values == NULL)
         return NULL;
 
-    // add to return_values int values where data is saved can use CreateNumber function
+    switch (Node_GetType(node))
+    {
+    case NODE_OPERATION:
+        break;
+
+    case NODE_ID:
+        fprintf(output, "MOVE %s%d %s%d\n", TMP, offset++, Element_GetKey(Node_GetData(node)), Element_GetID(Node_GetData(node)));
+        break;
+
+    case NODE_FUNCTION:
+        break;
+
+    case NODE_VALUE:
+        // fprintf(output, "hello there\n");
+        break;
+
+    case NODE_POP:
+        break;
+    
+    case NODE_NIL:
+        break;
+
+    default:
+        break;
+    }
+
+    if (destroy)
+        Node_Destroy(node, false);
     
     return return_values;
 }

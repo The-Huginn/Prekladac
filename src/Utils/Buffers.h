@@ -10,6 +10,8 @@
 #include "stack.h"
 #include "symbolelement.h"
 
+#include <stdio.h>
+
 typedef struct Buffers_t
 {
     Vector *variables;  //! used for parsing and saving recent variables from statement
@@ -21,13 +23,16 @@ typedef struct Buffers_t
     
     Stack *scopes;     //! to remember currently code-branches @note used as stack
     int top_id;     //! id to be assigned to the new code-branch, might be for each code-branch type different
+    int tmp_offset; //! auxilary variable for generating unique variable names for expression generations
+    FILE *output;   //! output where code is generated to
 }Buffers;
 
 /**
  * @brief Constructor for Buffers
+ * @param output Output file where code is generated
  * @return Valid pointer upon success otherwise NULL
  */
-Buffers *Buffers_Init();
+Buffers *Buffers_Init(FILE *output);
 
 /**
  * @brief Destructor for Buffers
