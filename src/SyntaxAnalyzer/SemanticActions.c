@@ -195,9 +195,6 @@ bool AbstractSemanticTree_IsZero(Node *node)
     return isZero;
 }
 
-/**
- * @note parameters are in reverse order
- */
 int AbstractSemanticTree_BinaryOperator(Node *root)
 {    
     if (!Node_IsOperation(root))
@@ -211,6 +208,12 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
         WARNING("Binary operator called with no 2 operands");
         return 7;
     }
+
+    // removing sons should not destroy them
+    // we need to reverse order of sons as they are reversed
+    Node *first_son = Vector_GetElement(Node_GetSons(root), 0);
+    Vector_RemoveElement(Node_GetSons(root), 0);
+    Vector_PushBack(Node_GetSons(root), first_son);
 
     SemanticType first = Node_GetSemantic(Vector_GetElement(Node_GetSons(root), 0));
     SemanticType second = Node_GetSemantic(Vector_GetElement(Node_GetSons(root), 1));
