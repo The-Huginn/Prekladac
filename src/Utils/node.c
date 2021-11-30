@@ -10,8 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TMP(a) "1tmp", (a)
-
 struct Node_t
 {
     NodeType nodeType;
@@ -177,12 +175,12 @@ Vector *Node_GetReturns(Node *parent)
     return parent->returns;
 }
 
-void DataDtor(void *data)
+void Number_Destroy(void *data)
 {
     free(data);
 }
 
-void *CreateNumber(int number)
+void *Number_Init(int number)
 {
     void *createdNumber = (void*)malloc(sizeof(int));
     if (createdNumber == NULL)
@@ -216,7 +214,7 @@ bool Node_IsBinaryOperator(PrecedenceItemType type)
 
 Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount, FILE *output)
 {
-    Vector *sons = Vector_Init(DataDtor);
+    Vector *sons = Vector_Init(Number_Destroy);
     if (sons == NULL)
         return NULL;
     
@@ -235,7 +233,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
             break;
         
         for (int j = 0; j < Vector_Size(returned_values); j++)
-            Vector_PushBack(sons, CreateNumber(*((int*)Vector_GetElement(returned_values, j))));
+            Vector_PushBack(sons, Number_Init(*((int*)Vector_GetElement(returned_values, j))));
 
         // increase offset for net declared variable
         if (!Vector_IsEmpty(returned_values))
@@ -244,7 +242,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
         Vector_Destroy(returned_values);
     }
 
-    Vector *return_values = Vector_Init(DataDtor);
+    Vector *return_values = Vector_Init(Number_Destroy);
     if (return_values == NULL)
         return NULL;
 
@@ -327,7 +325,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
                 fprintf(output, "NOT %s%d %s%d\n", TMP(offset), TMP(offset - 1));
             }
 
-            Vector_PushBack(return_values, CreateNumber(offset));
+            Vector_PushBack(return_values, Number_Init(offset));
         }
         else    // Unary
         {
@@ -347,12 +345,13 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
             }
 
             fprintf(output, " %s%d %s%d\n", TMP(offset), TMP(*((int*)Vector_GetElement(sons, 0))));
+            Vector_PushBack(return_values, Number_Init(offset));
         }
         break;
 
     case NODE_ID:
         fprintf(output, "MOVE %s%d %s%d\n", TMP(offset), Element_GetKey(Node_GetData(node)), Element_GetID(Node_GetData(node)));
-        Vector_PushBack(return_values, CreateNumber(offset));
+        Vector_PushBack(return_values, Number_Init(offset));
         break;
 
     case NODE_VALUE:
@@ -381,7 +380,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
         }
 
         fprintf(output, "@%s\n", (const char*)Node_GetData(node));
-        Vector_PushBack(return_values, CreateNumber(offset));
+        Vector_PushBack(return_values, Number_Init(offset));
 
         break;
 
@@ -395,7 +394,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
 
         fprintf(output, "CALL %s%d\n", Element_GetKey((Element*)Node_GetData(node)), Element_GetID((Element*)Node_GetData(node)));
 
-        Vector *returns = Vector_Init(DataDtor);
+        Vector *returns = Vector_Init(Number_Destroy);
         if (returns == NULL)
             return NULL;
 
@@ -407,7 +406,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
                 break;
             
             for (int j = 0; j < Vector_Size(returned_values); j++)
-                Vector_PushBack(returns, CreateNumber(*((int*)Vector_GetElement(returned_values, j))));
+                Vector_PushBack(returns, Number_Init(*((int*)Vector_GetElement(returned_values, j))));
 
             // increase offset for net declared variable
             if (!Vector_IsEmpty(returned_values))
@@ -418,7 +417,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
 
         // only first few parameters return
         for (int i = 0; i < expected_amount; i++)
-            Vector_PushBack(return_values, CreateNumber(*((int*)Vector_GetElement(returns, i))));
+            Vector_PushBack(return_values, Number_Init(*((int*)Vector_GetElement(returns, i))));
         
         Vector_Destroy(returns);
 
@@ -426,12 +425,12 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
 
     case NODE_POP:
         fprintf(output, "POPS %s%d\n", TMP(offset));
-        Vector_PushBack(return_values, CreateNumber(offset));
+        Vector_PushBack(return_values, Number_Init(offset));
         break;
     
     case NODE_NIL:
         fprintf(output, "MOVE %s%d nil@nil\n", TMP(offset));
-        Vector_PushBack(return_values, CreateNumber(offset));
+        Vector_PushBack(return_values, Number_Init(offset));
         break;
 
     default:

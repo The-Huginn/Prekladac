@@ -10,6 +10,8 @@
 
 typedef enum {IF, WHILE, FUNCTION_DEF}ScopeItem;
 
+#define ELEMENT(a) Element_GetKey((Element*)(a)), Element_GetID((Element*)(a))
+
 typedef struct
 {
     ScopeItem type;
@@ -86,7 +88,44 @@ void Code_DeclareVariables(Buffers *buffer)
 
 void Code_GenerateAssign(Buffers *buffer)
 {
-    // TODO generate code
+    Vector *assignments = Vector_Init(Number_Destroy);
+    
+    for (int i = 0; i < Vector_Size(buffer->expressions); i++)
+    {
+        Vector* variables = NULL;
+        if (i == Vector_Size(buffer->expressions) - 1)
+            variables = Node_PostOrder(
+                (Node*)Vector_GetElement(buffer->expressions, i),
+                true,
+                buffer->tmp_offset,
+                Vector_Size(buffer->variables) - Vector_Size(buffer->expressions) + 1,
+                buffer->output
+            );
+        else            
+            variables = Node_PostOrder(
+                (Node*)Vector_GetElement(buffer->expressions, i),
+                true,
+                buffer->tmp_offset,
+                1,
+                buffer->output
+            );
+
+        if (variables == NULL)
+            ERROR_VOID("Missing expressions");
+        
+        if (!Vector_IsEmpty(variables))
+            buffer->tmp_offset = *((int*)Vector_Back(variables)) + 1;
+
+        for (int i = 0; i < Vector_Size(variables); i++)
+            Vector_PushBack(assignments, Number_Init(*((int*)Vector_GetElement(variables, i))));
+    }
+
+    for (int i = Vector_Size(buffer->variables) - 1; i >= 0; i--)
+    {
+        fprintf(buffer->output, "MOVE %s%d %s%d\n", ELEMENT(Vector_GetElement(buffer->variables, i)), TMP(*((int*)Vector_GetElement(assignments, i))));
+    }
+
+    Vector_Destroy(assignments);
 }
 
 void Code_GenerateFunctionCall(Buffers *buffer)
@@ -101,8 +140,7 @@ void Code_GenerateFunctionReturn(Buffers *buffer)
 
 void Code_PopEnd(Buffers *buffer)
 {
-    Scope *top = Stack_Top(buffer->scopes);
-    fprintf(stderr, "Clearing from end!\n");
+    Scope *top = (Scope*)Stack_Top(buffer->scopes);
     switch (top->type)
     {
     case IF:
@@ -110,7 +148,6 @@ void Code_PopEnd(Buffers *buffer)
     case WHILE:
         break;
     case FUNCTION_DEF:
-        fprintf(stderr, "Clearing function\n");
         buffer->current_function = NULL;
         break;
     

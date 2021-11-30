@@ -15,6 +15,8 @@
 
 typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP}NodeType;
 
+#define TMP(a) "$tmp", (a)
+
 typedef struct Node_t Node;
 
 /**
@@ -129,5 +131,18 @@ bool Node_IsOperation(Node *node);
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
 Vector* Node_PostOrder(Node* node, bool destroy, int offset, int expected_amount, FILE *output);
+
+/**
+ * @brief Malloc int
+ * @param number Int value
+ * @return Pointer to int
+ */
+void *Number_Init(int number);
+
+/**
+ * @brief Destroys Number
+ * @param data Int value on heap
+ */
+void Number_Destroy(void *data);
 
 #endif //!__NODE_H__
