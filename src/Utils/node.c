@@ -389,6 +389,10 @@ Vector* Node_PostOrder(Node *node, bool destroy, int offset, int expected_amount
         for (int i = Vector_Size(sons) - 1; i >= 0; i--)
             fprintf(output, "PUSHS %s%d\n", TMP(*((int*)Vector_GetElement(sons, i))));
 
+        // because of convention we have decided to push number of variadic parameters in function write
+        if (strcmp(Element_GetKey((Element*)Node_GetData(node)), "write\0") == 0)
+            fprintf(output, "PUSHS int@%d\n", Vector_Size(sons));
+
         fprintf(output, "CALL %s%d\n", Element_GetKey((Element*)Node_GetData(node)), Element_GetID((Element*)Node_GetData(node)));
 
         Vector *returns = Vector_Init(DataDtor);
