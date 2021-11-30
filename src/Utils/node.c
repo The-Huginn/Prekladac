@@ -359,19 +359,19 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
         switch (Node_GetSemantic(node))
         {
         case SEMANTIC_BOOLEAN:
-            fprintf(buffer->output, "bool");
+            fprintf(buffer->output, "bool@%s\n", (const char*)Node_GetData(node));
             break;
 
         case SEMANTIC_INTEGER:
-            fprintf(buffer->output, "int");
+            fprintf(buffer->output, "int@%d\n", atoi((const char*)Node_GetData(node)));
             break;
             
         case SEMANTIC_STRING:
-            fprintf(buffer->output, "string");
+            fprintf(buffer->output, "string@%s\n", (const char*)Node_GetData(node));
             break;
         
         case SEMANTIC_NUMBER:
-            fprintf(buffer->output, "number");
+            fprintf(buffer->output, "number@%a\n", strtod((const char*)Node_GetData(node), NULL));
             break;
 
         default:
@@ -379,7 +379,6 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
             break;
         }
 
-        fprintf(buffer->output, "@%s\n", (const char*)Node_GetData(node));
         Vector_PushBack(return_values, Number_Init(buffer->tmp_offset));
 
         break;
