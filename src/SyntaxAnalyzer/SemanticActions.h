@@ -26,7 +26,7 @@ int AbstractSemanticTree_CompareWithNil(Node *node);
 bool AbstractSemanticTree_UpdateFunctionCalls(Node *root);
 
 /**
- * @brief This functions extends last parameter if it is function call and not enough params. Check whether Semantic action is alright, matches function signature.
+ * @brief This functions extends last parameter if it is function call and not enough params. Check whether Semantic action is alright, matches function signature. Generates return expressions.
  *      @note Before this function should be called @see AbstractSemanticTree_UpdateFunctionCalls to remove Void parameter
  *      @note Changes Semantic type of function Node
  * @param root Node of the function call

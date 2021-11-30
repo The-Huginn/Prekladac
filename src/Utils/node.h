@@ -30,7 +30,7 @@ Node *Node_Init(NodeType NodeType, void *data, SemanticType semanticType, void (
  * @brief New node is created (pointer is preserved) and this node compares previous old Node with nil
  *      @note Pointer is preserved and original Node is being pointed to by the same pointer
  * @param old Node
- * @return new node
+ * @return true upon success otherwise false
  */
 bool Node_CompareWithNil(Node *old);
 
@@ -124,9 +124,10 @@ bool Node_IsOperation(Node *node);
  * @param node Node
  * @param destroy Set to true to call destructor upon all Nodes
  * @param offset From which id we should start to generate variables to keep them unique
+ * @param expected_amount The expected amount of returned variables
  * @param output Where to print code
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
-Vector* Node_PostOrder(Node* node, bool destroy, int offset, FILE *output);
+Vector* Node_PostOrder(Node* node, bool destroy, int offset, int expected_amount, FILE *output);
 
 #endif //!__NODE_H__

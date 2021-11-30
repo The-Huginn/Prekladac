@@ -169,6 +169,9 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
         }
     }
 
+    for (int i = 0; i < Element_FunctionReturns_Size(Node_GetData(root)); i++)
+        Node_AppendReturn(root, Element_FunctionReturn_GetSemantic(Node_GetData(root), i));
+
     // returns something
     if (Element_FunctionReturns_Size(Node_GetData(root)) > 0)
         // changes semantic to first return value
@@ -230,7 +233,7 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     switch (Node_GetOperation(root))
     {
     case P_DIV:
-        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 0)) == true)
+        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 1)) == true)
             return 9;
 
         if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER)
@@ -245,7 +248,7 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
         break;
     
     case P_INT_DIV:
-        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 0)) == true)
+        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 1)) == true)
             return 9;
 
         if (first != SEMANTIC_INTEGER)
