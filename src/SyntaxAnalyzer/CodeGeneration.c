@@ -90,23 +90,30 @@ void Code_DeclareVariables(Buffers *buffer)
         fprintf(buffer->output, "DEFVAR LF@%s%d\n", ELEMENT(Vector_GetElement(buffer->variables, i)));
 }
 
-void Code_GenerateAssign(Buffers *buffer)
+/**
+ * @brief Generates code for all expressions and returns Vector of numbers in order from left to right where in TMP() are saved
+ * @param buffer Buffers
+ * @param assignment true if we are assigning values false if we are returning value
+ *      @note important to know if last expression is function call and we need to know how much more we need
+ * @return Vector of int*
+ */
+Vector *Code_GetRValues(Buffers *buffer, bool assignment)
 {
-    Vector *assignments = Vector_Init(Number_Destroy);
-    
+    Vector *returns = Vector_Init(Number_Destroy);
+
     for (int i = 0; i < Vector_Size(buffer->expressions); i++)
     {
-        Vector* variables = NULL;
+        Vector* tmp = NULL;
         if (i == Vector_Size(buffer->expressions) - 1)
-            variables = Node_PostOrder(
+            tmp = Node_PostOrder(
                 (Node*)Vector_GetElement(buffer->expressions, i),
                 true,
                 buffer,
-                Vector_Size(buffer->variables) - Vector_Size(buffer->expressions) + 1,
+                (assignment ? Vector_Size(buffer->variables) : Element_FunctionReturns_Size((buffer->current_function))) - Vector_Size(buffer->expressions) + 1,
                 buffer->output
             );
-        else            
-            variables = Node_PostOrder(
+        else
+            tmp = Node_PostOrder(
                 (Node*)Vector_GetElement(buffer->expressions, i),
                 true,
                 buffer,
@@ -114,20 +121,27 @@ void Code_GenerateAssign(Buffers *buffer)
                 buffer->output
             );
 
-        if (variables == NULL)
-            ERROR_VOID("Missing expressions");
+        if (tmp == NULL)
+            ERROR("Missing expressions");
         
-        if (!Vector_IsEmpty(variables))
-            buffer->tmp_offset = *((int*)Vector_Back(variables)) + 1;
+        if (!Vector_IsEmpty(tmp))
+            buffer->tmp_offset = *((int*)Vector_Back(tmp)) + 1;
 
-        for (int i = 0; i < Vector_Size(variables); i++)
-            Vector_PushBack(assignments, Number_Init(*((int*)Vector_GetElement(variables, i))));
+        for (int i = 0; i < Vector_Size(tmp); i++)
+            Vector_PushBack(returns, Number_Init(*((int*)Vector_GetElement(tmp, i))));
     }
+
+    return returns;
+}
+
+void Code_GenerateAssign(Buffers *buffer)
+{
+    Vector *assignments = Code_GetRValues(buffer, true);
+    if (assignments == NULL)
+        return;
 
     for (int i = Vector_Size(buffer->variables) - 1; i >= 0; i--)
-    {
         fprintf(buffer->output, "MOVE %s%d %s%d\n", ELEMENT(Vector_GetElement(buffer->variables, i)), TMP(*((int*)Vector_GetElement(assignments, i))));
-    }
 
     Vector_Destroy(assignments);
 }
@@ -139,7 +153,14 @@ void Code_GenerateFunctionCall(Buffers *buffer, Node *function_call)
 
 void Code_GenerateFunctionReturn(Buffers *buffer)
 {
-    // TODO generate code
+    Vector *returns = Code_GetRValues(buffer, false);
+    if (returns == NULL)
+        return;
+
+    for (int i = Vector_Size(returns) - 1; i >= 0; i--)
+        fprintf(buffer->output, "PUSHS %s%d\n", TMP(*((int*)Vector_GetElement(returns, i))));
+
+    Vector_Destroy(returns);
 }
 
 void Code_PopEnd(Buffers *buffer)

@@ -326,7 +326,7 @@ int main(int argc, char **argv) {
         tests += ":Test1.2*";
         ::testing::GTEST_FLAG(filter) = tests;
     }*/
-    // ::testing::GTEST_FLAG(filter) = "SyntaxTests.16_SimpleTest";
+    ::testing::GTEST_FLAG(filter) = "SyntaxTests.2_SimpleTest";
     return RUN_ALL_TESTS();
 }
 
