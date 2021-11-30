@@ -8,6 +8,7 @@
 
 #include "../Utils/Buffers.h"
 #include "../Utils/node.h"
+#include "../Utils/symtable.h"
 
 /**
  * @brief Generates code for the header of file
@@ -16,38 +17,47 @@
 void Code_AddHeader(Buffers *buffer);
 
 /**
- * @brief Adds code-branch for if condition
+ * @brief Adds code-branch for if condition and creates new scope in symtable
  *      @note only Code_AddElseif, Code_AddElse and Code_PopEnd are expected calls
  * @param buffer Buffers
  * @param expression Node
+ * @param symtable Symtable
+ * @return -1 upon success otherwise error code
  */
-void Code_AddCondition(Buffers *buffer, Node *expression);
+int Code_AddCondition(Buffers *buffer, Node *expression, Symtable *symtable);
 
 /**
- * @brief Adds elseif code-branch on top of current if condition code-branch
+ * @brief Adds elseif code-branch on top of current if condition code-branch and creates new scope in symtable
  * @param buffer Buffers
  * @param expression Node
+ * @param symtable Symtable
+ * @return -1 upon success otherwise error code
  */
-void Code_AddElseif(Buffers *buffer, Node *expression);
+int Code_AddElseif(Buffers *buffer, Node *expression, Symtable *symtable);
 
 /**
- * @brief Adds else code-branch on top of current if condition code-branch
+ * @brief Adds else code-branch on top of current if condition code-branch and creates new scope in symtable
  * @param buffer Buffers
+ * @param symtable Symtable
+ * @return -1 upon success otherwise error code
  */
-void Code_AddElse(Buffers *buffer);
+int Code_AddElse(Buffers *buffer, Symtable *symtable);
 
 /**
- * @brief Adds while code-branch for while loop
+ * @brief Adds while code-branch for while loop and creates new scope in symtable
  * @param buffer Buffers
  * @param expression Node
+ * @param symtable Symtable
+ * @return -1 upon success otherwise error code
  */
-void Code_AddWhile(Buffers *buffer, Node *expression);
+int Code_AddWhile(Buffers *buffer, Node *expression, Symtable *symtable);
 
 /**
  * @brief Adds function definition code-branch generates frame&pops values
  * @param buffer Buffers
+ * @return -1 upon success otherwise error code
  */
-void Code_AddFunction(Buffers *buffer);
+int Code_AddFunction(Buffers *buffer);
 
 /**
  * @brief Generates code for declaration of variables @note variables are expected to be in buffer->variables, this Vector is not changed
@@ -75,9 +85,10 @@ void Code_GenerateFunctionCall(Buffers *buffer, Node *function_call);
 void Code_GenerateFunctionReturn(Buffers *buffer);
 
 /**
- * @brief This function should be called upon found 'end' terminal
+ * @brief This function should be called upon found 'end' terminal and removes last scope from symtable
  * @param buffer Buffers
+ * @param symtable Symtable
  */
-void Code_PopEnd(Buffers *buffer);
+void Code_PopEnd(Buffers *buffer, Symtable *symtable);
 
 #endif // !__CODE_GENERATION_H__

@@ -23,9 +23,47 @@
 
 #include <stdlib.h>
 
-typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS}FSM_STATE;
+typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS, FSM_IF, FSM_ELSEIF, FSM_ELSE, FSM_WHILE}FSM_STATE;
 
 // #define DEBUG_SYNTAX
+
+int Syntax_FunctionDefined(Buffers *buffer, Symtable *symtable)
+{
+    Symtable_AddScope(symtable);
+
+    // clear variables
+    Vector_Clear(buffer->variables);
+
+    int return_value = -1;
+    // add all parameters from current function to TS
+    for (int i = 0; i < Element_FunctionParameters_Size(buffer->current_function); i++)
+    {
+        Element *previous_parameter = Symtable_GetElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i));
+        Element* parameter = Symtable_CreateElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i),VARIABLE);
+        if (parameter == NULL)
+        {
+            return_value = 99;
+            break;
+        }
+
+        // parameters with same name
+        if (previous_parameter != NULL)
+            if (Element_GetID(parameter) == Element_GetID(previous_parameter))
+                return_value = 3;
+                    
+        Element_SetSemantic(parameter, Element_FunctionParameter_GetSemantic(buffer->current_function, i));
+        Element_Define(parameter);
+
+        // for code generation
+        Vector_PushBack(buffer->variables, parameter);
+    }
+
+    // generate code for function label
+    if (return_value == -1)
+        Code_AddFunction(buffer);
+
+    return return_value;
+}
 
 /**
  * @brief Decides what is our next internal state of FSM about Syntax and Semantic validation with code generation combined
@@ -223,6 +261,8 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         buffer->position = 0;
         if (Token_getType(token) == T_DEF)
             *state = FSM_FUN_DEF_RETURNS;
+        else
+            *return_value = Syntax_FunctionDefined(buffer, symtable);
         break;
 
     case FSM_FUN_DEF_RETURNS:
@@ -234,11 +274,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
                 Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
         }
         else if (Token_getType(token) != T_COMMA)
-        {
-            // Most likely this is a wrong part as this is done in TopToBottom parser when switching states!
-            // Symtable_AddScope(symtable);
             *state = FSM_START;
-        }
         break;
 
     case FSM_RETURNS:
@@ -253,26 +289,56 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         }
         break;
 
-
-    default:
-
-        switch (Token_getType(token))
+    case FSM_IF:
+        if (!Vector_IsEmpty(buffer->expressions))
         {
-        case K_IF:
-            Code_AddCondition(buffer, NULL);
-            break;
-        case K_WHILE:
-            Code_AddWhile(buffer, NULL);
-            break;
-        case K_END:
-            Code_PopEnd(buffer);
-            break;
-        
-        default:
-            break;
+            Code_AddCondition(buffer, Vector_Back(buffer->expressions), symtable);
+            *state = FSM_START;
         }
         break;
+    
+    case FSM_ELSEIF:
+        if (!Vector_IsEmpty(buffer->expressions))
+        {
+            Code_AddElseif(buffer, Vector_Back(buffer->expressions), symtable);
+            *state = FSM_START;
+        }
+        break;
+
+    case FSM_WHILE:
+        if (!Vector_IsEmpty(buffer->expressions))
+        {
+            Code_AddWhile(buffer, Vector_Back(buffer->expressions), symtable);
+            *state = FSM_START;
+        }
+        break;
+
+    default:
+        break;
     }
+
+    switch (Token_getType(token))
+    {
+    case K_IF:
+        *state = FSM_IF;
+        break;
+    case K_ELSEIF:
+        *state = FSM_ELSEIF;
+        break;
+    case K_ELSE:
+        Code_AddElse(buffer, symtable);
+        break;
+    case K_WHILE:
+        *state = FSM_WHILE;
+        break;
+    case K_END:
+        Code_PopEnd(buffer, symtable);
+        break;
+    
+    default:
+        break;
+    }
+    
 }
 
 /**
@@ -419,8 +485,6 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             Symtable_Destroy(symtable);
             return 99;
         }
-        // for first non existing global_statement so we can allways pop scope
-        Symtable_AddScope(symtable);
 
         Code_AddHeader(buffer);
     }
@@ -475,7 +539,6 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     }
     else
     {
-        bool popScope = false;
         FSM_STATE previous_state = state;
 
         switch (Symbol_GetValue(top))
@@ -505,7 +568,6 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         // we must pop after all changes from previous scope are done
         case NT_GLOBAL_STATEMENT:
             state = FSM_START;
-            popScope = true;
             break;
             
         // do nothing
@@ -531,30 +593,10 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             // add scope for current function
             case FSM_FUN_DEF_WAIT:
             case FSM_FUN_DEF_RETURNS:
-                // generate code for function label
-                Code_AddFunction(buffer);
 
-                Symtable_AddScope(symtable);
+                if (buffer->current_function != NULL)
+                    return_value = Syntax_FunctionDefined(buffer, symtable);
 
-                // add all parameters from current function to TS
-                for (int i = 0; i < Element_FunctionParameters_Size(buffer->current_function); i++)
-                {
-                    Element *previous_parameter = Symtable_GetElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i));
-                    Element* parameter = Symtable_CreateElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i),VARIABLE);
-                    if (parameter == NULL)
-                    {
-                        return_value = 99;
-                        break;
-                    }
-
-                    // parameters with same name
-                    if (previous_parameter != NULL)
-                        if (Element_GetID(parameter) == Element_GetID(previous_parameter))
-                            return_value = 3;
-                    
-                    Element_SetSemantic(parameter, Element_FunctionParameter_GetSemantic(buffer->current_function, i));
-                    Element_Define(parameter);
-                }
                 break;
             
             default:
@@ -566,13 +608,6 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             buffer->position = 0;
             buffer->declared = false;
         }
-
-        if (popScope == true)
-            if (buffer->current_function != NULL)
-            {
-                buffer->current_function = NULL;
-                Symtable_PopScope(symtable);
-            }
 
         if (Symbol_GetValue(top) == NT_EXPRESSION)
         {
