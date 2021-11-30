@@ -129,10 +129,9 @@ bool Node_IsOperation(Node *node);
  * @param destroy Set to true to call destructor upon all Nodes
  * @param buffer Buffers for changing offset @note function changes content of buffer->tmp_offset
  * @param expected_amount The expected amount of returned variables
- * @param output Where to print code
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
-Vector* Node_PostOrder(Node* node, bool destroy, Buffers *buffer, int expected_amount, FILE *output);
+Vector* Node_PostOrder(Node* node, bool destroy, Buffers *buffer, int expected_amount);
 
 /**
  * @brief Malloc int
