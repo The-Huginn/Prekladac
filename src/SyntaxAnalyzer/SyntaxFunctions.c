@@ -225,7 +225,11 @@ int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer)
         Vector_RemoveElement(buffer->expressions, 0);
     }
 
-    Code_GenerateFunctionCall(buffer);
+    int ret = AbstractSemanticTree_VerifyFunctionCall(function_call);
+    if (ret != -1)
+        return ret;
 
-    return AbstractSemanticTree_VerifyFunctionCall(function_call);
+    Code_GenerateFunctionCall(buffer, function_call);
+
+    return -1;
 }

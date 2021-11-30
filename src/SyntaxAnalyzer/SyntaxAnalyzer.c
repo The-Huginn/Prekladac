@@ -60,6 +60,8 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
             if (buffer->position != Vector_Size(buffer->variables))
                 *return_value = 2;
             *state = FSM_VAR_ASSIGN;
+            if (*return_value == -1)
+                Code_DeclareVariables(buffer);
         }
         else if (Syntax_IsDatatype(token))
             *return_value = Syntax_Variable_SetSemantic(buffer, token);
@@ -419,6 +421,8 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
         }
         // for first non existing global_statement so we can allways pop scope
         Symtable_AddScope(symtable);
+
+        Code_AddHeader(buffer);
     }
     
     Symbol *top = (Symbol *) Stack_Top(topToBottomStack);
@@ -519,6 +523,9 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             case FSM_RETURNS:
                 if (buffer->current_function != NULL)
                     return_value = Syntax_Return_Assign(buffer);
+                break;
+            case FSM_VAR_DATATYPES:
+                Code_DeclareVariables(buffer);
                 break;
 
             // add scope for current function
@@ -629,6 +636,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 int parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
 {
     int return_value = 0;
+
     while (true)
     {
         int a = TopToBottom(input, output, error_output, false);

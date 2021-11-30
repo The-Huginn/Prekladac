@@ -8,6 +8,7 @@
 
 #include "vector.h"
 #include "semantictype.h"
+#include "Buffers.h"
 #include "../SyntaxAnalyzer/PrecedenceTable.h"
 
 #include <stdbool.h>
@@ -16,6 +17,7 @@
 typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP}NodeType;
 
 #define TMP(a) "$tmp", (a)
+#define ELEMENT(a) Element_GetKey((Element*)(a)), Element_GetID((Element*)(a))
 
 typedef struct Node_t Node;
 
@@ -125,12 +127,12 @@ bool Node_IsOperation(Node *node);
  * @brief Iterates in post-order for code-generation
  * @param node Node
  * @param destroy Set to true to call destructor upon all Nodes
- * @param offset From which id we should start to generate variables to keep them unique
+ * @param buffer Buffers for changing offset @note function changes content of buffer->tmp_offset
  * @param expected_amount The expected amount of returned variables
  * @param output Where to print code
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
-Vector* Node_PostOrder(Node* node, bool destroy, int offset, int expected_amount, FILE *output);
+Vector* Node_PostOrder(Node* node, bool destroy, Buffers *buffer, int expected_amount, FILE *output);
 
 /**
  * @brief Malloc int
