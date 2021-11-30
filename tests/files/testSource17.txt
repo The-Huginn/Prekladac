@@ -1,0 +1,15 @@
+require "ifj21"
+
+function get2Numbers(): integer, integer
+    return 2, 3
+end
+
+function getNumbers(): integer, integer, integer
+    return 1, get2Numbers()
+end
+
+function main()
+    local a, b: integer, integer = getNumbers()
+end
+
+main()

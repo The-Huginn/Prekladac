@@ -1,0 +1,11 @@
+require "ifj21"
+
+function getNumbers(): integer, integer, integer
+    return 1, 2, 3
+end
+
+function main()
+    local a, b :integer, integer = getNumbers()
+end
+
+main()

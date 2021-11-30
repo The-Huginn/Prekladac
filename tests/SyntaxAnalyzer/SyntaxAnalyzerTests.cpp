@@ -139,6 +139,20 @@ TEST_F(SyntaxTests, 15_SimpleTest)
     fclose(input);
 }
 
+TEST_F(SyntaxTests, 16_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource16.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 17_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource17.txt", "r");
+    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    fclose(input);
+}
+
 TEST_F(SyntaxTests, 1_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong1.txt", "r");
@@ -167,8 +181,6 @@ TEST_F(SyntaxTests, 4_SimpleWrongTest)
     fclose(input);
 }
 
-// unable to decide correctness of this test, whether it is syntax error or semantic erro
-// but it's an error nonetheless
 TEST_F(SyntaxTests, 5_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong5.txt", "r");
@@ -314,7 +326,7 @@ int main(int argc, char **argv) {
         tests += ":Test1.2*";
         ::testing::GTEST_FLAG(filter) = tests;
     }*/
-    // ::testing::GTEST_FLAG(filter) = "SyntaxTests.3_SimpleWrongTest";
+    // ::testing::GTEST_FLAG(filter) = "SyntaxTests.16_SimpleTest";
     return RUN_ALL_TESTS();
 }
 
