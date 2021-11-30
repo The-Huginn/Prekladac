@@ -10,6 +10,12 @@
 #include "../Utils/node.h"
 
 /**
+ * @brief Generates code for the header of file
+ * @param buffer Buffers
+ */
+void Code_AddHeader(Buffers *buffer);
+
+/**
  * @brief Adds code-branch for if condition
  *      @note only Code_AddElseif, Code_AddElse and Code_PopEnd are expected calls
  * @param buffer Buffers
@@ -57,9 +63,10 @@ void Code_GenerateAssign(Buffers *buffer);
 
 /**
  * @brief Generates code for function call @note function expected in buffer->variables, arguments in buffer->expressions. @note Vectors are not changed. Return values are not used
- * @param buffer 
+ * @param buffer Buffers
+ * @param function_call Node with function call expression
  */
-void Code_GenerateFunctionCall(Buffers *buffer);
+void Code_GenerateFunctionCall(Buffers *buffer, Node *function_call);
 
 /**
  * @brief Generates code for function return @note function expected in buffer->current_function and return values in buffer->expressions. Vectors are not changed.

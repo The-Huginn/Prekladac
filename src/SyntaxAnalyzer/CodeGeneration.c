@@ -10,8 +10,6 @@
 
 typedef enum {IF, WHILE, FUNCTION_DEF}ScopeItem;
 
-#define ELEMENT(a) Element_GetKey((Element*)(a)), Element_GetID((Element*)(a))
-
 typedef struct
 {
     ScopeItem type;
@@ -33,6 +31,11 @@ Scope *Scope_Init( ScopeItem type, int unique_id)
     scope->last_else = false;
 
     return scope;
+}
+
+void Code_AddHeader(Buffers *buffer)
+{
+    fprintf(buffer->output, ".IFJcode21\n");
 }
 
 void Code_AddCondition(Buffers *buffer, Node *expression)
@@ -83,7 +86,8 @@ void Code_AddFunction(Buffers *buffer)
 
 void Code_DeclareVariables(Buffers *buffer)
 {
-    // TODO generate code
+    for (int i = 0; i < Vector_Size(buffer->variables); i++)
+        fprintf(buffer->output, "DEFVAR LF@%s%d\n", ELEMENT(Vector_GetElement(buffer->variables, i)));
 }
 
 void Code_GenerateAssign(Buffers *buffer)
@@ -97,7 +101,7 @@ void Code_GenerateAssign(Buffers *buffer)
             variables = Node_PostOrder(
                 (Node*)Vector_GetElement(buffer->expressions, i),
                 true,
-                buffer->tmp_offset,
+                buffer,
                 Vector_Size(buffer->variables) - Vector_Size(buffer->expressions) + 1,
                 buffer->output
             );
@@ -105,7 +109,7 @@ void Code_GenerateAssign(Buffers *buffer)
             variables = Node_PostOrder(
                 (Node*)Vector_GetElement(buffer->expressions, i),
                 true,
-                buffer->tmp_offset,
+                buffer,
                 1,
                 buffer->output
             );
@@ -128,9 +132,9 @@ void Code_GenerateAssign(Buffers *buffer)
     Vector_Destroy(assignments);
 }
 
-void Code_GenerateFunctionCall(Buffers *buffer)
+void Code_GenerateFunctionCall(Buffers *buffer, Node *function_call)
 {
-    // TODO generate code
+    Node_PostOrder(function_call, true, buffer, 0, buffer->output);
 }
 
 void Code_GenerateFunctionReturn(Buffers *buffer)
