@@ -45,7 +45,7 @@ Token *getToken(FILE *input)
 
     if (!Stack_IsEmpty(stack))
     {
-        Token *token = Stack_Top(stack);
+        Token *token = (Token*)Stack_Top(stack);
         Stack_Pop(stack);
         return token;
     }
@@ -71,12 +71,12 @@ Token *getToken(FILE *input)
         int keyword = IsKeyWord(lexeme);
         if (keyword != -1)
         {
-            token->type = K_AND + keyword;
+            token->type = (Terminal) (K_AND + keyword);
         }
         else
         {
             // needs to be redone, one enum has to be renamed
-            token->type = T_ASS + getFinalState(lexeme) - F_ASS;
+            token->type = (Terminal)(T_ASS + getFinalState(lexeme) - F_ASS);
         }
     }
 
@@ -101,7 +101,7 @@ void LexicalDestroy()
 
     while (!Stack_IsEmpty(stack))
     {
-        Token *token = Stack_Top(stack);
+        Token *token = (Token*)Stack_Top(stack);
         // token free function
         Token_Destroy(token);
         Stack_Pop(stack);
