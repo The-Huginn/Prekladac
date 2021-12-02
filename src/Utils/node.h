@@ -18,12 +18,14 @@ typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NOD
     NODE_ELSEIF, NODE_ELSE, NODE_WHILE, NODE_FUNCTION_DEF, NODE_FUNCTION_POP, NODE_DECLARE, NODE_ASSIGN,
     NODE_LVALUES, NODE_RVALUES, NODE_RETURN}NodeType;
 
+typedef enum {ALL, ONLY_DEF, EXCEPT_DEF}RecurcionType;
+
 #define TMP(a) "$tmp", (a)
 #define ELEMENT(a) Element_GetKey((Element*)Node_GetData(a)), Element_GetID((Element*)Node_GetData(a))
 #define JUMP "$function_calls"  // each variable/functions has added id so no overlapps
 #define IF_LABEL "$if"
 #define WHILE_LABEL "$while"
-#define DEF_TMP(a) fprintf(buffer->output, "DEFVAR LF@$tmp%d\n", (a));
+#define DEF_TMP(a) fprintf(buffer->output, "DEFVAR LF@$tmp%d\n", (a))
 
 typedef struct Node_t Node;
 
@@ -135,9 +137,10 @@ bool Node_IsOperation(Node *node);
  * @param destroy Set to true to call destructor upon all Nodes
  * @param buffer Buffers for changing offset @note function changes content of buffer->tmp_offset
  * @param expected_amount The expected amount of returned variables
+ * @param type RecursionType used for generating defvars before loops
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
-Vector* Node_PostOrder(Node* node, bool destroy, Buffers *buffer, int expected_amount);
+Vector* Node_PostOrder(Node* node, bool destroy, Buffers *buffer, int expected_amount, RecurcionType type);
 
 /**
  * @brief Malloc int

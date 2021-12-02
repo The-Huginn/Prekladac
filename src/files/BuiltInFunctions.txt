@@ -1,4 +1,4 @@
-# author Samuel Hribik, Sebastian Chupac
+# authors of BuiltInFunctions Samuel Hribik, Sebastian Chupac
 LABEL substr1
 	
 	CREATEFRAME

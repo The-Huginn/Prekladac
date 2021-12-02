@@ -50,7 +50,7 @@ void ASS_AddFooter(Buffers *buffer)
 {
     fprintf(buffer->output, "LABEL %s\n", JUMP);
     for (int i = 0; i < Vector_Size(buffer->function_calls); i++)
-        Vector_Destroy(Node_PostOrder(Vector_GetElement(buffer->function_calls, i), true, buffer, 0));
+        Vector_Destroy(Node_PostOrder(Vector_GetElement(buffer->function_calls, i), true, buffer, 0, ALL));
 }
 
 int ASS_AddCondition(Buffers *buffer, Node *expression, Symtable *symtable)
@@ -309,7 +309,7 @@ void ASS_PopEnd(Buffers *buffer, Symtable *symtable)
     case FUNCTION_DEF:
         node_above = false;
 
-        Vector_Destroy(Node_PostOrder(top->node, true, buffer, 0));
+        Vector_Destroy(Node_PostOrder(top->node, true, buffer, 0, ALL));
         
         buffer->current_function = NULL;
         buffer->tmp_offset = 0;
