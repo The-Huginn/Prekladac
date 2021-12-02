@@ -282,7 +282,7 @@ void Node_GenerateReturn(Node *node, Buffers *buffer)
         return;
 
     for (int i = Vector_Size(returns) - 1; i >= 0; i--)
-        fprintf(buffer->output, "PUSHS %s%d\n", TMP(*((int*)Vector_GetElement(returns, i))));
+        fprintf(buffer->output, "PUSHS LF@%s%d\n", TMP(*((int*)Vector_GetElement(returns, i))));
 
     Vector_Destroy(returns);
 
