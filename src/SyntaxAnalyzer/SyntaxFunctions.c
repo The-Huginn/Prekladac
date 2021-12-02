@@ -219,11 +219,8 @@ int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer)
     Node *function_call = Node_Init(NODE_FUNCTION, Vector_Back(buffer->variables), SEMANTIC_VOID, NULL, P_FUNCTION);
 
     // create a function call node with all expressions as parameters, they are normalized no need for AST_UpdateFunctionCalls
-    while (!Vector_IsEmpty(buffer->expressions))
-    {
-        Node_AppendSon(function_call, (Node*)Vector_GetElement(buffer->expressions, 0));
-        Vector_RemoveElement(buffer->expressions, 0);
-    }
+    for (int i = 0; i < Vector_Size(buffer->expressions); i++)
+        Node_AppendSon(function_call, (Node*)Vector_GetElement(buffer->expressions, i));
 
     int ret = AbstractSemanticTree_VerifyFunctionCall(function_call);
     if (ret != -1)
