@@ -270,7 +270,7 @@ void Node_GenerateAssign(Node *node, Buffers *buffer)
         return;
 
     for (int i = Vector_Size(lvalues) - 1; i >= 0; i--)
-        fprintf(buffer->output, "MOVE %s%d %s%d\n", ELEMENT((Node*)Vector_GetElement(lvalues, i)), TMP(*((int*)Vector_GetElement(assignments, i))));
+        fprintf(buffer->output, "MOVE LF@%s%d LF@%s%d\n", ELEMENT((Node*)Vector_GetElement(lvalues, i)), TMP(*((int*)Vector_GetElement(assignments, i))));
 
     Vector_Destroy(assignments);
 }
