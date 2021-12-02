@@ -330,14 +330,22 @@ void Node_GenerateIf(Node *node, Buffers *buffer, bool destroy, RecurcionType ty
         {
         case NODE_ELSEIF:
             if (type != ONLY_DEF)
+            {
+                fprintf(buffer->output, "JUMP %s%d\n", IF_END_LABEL, id);
                 fprintf(buffer->output, "LABEL %s%d_%d\n", IF_LABEL, id, label_count++); // increases label for next one
+            }
 
             Node_GenerateConditionLabel(buffer, (Node*)Node_GetData(current), destroy, id, label_count, IF_LABEL, type);
             break;
 
         case NODE_ELSE:
             if (type != ONLY_DEF)
+            {
+                fprintf(buffer->output, "JUMP %s%d\n", IF_END_LABEL, id);
                 fprintf(buffer->output, "LABEL %s%d_%d\n", IF_LABEL, id, label_count++); // increases label for next one
+            }
+             
+            
             break;
         
         default:
@@ -345,6 +353,9 @@ void Node_GenerateIf(Node *node, Buffers *buffer, bool destroy, RecurcionType ty
             break;
         }
     }
+
+    if (type != ONLY_DEF)
+        fprintf(buffer->output, "LABEL %s%d\n", IF_END_LABEL, id);
 }
 
 void Node_GenerateWhile(Node *node, Buffers *buffer, bool destroy, RecurcionType type)

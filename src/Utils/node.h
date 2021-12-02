@@ -24,6 +24,7 @@ typedef enum {ALL, ONLY_DEF, EXCEPT_DEF}RecurcionType;
 #define ELEMENT(a) Element_GetKey((Element*)Node_GetData(a)), Element_GetID((Element*)Node_GetData(a))
 #define JUMP "$function_calls"  // each variable/functions has added id so no overlapps
 #define IF_LABEL "$if"
+#define IF_END_LABEL "$endif"
 #define WHILE_LABEL "$while"
 #define DEF_TMP(a) fprintf(buffer->output, "DEFVAR LF@$tmp%d\n", (a))
 
