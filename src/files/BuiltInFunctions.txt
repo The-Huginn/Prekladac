@@ -51,8 +51,6 @@ LABEL substrpush1
 	POPFRAME
 	RETURN
 
-##########################################
-
 LABEL write1
 CREATEFRAME
 PUSHFRAME
@@ -67,8 +65,6 @@ JUMPIFNEQ write_loop1 LF@n int@0
 POPFRAME
 RETURN
 
-##########################################
-
 LABEL reads1
 CREATEFRAME
 PUSHFRAME
@@ -77,8 +73,6 @@ READ LF@str string
 PUSHS LF@str
 POPFRAME
 RETURN
-
-##########################################
 
 LABEL readi1
 CREATEFRAME
@@ -89,8 +83,6 @@ PUSHS LF@i
 POPFRAME
 RETURN
 
-##########################################
-
 LABEL readn1
 CREATEFRAME
 PUSHFRAME
@@ -100,8 +92,6 @@ PUSHS LF@n
 POPFRAME
 RETURN
 
-##########################################
-
 LABEL toint1
 CREATEFRAME
 PUSHFRAME
@@ -109,7 +99,7 @@ DEFVAR LF@n
 POPS LF@n
 DEFVAR LF@check
 TYPE LF@check LF@n
-JMPIFEQ tointnil1 LF@check string@nil
+JUMPIFEQ tointnil1 LF@check string@nil
 DEFVAR LF@i
 FLOAT2INT LF@i LF@n
 PUSHS LF@i
@@ -119,8 +109,6 @@ LABEL tointnil1
 PUSHS nil@nil
 POPFRAME
 RETURN
-
-##########################################
 
 LABEL chr1
 CREATEFRAME
@@ -146,8 +134,6 @@ POPFRAME
 RETURN
 LABEL chrerror1
 EXIT int@8
-
-##########################################
 
 LABEL ord1
 CREATEFRAME
@@ -180,29 +166,3 @@ POPFRAME
 RETURN
 LABEL orderror1
 EXIT int@8
-
-##########################################	
-
-write(t0, t1, ... , tn-1) -> 
-	// n = pocet termov na vypis
-	for (int i = n-1; i >= 0; i--) {
-		PUSHS LF@t[i]
-	}
-	PUSHS LF@n
-	CALL _write
-
-
-s = reads() -> READ LF@s string
-i = readi() -> READ LF@i int
-n = readn() -> READ LF@n float
-
-i = tointeger(n) -> FLOAT2INT LF@i LF@n // var = integer, symb = number
-i = ord(string, int) -> STRI2INT LF@i GF@string LF@int
-s = chr(i) -> INT2CHAR LF@string LF@int
-
-s = substr(string, n ,m) ->
-	PUSHS LF@m
-	PUSHS LF@n
-	PUSHS LF@string
-	CALL LF@_substr
-	POPS LF@s
