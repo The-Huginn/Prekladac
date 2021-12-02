@@ -9,6 +9,7 @@
 #define LEXICAL_FSM_H
 
 #include <stdio.h>
+#include <stdbool.h>
 #include "../Utils/Token.h"
 
 #define MAX_LEXEME_LEN 256
@@ -25,6 +26,7 @@ typedef struct {
     LexicalType state;
     char lexeme[MAX_LEXEME_LEN];
     short pos;
+    bool esc_seq;
 } LexicalOutput;
 
 /**
