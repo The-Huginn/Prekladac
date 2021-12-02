@@ -50,7 +50,7 @@ class LexicalTests : public ::testing::Test
 TEST_F(LexicalTests, 1_ExpectCorrect) {
     input = fopen("../../../../tests/files/testSource1.txt", "r");
     
-    std::vector<std::pair<std::string, Terminal>> lexemes = { {"require", K_REQUIRE}, {"\"ifj21\"", T_STRING}, {"function", K_FUNCTION}, {"main", T_ID}, {"(", T_LEFT}, {")", T_RIGHT}, {"local", K_LOCAL}, {"a", T_ID}, {":", T_DEF}, {"integer", K_INTEGER}, {"local", K_LOCAL}, {"vysl", T_ID}, {":", T_DEF}, {"integer", K_INTEGER}, {"=", T_ASS}, {"0", T_INTEGER}, {"write", T_ID}, {"(", T_LEFT}, {"\"Zadejte cislo pro vypocet faktorialu\n\"", T_STRING}, {")", T_RIGHT}, {"a", T_ID}, {"=", T_ASS}, {"readi", T_ID}, {"(", T_LEFT}, {")", T_RIGHT}, {"if", K_IF}, {"a", T_ID}, {"==", T_EQ}, {"nil", K_NIL}, {"then", K_THEN}, {"write", T_ID}, {"(", T_LEFT}, {"\"a je nil\n\"", T_STRING}, {")", T_RIGHT}, {"return", K_RETURN}, {"else", K_ELSE}, {"end", K_END}, {"if", K_IF}, {"a", T_ID}, {"<", T_LESS}, {"0", T_INTEGER}, {"then", K_THEN}, {"write", T_ID}, {"(", T_LEFT}, {"\"Faktorial nelze spocitat\n\"", T_STRING}, {")", T_RIGHT}, {"else", K_ELSE}, {"vysl", T_ID}, {"=", T_ASS}, {"1", T_INTEGER}, {"while", K_WHILE}, {"a", T_ID}, {">", T_GRT}, {"0", T_INTEGER}, {"do", K_DO}, {"vysl", T_ID}, {"=", T_ASS}, {"vysl", T_ID}, {"*", T_MUL}, {"a", T_ID}, {"a", T_ID}, {"=", T_ASS}, {"a", T_ID}, {"-", T_MINUS}, {"1", T_INTEGER}, {"end", K_END}, {"write", T_ID}, {"(", T_LEFT}, {"\"Vysledek je: \"", T_STRING}, {",", T_COMMA}, {"vysl", T_ID}, {",", T_COMMA}, {"\"\n\"", T_STRING}, {")", T_RIGHT}, {"end", K_END}, {"end", K_END}, {"main", T_ID}, {"(", T_LEFT}, {")", T_RIGHT} };
+    std::vector<std::pair<std::string, Terminal>> lexemes = { {"require", K_REQUIRE}, {"ifj21", T_STRING}, {"function", K_FUNCTION}, {"main", T_ID}, {"(", T_LEFT}, {")", T_RIGHT}, {"local", K_LOCAL}, {"a", T_ID}, {":", T_DEF}, {"integer", K_INTEGER}, {"local", K_LOCAL}, {"vysl", T_ID}, {":", T_DEF}, {"integer", K_INTEGER}, {"=", T_ASS}, {"0", T_INTEGER}, {"write", T_ID}, {"(", T_LEFT}, {"Zadejte cislo pro vypocet faktorialu\n", T_STRING}, {")", T_RIGHT}, {"a", T_ID}, {"=", T_ASS}, {"readi", T_ID}, {"(", T_LEFT}, {")", T_RIGHT}, {"if", K_IF}, {"a", T_ID}, {"==", T_EQ}, {"nil", K_NIL}, {"then", K_THEN}, {"write", T_ID}, {"(", T_LEFT}, {"a je nil\n", T_STRING}, {")", T_RIGHT}, {"return", K_RETURN}, {"else", K_ELSE}, {"end", K_END}, {"if", K_IF}, {"a", T_ID}, {"<", T_LESS}, {"0", T_INTEGER}, {"then", K_THEN}, {"write", T_ID}, {"(", T_LEFT}, {"Faktorial nelze spocitat\n", T_STRING}, {")", T_RIGHT}, {"else", K_ELSE}, {"vysl", T_ID}, {"=", T_ASS}, {"1", T_INTEGER}, {"while", K_WHILE}, {"a", T_ID}, {">", T_GRT}, {"0", T_INTEGER}, {"do", K_DO}, {"vysl", T_ID}, {"=", T_ASS}, {"vysl", T_ID}, {"*", T_MUL}, {"a", T_ID}, {"a", T_ID}, {"=", T_ASS}, {"a", T_ID}, {"-", T_MINUS}, {"1", T_INTEGER}, {"end", K_END}, {"write", T_ID}, {"(", T_LEFT}, {"Vysledek je: ", T_STRING}, {",", T_COMMA}, {"vysl", T_ID}, {",", T_COMMA}, {"\n", T_STRING}, {")", T_RIGHT}, {"end", K_END}, {"end", K_END}, {"main", T_ID}, {"(", T_LEFT}, {")", T_RIGHT} };
 
     for (auto lexeme : lexemes)
         TestLexeme(lexeme);
@@ -87,7 +87,7 @@ TEST_F(LexicalTests, 5_ExpectCorrect) {
     input = fopen("../../../../tests/files/testSource5.txt", "r");
 
     TestLexeme({"require", K_REQUIRE});
-    TestLexeme({"\"ifj21\"", T_STRING});
+    TestLexeme({"ifj21", T_STRING});
 
     fclose(input);
 
