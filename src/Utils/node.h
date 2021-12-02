@@ -18,6 +18,7 @@ typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NOD
 
 #define TMP(a) "$tmp", (a)
 #define ELEMENT(a) Element_GetKey((Element*)(a)), Element_GetID((Element*)(a))
+#define JUMP "$function_calls"  // each variable/functions has added id so no overlapps
 
 typedef struct Node_t Node;
 

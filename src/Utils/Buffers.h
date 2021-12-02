@@ -25,6 +25,9 @@ typedef struct Buffers_t
     int top_id;     //! id to be assigned to the new code-branch, might be for each code-branch type different
     int tmp_offset; //! auxilary variable for generating unique variable names for expression generations
     FILE *output;   //! output where code is generated to
+
+    Vector *function_calls; //! for all function calls in global scope
+    Vector *function_defs;  //! for all function definitions Nodes
 }Buffers;
 
 /**

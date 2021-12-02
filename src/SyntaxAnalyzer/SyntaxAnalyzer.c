@@ -451,6 +451,8 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     if (topToBottomStack == NULL)
     {
         buffer = Buffers_Init(output);
+        if (buffer == NULL)
+            return 99;
 
         symtable = Symtable_Init();
         if (symtable == NULL)

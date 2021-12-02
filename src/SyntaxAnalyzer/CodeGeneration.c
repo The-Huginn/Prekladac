@@ -37,6 +37,7 @@ Scope *Scope_Init( ScopeItem type, int unique_id)
 void Code_AddHeader(Buffers *buffer)
 {
     fprintf(buffer->output, ".IFJcode21\n");
+    fprintf(buffer->output, "LABEL %s\n", JUMP);
 }
 
 int Code_AddCondition(Buffers *buffer, Node *expression, Symtable *symtable)
