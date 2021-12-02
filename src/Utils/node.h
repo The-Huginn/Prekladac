@@ -14,11 +14,15 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP}NodeType;
+typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP, NODE_IF,
+    NODE_ELSEIF, NODE_ELSE, NODE_WHILE, NODE_FUNCTION_DEF, NODE_FUNCTION_POP, NODE_DECLARE, NODE_ASSIGN,
+    NODE_LVALUES, NODE_RVALUES, NODE_RETURN}NodeType;
 
 #define TMP(a) "$tmp", (a)
-#define ELEMENT(a) Element_GetKey((Element*)(a)), Element_GetID((Element*)(a))
+#define ELEMENT(a) Element_GetKey((Element*)Node_GetData(a)), Element_GetID((Element*)Node_GetData(a))
 #define JUMP "$function_calls"  // each variable/functions has added id so no overlapps
+#define IF_LABEL "$if"
+#define WHILE_LABEL "$while"
 
 typedef struct Node_t Node;
 

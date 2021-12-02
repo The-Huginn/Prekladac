@@ -212,12 +212,152 @@ bool Node_IsBinaryOperator(PrecedenceItemType type)
         ? true : false;
 }
 
-Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_amount)
+/**
+ * @brief Generates code for all expressions and returns Vector of numbers in order from left to right where in TMP() are saved
+ * @param node NODE should be of type NODE_RVALUES
+ * @param buffer Buffers
+ * @param lvalues Amount of lvalues / returns of function
+ *      @note important to know if last expression is function call and we need to know how much more we need
+ * @return Vector of int*
+ */
+Vector *Node_GetRValues(Node *node, Buffers *buffer, int lvalues)
+{    
+    Vector *returns = Vector_Init(Number_Destroy);
+
+    // rvalues
+    Vector *sons = Node_GetSons(node);
+
+    for (int i = 0; i < Vector_Size(sons); i++)
+    {
+        Vector* tmp = NULL;
+        if (i == Vector_Size(sons) - 1)
+            tmp = Node_PostOrder(
+                (Node*)Vector_GetElement(sons, i),
+                true,
+                buffer,
+                lvalues - Vector_Size(sons) + 1
+            );
+        else
+            tmp = Node_PostOrder(
+                (Node*)Vector_GetElement(sons, i),
+                true,
+                buffer,
+                1
+            );
+
+        if (tmp == NULL)
+            ERROR("Missing expressions");
+
+        for (int i = 0; i < Vector_Size(tmp); i++)
+            Vector_PushBack(returns, Number_Init(*((int*)Vector_GetElement(tmp, i))));
+    }
+
+    return returns;
+}
+
+void Node_GenerateAssign(Node *node, Buffers *buffer)
 {
+    Vector *sons = Node_GetSons(node);
+
+    Vector *lvalues = Node_GetSons((Node*)Vector_GetElement(sons, 0));
+    Node *rvalues = (Node*)Vector_GetElement(sons, 1);
+
+    // move to node.c Node_PostOrder
+
+    // sons[0] are lvalues sons[1] are rvalues
+    Vector *assignments = Node_GetRValues(rvalues, buffer, Vector_Size(lvalues));
+    if (assignments == NULL)
+        return;
+
+    for (int i = Vector_Size(lvalues) - 1; i >= 0; i--)
+        fprintf(buffer->output, "MOVE %s%d %s%d\n", ELEMENT((Node*)Vector_GetElement(lvalues, i)), TMP(*((int*)Vector_GetElement(assignments, i))));
+
+    Vector_Destroy(assignments);
+}
+
+void Node_GenerateReturn(Node *node, Buffers *buffer)
+{
+    Vector *returns = Node_GetRValues(node, buffer, Element_FunctionReturns_Size(buffer->current_function));
+    if (returns == NULL)
+        return;
+
+    for (int i = Vector_Size(returns) - 1; i >= 0; i--)
+        fprintf(buffer->output, "PUSHS %s%d\n", TMP(*((int*)Vector_GetElement(returns, i))));
+
+    Vector_Destroy(returns);
+
+    fprintf(buffer->output, "POPFRAME\n");
+    fprintf(buffer->output, "RETURN\n");
+}
+
+void Node_GenerateConditionLabel(Buffers *buffer, Node *expression, int id, int label_count, char *label)
+{
+    // should be already bool
+    Vector *condition = Node_PostOrder(expression, true, buffer, 1);
+
+    if (Vector_IsEmpty(condition))
+        return;
+
+    fprintf(buffer->output, "JUMPIFNEQ %s%d_%d LF@%s%d bool@true\n", label, id, label_count, TMP(*((int*)Vector_GetElement(condition, 0))));
+    Vector_Destroy(condition);
+}
+
+void Node_GenerateIf(Node *node, Buffers *buffer)
+{
+    Vector *sons = Node_GetSons(node);
+    int id = Node_GetParamCount(node);
+    int label_count = 0;
+
+    Node_GenerateConditionLabel(buffer, (Node*)Node_GetData(node), id, label_count, IF_LABEL);
+
+    // scope of other statemets
+    for (int i = 0; i < Vector_Size(sons); i++)
+    {
+        Node *current = (Node*)Vector_GetElement(sons, i);
+        switch (Node_GetType(current))
+        {
+        case NODE_ELSEIF:
+            fprintf(buffer->output, "LABEL %s%d_%d\n", IF_LABEL, id, label_count++); // increases label for next one
+            Node_GenerateConditionLabel(buffer, (Node*)Node_GetData(current), id, label_count, IF_LABEL);
+            break;
+
+        case NODE_ELSE:
+            fprintf(buffer->output, "LABEL %s%d_%d\n", IF_LABEL, id, label_count++); // increases label for next one
+            break;
+        
+        default:
+            Vector_Destroy(Node_PostOrder(current, true, buffer, 0));
+            break;
+        }
+    }
+}
+
+void Node_GenerateWhile(Node *node, Buffers *buffer)
+{
+    Vector *sons = Node_GetSons(node);
+    int id = Node_GetParamCount(node);
+    int label_count = 0;
+
+    fprintf(buffer->output, "LABEL %s%d_%d\n", WHILE_LABEL, id, label_count);
+
+    Node_GenerateConditionLabel(buffer, (Node*)Node_GetData(node), id, label_count + 1, WHILE_LABEL);  // +1 as we want to jump to end and first label is while
+
+    for (int i = 0; i < Vector_Size(sons); i++)
+    {
+        Node *current = (Node*)Vector_GetElement(sons, i);
+        Vector_Destroy(Node_PostOrder(current, true, buffer, 0));
+    }
+
+    fprintf(buffer->output, "JUMP %s%d_%d\n", WHILE_LABEL, id, label_count);
+    fprintf(buffer->output, "LABEL %s%d_%d\n", WHILE_LABEL, id, label_count + 1);
+}
+
+Vector *Node_GenerateSons(Node *node, Buffers *buffer, bool destroy)
+{    
     Vector *sons = Vector_Init(Number_Destroy);
     if (sons == NULL)
         return NULL;
-    
+
     for (int i = 0; i < Vector_Size(Node_GetSons(node)); i++)
     {
         Vector *returned_values = NULL;
@@ -235,20 +375,26 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
         for (int j = 0; j < Vector_Size(returned_values); j++)
             Vector_PushBack(sons, Number_Init(*((int*)Vector_GetElement(returned_values, j))));
 
-        // increase offset for net declared variable
-        if (!Vector_IsEmpty(returned_values))
-            buffer->tmp_offset = *((int*)Vector_Back(returned_values)) + 1;
-
         Vector_Destroy(returned_values);
     }
 
+    return sons;
+}
+
+Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_amount)
+{
     Vector *return_values = Vector_Init(Number_Destroy);
     if (return_values == NULL)
         return NULL;
 
+    Vector *sons = NULL;
+    if (Node_GetType(node) == NODE_FUNCTION || Node_IsOperation(node))
+        sons = Node_GenerateSons(node, buffer, destroy);
+
     switch (Node_GetType(node))
     {
     case NODE_OPERATION:
+    
         if (Node_IsBinaryOperator(Node_GetOperation(node)))
         {
             bool compare_with_not = false;
@@ -317,18 +463,19 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
                 break;
             }
 
-            fprintf(buffer->output, " LF@%s%d LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset), TMP(*((int*)Vector_GetElement(sons, 0))), TMP(*((int*)Vector_GetElement(sons, 1))));
+            fprintf(buffer->output, " LF@%s%d LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset++), TMP(*((int*)Vector_GetElement(sons, 0))), TMP(*((int*)Vector_GetElement(sons, 1))));
 
             if (compare_with_not)
             {
+                fprintf(buffer->output, "NOT LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset + 1), TMP(buffer->tmp_offset));
                 buffer->tmp_offset++;
-                fprintf(buffer->output, "NOT LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset), TMP(buffer->tmp_offset - 1));
             }
 
-            Vector_PushBack(return_values, Number_Init(buffer->tmp_offset));
+            Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
         }
         else    // Unary
         {
+
             switch (Node_GetOperation(node))
             {
 
@@ -344,21 +491,24 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
                 break;
             }
 
-            fprintf(buffer->output, " LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset), TMP(*((int*)Vector_GetElement(sons, 0))));
-            Vector_PushBack(return_values, Number_Init(buffer->tmp_offset));
+            fprintf(buffer->output, " LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset++), TMP(*((int*)Vector_GetElement(sons, 0))));
+            Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
         }
+
+        Vector_Destroy(sons);
         break;
 
     case NODE_ID:
-        fprintf(buffer->output, "MOVE LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset), ELEMENT(Node_GetData(node)));
-        Vector_PushBack(return_values, Number_Init(buffer->tmp_offset));
+        fprintf(buffer->output, "MOVE LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset++), ELEMENT(node));
+        Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
         break;
 
     case NODE_VALUE:
-        fprintf(buffer->output, "MOVE LF@%s%d ", TMP(buffer->tmp_offset));
+        fprintf(buffer->output, "MOVE LF@%s%d ", TMP(buffer->tmp_offset++));
         switch (Node_GetSemantic(node))
         {
         case SEMANTIC_BOOLEAN:
+                buffer->tmp_offset++;
             fprintf(buffer->output, "bool@%s\n", (const char*)Node_GetData(node));
             break;
 
@@ -379,11 +529,12 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
             break;
         }
 
-        Vector_PushBack(return_values, Number_Init(buffer->tmp_offset));
+        Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
 
         break;
 
     case NODE_FUNCTION:
+
         for (int i = Vector_Size(sons) - 1; i >= 0; i--)
             fprintf(buffer->output, "PUSHS LF@%s%d\n", TMP(*((int*)Vector_GetElement(sons, i))));
 
@@ -407,10 +558,6 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
             for (int j = 0; j < Vector_Size(returned_values); j++)
                 Vector_PushBack(returns, Number_Init(*((int*)Vector_GetElement(returned_values, j))));
 
-            // increase offset for net declared variable
-            if (!Vector_IsEmpty(returned_values))
-                buffer->tmp_offset = *((int*)Vector_Back(returned_values)) + 1;
-
             Vector_Destroy(returned_values);
         }
 
@@ -419,24 +566,62 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
             Vector_PushBack(return_values, Number_Init(*((int*)Vector_GetElement(returns, i))));
         
         Vector_Destroy(returns);
+        Vector_Destroy(sons);
 
         break;
 
     case NODE_POP:
-        fprintf(buffer->output, "POPS LF@%s%d\n", TMP(buffer->tmp_offset));
-        Vector_PushBack(return_values, Number_Init(buffer->tmp_offset));
+        fprintf(buffer->output, "POPS LF@%s%d\n", TMP(buffer->tmp_offset++));
+        Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
         break;
     
     case NODE_NIL:
-        fprintf(buffer->output, "MOVE %s%d nil@nil\n", TMP(buffer->tmp_offset));
-        Vector_PushBack(return_values, Number_Init(buffer->tmp_offset));
+        fprintf(buffer->output, "MOVE %s%d nil@nil\n", TMP(buffer->tmp_offset++));
+        Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
+        break;
+
+    case NODE_ASSIGN:
+        Node_GenerateAssign(node, buffer);
+        break;
+
+    case NODE_RETURN:
+        Node_GenerateReturn(node, buffer);
+        break;
+
+    case NODE_DECLARE:
+        fprintf(buffer->output, "DEFVAR LF@%s%d\n", ELEMENT(node));
+        break;
+
+    case NODE_FUNCTION_POP:
+        fprintf(buffer->output, "DEFVAR LF@%s%d\n", ELEMENT(node));
+        fprintf(buffer->output, "POPS LF@%s%d\n", ELEMENT(node));
+        break;
+
+    case NODE_IF:
+        Node_GenerateIf(node, buffer);
+        break;
+
+    case NODE_WHILE:
+        Node_GenerateWhile(node, buffer);
+        break;
+
+    case NODE_FUNCTION_DEF:
+        fprintf(buffer->output, "LABEL %s%d\n", Element_GetKey(buffer->current_function), Element_GetID(buffer->current_function));
+        fprintf(buffer->output, "CREATEFRAME\n");
+        fprintf(buffer->output, "PUSHFRAME\n");
+
+        sons = Node_GetSons(node);
+        for (int i = 0; i < Vector_Size(sons); i++)
+            Vector_Destroy(Node_PostOrder((Node*)Vector_GetElement(sons, i), true, buffer, 0));
+
+        fprintf(buffer->output, "POPFRAME\n");
+        fprintf(buffer->output, "RETURN\n");
+
         break;
 
     default:
         break;
     }
-
-    Vector_Destroy(sons);
 
     if (destroy)
         Node_Destroy(node, false);
