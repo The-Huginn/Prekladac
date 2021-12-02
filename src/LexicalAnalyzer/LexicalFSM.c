@@ -57,7 +57,7 @@ void LexicalOutput_AddChar(LexicalOutput *output, int data)
 {
     if (output->pos == MAX_LEXEME_LEN - 2)
         return;
-    if (output->esc_seq == false && output->state != STRING_FINALIZE && !(output->state == LOAD_STRING && data == (int)'"'))
+    if (!(output->esc_seq == true && data == 92) && output->state != STRING_FINALIZE && !(output->state == LOAD_STRING && data == (int)'"'))
         output->lexeme[++(output->pos)] = (char) data;
 }
 
@@ -208,6 +208,10 @@ LexicalOutput *getLexeme(FILE *file)
             {
                 switch (c)
                 {
+                case 99:
+                    c = '\\';
+                    break;
+                    
                 case 'n':
                     c = '\n';
                     break;
