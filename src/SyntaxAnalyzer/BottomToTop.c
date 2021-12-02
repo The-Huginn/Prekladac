@@ -95,6 +95,10 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions, Identifier *last_eleme
 
                 Node *node = NULL;
                 NodeType nodeType = last_element->inTS == true ? NODE_ID : NODE_VALUE;  // This should be in case 0 but doesnt work idk why
+
+                if (strcmp(last_element->element, "nil\0") == 0)
+                    nodeType = NODE_NIL;
+                    
                 switch (i)
                 {
                     case 0: // E->I
