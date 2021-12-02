@@ -5,7 +5,7 @@
  */
 #include "SyntaxFunctions.h"
 #include "SemanticActions.h"
-#include "CodeGeneration.h"
+#include "GenerateASS.h"
 
 #include <stdlib.h>
 
@@ -131,7 +131,7 @@ int Syntax_Variable_Assign(Buffers *buffer)
         }
     }
 
-    Code_GenerateAssign(buffer);
+    ASS_GenerateAssign(buffer);
 
     return -1;
 }
@@ -203,7 +203,7 @@ int Syntax_Return_Assign(Buffers *buffer)
         }
     }
 
-    Code_GenerateFunctionReturn(buffer);
+    ASS_GenerateFunctionReturn(buffer);
 
     return -1;
 }
@@ -229,7 +229,45 @@ int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer)
     if (ret != -1)
         return ret;
 
-    Code_GenerateFunctionCall(buffer, function_call);
+    ASS_GenerateFunctionCall(buffer, function_call);
 
     return -1;
+}
+
+int Syntax_FunctionDefined(Buffers *buffer, Symtable *symtable)
+{
+    Symtable_AddScope(symtable);
+
+    // clear variables
+    Vector_Clear(buffer->variables);
+
+    int return_value = -1;
+    // add all parameters from current function to TS
+    for (int i = 0; i < Element_FunctionParameters_Size(buffer->current_function); i++)
+    {
+        Element *previous_parameter = Symtable_GetElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i));
+        Element* parameter = Symtable_CreateElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i),VARIABLE);
+        if (parameter == NULL)
+        {
+            return_value = 99;
+            break;
+        }
+
+        // parameters with same name
+        if (previous_parameter != NULL)
+            if (Element_GetID(parameter) == Element_GetID(previous_parameter))
+                return_value = 3;
+                    
+        Element_SetSemantic(parameter, Element_FunctionParameter_GetSemantic(buffer->current_function, i));
+        Element_Define(parameter);
+
+        // for code generation
+        Vector_PushBack(buffer->variables, parameter);
+    }
+
+    // generate code for function label
+    if (return_value == -1)
+        ASS_AddFunction(buffer);
+
+    return return_value;
 }

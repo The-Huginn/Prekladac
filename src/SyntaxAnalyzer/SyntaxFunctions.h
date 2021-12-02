@@ -68,4 +68,12 @@ int Syntax_Return_Assign(Buffers *buffer);
  */
 int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer);
 
+/**
+ * @brief Creates Node of function define and checks correctness of this function define
+ * @param buffer Buffers
+ * @param symtable Symtable
+ * @return -1 upon succes otherwise error code
+ */
+int Syntax_FunctionDefined(Buffers *buffer, Symtable *symtable);
+
 #endif //!__SYNTAX_FUNCTIONS_H__
