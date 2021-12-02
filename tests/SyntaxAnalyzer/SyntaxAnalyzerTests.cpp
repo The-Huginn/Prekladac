@@ -36,7 +36,9 @@ TEST_F(SyntaxTests, 0_SimpleTest)
 TEST_F(SyntaxTests, 1_SimpleTest)
 {
     FILE* input = fopen("../../../../tests/files/testSource1.txt", "r");
-    EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    FILE *output = fopen("../../../../../interpret/ic21int_linux64_2021-10-04/program.code", "w");
+    if (output == NULL) return;
+    EXPECT_EQ(parseAndGenerate(input, output, stderr), 0);
     fclose(input);
 }
 
@@ -326,7 +328,7 @@ int main(int argc, char **argv) {
         tests += ":Test1.2*";
         ::testing::GTEST_FLAG(filter) = tests;
     }*/
-    // ::testing::GTEST_FLAG(filter) = "SyntaxTests.14_SimpleTest";
+    ::testing::GTEST_FLAG(filter) = "SyntaxTests.1_SimpleTest";
     return RUN_ALL_TESTS();
 }
 

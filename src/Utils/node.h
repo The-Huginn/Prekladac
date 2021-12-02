@@ -23,6 +23,7 @@ typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NOD
 #define JUMP "$function_calls"  // each variable/functions has added id so no overlapps
 #define IF_LABEL "$if"
 #define WHILE_LABEL "$while"
+#define DEF_TMP(a) fprintf(buffer->output, "DEFVAR LF@$tmp%d\n", (a));
 
 typedef struct Node_t Node;
 

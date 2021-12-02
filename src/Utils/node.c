@@ -398,6 +398,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
         if (Node_IsBinaryOperator(Node_GetOperation(node)))
         {
             bool compare_with_not = false;
+            DEF_TMP(buffer->tmp_offset);
             switch (Node_GetOperation(node))
             {
             case P_MUL:
@@ -463,10 +464,12 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
                 break;
             }
 
+            // DEF_TMP is above
             fprintf(buffer->output, " LF@%s%d LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset++), TMP(*((int*)Vector_GetElement(sons, 0))), TMP(*((int*)Vector_GetElement(sons, 1))));
 
             if (compare_with_not)
             {
+                DEF_TMP(buffer->tmp_offset + 1);
                 fprintf(buffer->output, "NOT LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset + 1), TMP(buffer->tmp_offset));
                 buffer->tmp_offset++;
             }
@@ -491,6 +494,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
                 break;
             }
 
+            DEF_TMP(buffer->tmp_offset);
             fprintf(buffer->output, " LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset++), TMP(*((int*)Vector_GetElement(sons, 0))));
             Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
         }
@@ -499,11 +503,13 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
         break;
 
     case NODE_ID:
+        DEF_TMP(buffer->tmp_offset);
         fprintf(buffer->output, "MOVE LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset++), ELEMENT(node));
         Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
         break;
 
     case NODE_VALUE:
+        DEF_TMP(buffer->tmp_offset);
         fprintf(buffer->output, "MOVE LF@%s%d ", TMP(buffer->tmp_offset++));
         switch (Node_GetSemantic(node))
         {
@@ -517,7 +523,18 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
             break;
             
         case SEMANTIC_STRING:
-            fprintf(buffer->output, "string@%s\n", (const char*)Node_GetData(node));
+            fprintf(buffer->output, "string@");
+            char* a = (char*)Node_GetData(node);
+            while (*a != '\0')
+            {
+                if ((int)(*a) <= 32 || (int)(*a) == 35 || (int)(*a) == 92)
+                    fprintf(buffer->output, "\\0%d", (int)(*a));
+                else
+                    fprintf(buffer->output, "%c", (*a));
+
+                a++;
+            }
+            fprintf(buffer->output,"\n");
             break;
         
         case SEMANTIC_NUMBER:
@@ -542,7 +559,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
         if (strcmp(Element_GetKey((Element*)Node_GetData(node)), "write\0") == 0)
             fprintf(buffer->output, "PUSHS int@%d\n", Vector_Size(sons));
 
-        fprintf(buffer->output, "CALL LF@%s%d\n", Element_GetKey((Element*)Node_GetData(node)), Element_GetID((Element*)Node_GetData(node)));
+        fprintf(buffer->output, "CALL %s%d\n", Element_GetKey((Element*)Node_GetData(node)), Element_GetID((Element*)Node_GetData(node)));
 
         Vector *returns = Vector_Init(Number_Destroy);
         if (returns == NULL)
@@ -571,12 +588,14 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
         break;
 
     case NODE_POP:
+        DEF_TMP(buffer->tmp_offset);
         fprintf(buffer->output, "POPS LF@%s%d\n", TMP(buffer->tmp_offset++));
         Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
         break;
     
     case NODE_NIL:
-        fprintf(buffer->output, "MOVE %s%d nil@nil\n", TMP(buffer->tmp_offset++));
+        DEF_TMP(buffer->tmp_offset);
+        fprintf(buffer->output, "MOVE LF@%s%d nil@nil\n", TMP(buffer->tmp_offset++));
         Vector_PushBack(return_values, Number_Init(buffer->tmp_offset - 1));
         break;
 
