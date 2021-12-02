@@ -268,12 +268,14 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     case P_GEQ:
         if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER)
             return 6;
+        first = SEMANTIC_BOOLEAN;
         break;
 
     case P_EQ:
     case P_NEQ:
         if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER && first != SEMANTIC_BOOLEAN && first != SEMANTIC_NIL && first != SEMANTIC_STRING)
             return 6;
+        first = SEMANTIC_BOOLEAN;
         break;
 
     case P_AND:
@@ -291,6 +293,7 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
             if (ret != -1)
                 return ret;
         }
+        first = SEMANTIC_BOOLEAN;
         break;
     // not a binary operator
     default:
