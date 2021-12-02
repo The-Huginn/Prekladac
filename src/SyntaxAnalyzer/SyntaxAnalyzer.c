@@ -10,7 +10,7 @@
 #include "BottomToTop.h"
 #include "SemanticActions.h"
 #include "SyntaxFunctions.h"
-#include "CodeGeneration.h"
+#include "GenerateASS.h"
 
 #include "../Utils/stack.h"
 #include "../Utils/list.h"
@@ -26,44 +26,6 @@
 typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS, FSM_IF, FSM_ELSEIF, FSM_ELSE, FSM_WHILE}FSM_STATE;
 
 // #define DEBUG_SYNTAX
-
-int Syntax_FunctionDefined(Buffers *buffer, Symtable *symtable)
-{
-    Symtable_AddScope(symtable);
-
-    // clear variables
-    Vector_Clear(buffer->variables);
-
-    int return_value = -1;
-    // add all parameters from current function to TS
-    for (int i = 0; i < Element_FunctionParameters_Size(buffer->current_function); i++)
-    {
-        Element *previous_parameter = Symtable_GetElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i));
-        Element* parameter = Symtable_CreateElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i),VARIABLE);
-        if (parameter == NULL)
-        {
-            return_value = 99;
-            break;
-        }
-
-        // parameters with same name
-        if (previous_parameter != NULL)
-            if (Element_GetID(parameter) == Element_GetID(previous_parameter))
-                return_value = 3;
-                    
-        Element_SetSemantic(parameter, Element_FunctionParameter_GetSemantic(buffer->current_function, i));
-        Element_Define(parameter);
-
-        // for code generation
-        Vector_PushBack(buffer->variables, parameter);
-    }
-
-    // generate code for function label
-    if (return_value == -1)
-        Code_AddFunction(buffer);
-
-    return return_value;
-}
 
 /**
  * @brief Decides what is our next internal state of FSM about Syntax and Semantic validation with code generation combined
@@ -99,14 +61,14 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
                 *return_value = 2;
             *state = FSM_VAR_ASSIGN;
             if (*return_value == -1)
-                Code_DeclareVariables(buffer);
+                ASS_DeclareVariables(buffer);
         }
         else if (Syntax_IsDatatype(token))
             *return_value = Syntax_Variable_SetSemantic(buffer, token);
         else if (Token_getType(token) != T_COMMA)
         {
             *state = FSM_START;
-            Code_DeclareVariables(buffer);
+            ASS_DeclareVariables(buffer);
             // no need to clear vector, gets cleared when in state = FSM_START
         }
         break;
@@ -292,7 +254,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
     case FSM_IF:
         if (!Vector_IsEmpty(buffer->expressions))
         {
-            Code_AddCondition(buffer, Vector_Back(buffer->expressions), symtable);
+            ASS_AddCondition(buffer, Vector_Back(buffer->expressions), symtable);
             *state = FSM_START;
         }
         break;
@@ -300,7 +262,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
     case FSM_ELSEIF:
         if (!Vector_IsEmpty(buffer->expressions))
         {
-            Code_AddElseif(buffer, Vector_Back(buffer->expressions), symtable);
+            ASS_AddElseif(buffer, Vector_Back(buffer->expressions), symtable);
             *state = FSM_START;
         }
         break;
@@ -308,7 +270,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
     case FSM_WHILE:
         if (!Vector_IsEmpty(buffer->expressions))
         {
-            Code_AddWhile(buffer, Vector_Back(buffer->expressions), symtable);
+            ASS_AddWhile(buffer, Vector_Back(buffer->expressions), symtable);
             *state = FSM_START;
         }
         break;
@@ -326,13 +288,13 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         *state = FSM_ELSEIF;
         break;
     case K_ELSE:
-        Code_AddElse(buffer, symtable);
+        ASS_AddElse(buffer, symtable);
         break;
     case K_WHILE:
         *state = FSM_WHILE;
         break;
     case K_END:
-        Code_PopEnd(buffer, symtable);
+        ASS_PopEnd(buffer, symtable);
         break;
     
     default:
@@ -418,6 +380,8 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 
     if (clear)
     {
+        ASS_AddFooter(buffer);
+        
         int return_value = 0;
 
         Stack_Destroy(topToBottomStack);
@@ -488,7 +452,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             return 99;
         }
 
-        Code_AddHeader(buffer);
+        ASS_AddHeader(buffer);
     }
     
     Symbol *top = (Symbol *) Stack_Top(topToBottomStack);
@@ -589,7 +553,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
                     return_value = Syntax_Return_Assign(buffer);
                 break;
             case FSM_VAR_DATATYPES:
-                Code_DeclareVariables(buffer);
+                ASS_DeclareVariables(buffer);
                 break;
 
             // add scope for current function

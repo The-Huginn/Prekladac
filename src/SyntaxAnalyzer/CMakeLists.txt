@@ -16,8 +16,8 @@ set(SYNTAX_FILES
     PrecedenceTable.h
     SemanticActions.c
     SemanticActions.h
-    CodeGeneration.h
-    CodeGeneration.c
+    GenerateASS.h
+    GenerateASS.c
     BottomToTop.c
     BottomToTop.h
     Terminal.h
