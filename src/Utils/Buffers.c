@@ -65,18 +65,6 @@ Buffers *Buffers_Init(FILE *output)
         return NULL;
     }
 
-    buffer->function_defs = Vector_Init((void (*)(void *))NULL);
-    if (buffer->function_defs == NULL)
-    {
-        Vector_Destroy(buffer->variables);
-        Vector_Destroy(buffer->expressions);
-        Vector_Destroy(buffer->only_declared);
-        Stack_Destroy(buffer->scopes);
-        Vector_Destroy(buffer->function_calls);
-        free(buffer);
-        return NULL;
-    }
-
     buffer->position = 0;
     buffer->declared = false;
     buffer->current_function = NULL;
@@ -94,6 +82,5 @@ void Buffers_Destroy(Buffers *buffer)
     Vector_Destroy(buffer->only_declared);
     Stack_Destroy(buffer->scopes);
     Vector_Destroy(buffer->function_calls);
-    Vector_Destroy(buffer->function_defs);
     free(buffer);
 }

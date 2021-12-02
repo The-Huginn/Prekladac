@@ -27,7 +27,6 @@ typedef struct Buffers_t
     FILE *output;   //! output where code is generated to
 
     Vector *function_calls; //! for all function calls in global scope
-    Vector *function_defs;  //! for all function definitions Nodes
 }Buffers;
 
 /**
