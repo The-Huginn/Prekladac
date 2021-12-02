@@ -36,6 +36,14 @@ void ASS_AddHeader(Buffers *buffer)
 {
     fprintf(buffer->output, ".IFJcode21\n");
     fprintf(buffer->output, "JUMP %s\n", JUMP);
+    FILE *builtIn = fopen("../../../../src/files/BuiltInFunctions.txt", "r");
+    if (builtIn != NULL)
+    {
+        int a;
+        while ((a = getc(builtIn)) != EOF)
+            fprintf(buffer->output, "%c", a);
+    }
+    fprintf(buffer->output, "\n#COMPILED CODE BEGINS HERE\n\n");
 }
 
 void ASS_AddFooter(Buffers *buffer)
