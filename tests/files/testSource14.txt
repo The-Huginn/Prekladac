@@ -1,0 +1,11 @@
+require "ifj21"
+
+function values():integer, integer, integer, integer
+    return 1, 2, 3
+end
+
+function main()
+    local a, b:integer, integer = values()
+    a = values()
+    local c, d, e, f, g :number, integer, integer, integer, integer = 1.0, values()
+end
