@@ -1,8 +1,9 @@
+// IFJ Project 2021
 /**
  * @file list.c
  * @brief This file contains implementation of internal structure of elements
  * and interface of it's header file
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #include <string.h>
 

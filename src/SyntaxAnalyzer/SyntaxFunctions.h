@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file SyntaxFunctions.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains supportive functions for Syntax analyzer and for code generation
  */
 #ifndef __SYNTAX_FUNCTIONS_H__
@@ -11,28 +12,7 @@
 #include "../Utils/vector.h"
 #include "../Utils/node.h"
 #include "../Utils/symbolelement.h"
-
-typedef struct Buffers_t
-{
-    Vector *variables;
-    Vector *expressions;
-    Vector *only_declared;
-    int position;
-    bool declared;
-    Element *current_function;
-}Buffers;
-
-/**
- * @brief Constructor for Buffers
- * @return Valid pointer upon success otherwise NULL
- */
-Buffers *Buffers_Init();
-
-/**
- * @brief Destructor for Buffers
- * @param buffer Buffers
- */
-void Buffers_Destroy(Buffers *buffer);
+#include "../Utils/Buffers.h"
 
 /**
  * @param token Token
@@ -66,6 +46,7 @@ int Syntax_Variable_SetSemantic(Buffers *buffer, Token *token);
 
 /**
  * @brief Assigns all expressions to variables, missing expressions are filled with last function call or nils (depending on amount of returns from function) or removes extraneous
+ *      @note Generates code
  * @param buffer Buffers
  * @return -1 upon success otherwise error code
  */
@@ -73,6 +54,7 @@ int Syntax_Variable_Assign(Buffers *buffer);
 
 /**
  * @brief Assigns all expressions to returns of function missing expressions are filled with last function call of nils (depending on amount of returns from function) or removes extraneous
+ *      @note Generates code
  * @param buffer Buffers
  * @return -1 upon success otherwise error code
  */
@@ -80,10 +62,19 @@ int Syntax_Return_Assign(Buffers *buffer);
 
 /**
  * @brief Creates Node of function call and checks correctness of this function call
+ *      @note Generates code
  * @param symtable Symtable
  * @param buffer Buffers
  * @return -1 upon success otherwise error code
  */
 int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer);
+
+/**
+ * @brief Creates Node of function define and checks correctness of this function define
+ * @param buffer Buffers
+ * @param symtable Symtable
+ * @return -1 upon succes otherwise error code
+ */
+int Syntax_FunctionDefined(Buffers *buffer, Symtable *symtable);
 
 #endif //!__SYNTAX_FUNCTIONS_H__

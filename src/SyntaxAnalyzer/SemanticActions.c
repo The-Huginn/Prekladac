@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file SemanticActions.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief Contains implementation of semantic functions and supportive functions 
  */
 #include "SemanticActions.h"
@@ -169,6 +170,9 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
         }
     }
 
+    for (int i = 0; i < Element_FunctionReturns_Size(Node_GetData(root)); i++)
+        Node_AppendReturn(root, Element_FunctionReturn_GetSemantic(Node_GetData(root), i));
+
     // returns something
     if (Element_FunctionReturns_Size(Node_GetData(root)) > 0)
         // changes semantic to first return value
@@ -195,9 +199,6 @@ bool AbstractSemanticTree_IsZero(Node *node)
     return isZero;
 }
 
-/**
- * @note parameters are in reverse order
- */
 int AbstractSemanticTree_BinaryOperator(Node *root)
 {    
     if (!Node_IsOperation(root))
@@ -212,43 +213,50 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
         return 7;
     }
 
+    // removing sons should not destroy them
+    // we need to reverse order of sons as they are reversed
+    Node *first_son = Vector_GetElement(Node_GetSons(root), 0);
+    Vector_RemoveElement(Node_GetSons(root), 0);
+    Vector_PushBack(Node_GetSons(root), first_son);
+
     SemanticType first = Node_GetSemantic(Vector_GetElement(Node_GetSons(root), 0));
     SemanticType second = Node_GetSemantic(Vector_GetElement(Node_GetSons(root), 1));
 
-    if (first != second)
-    {
-        if (first != SEMANTIC_NIL && second != SEMANTIC_NIL)
-            return 6;
-    }
+    // one of them at least is nil, we can only EQ / NEQ with nil
+    if (Node_GetOperation(root) != P_EQ && Node_GetOperation(root) != P_NEQ && (first == SEMANTIC_NIL || second == SEMANTIC_NIL))
+        return 8;
 
     switch (Node_GetOperation(root))
     {
     case P_DIV:
-        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 0)) == true)
+        if (AbstractSemanticTree_IsZero((Node*)Vector_GetElement(Node_GetSons(root), 1)) == true)
             return 9;
-
-        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER)
+        
+        if (first != second || first != SEMANTIC_NUMBER)
             return 6;
+
         first = SEMANTIC_NUMBER;
         break;
     case P_MUL:
     case P_PLUS:
     case P_MINUS:
-        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER)
+        if ((first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER) || (second != SEMANTIC_INTEGER && second != SEMANTIC_NUMBER))
             return 6;
+        if (first != second)
+            first = SEMANTIC_NUMBER;
         break;
     
     case P_INT_DIV:
-        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 0)) == true)
+        if (AbstractSemanticTree_IsZero(Vector_GetElement(Node_GetSons(root), 1)) == true)
             return 9;
 
-        if (first != SEMANTIC_INTEGER)
+        if (first != SEMANTIC_INTEGER && second != SEMANTIC_NUMBER)
             return 6;
         break;
 
     // we can concat with nil probably
     case P_CONCAT:
-        if (first != SEMANTIC_STRING)
+        if (first != SEMANTIC_STRING && second != SEMANTIC_STRING)
             if (first != SEMANTIC_NIL && second != SEMANTIC_NIL)
                 return 6;
         break;
@@ -257,14 +265,16 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
     case P_GRT:
     case P_LEQ:
     case P_GEQ:
-        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER)
+        if ((first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER) || first != second)
             return 6;
+        first = SEMANTIC_BOOLEAN;
         break;
 
     case P_EQ:
     case P_NEQ:
-        if (first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER && first != SEMANTIC_BOOLEAN && first != SEMANTIC_NIL && first != SEMANTIC_STRING)
+        if ((first != SEMANTIC_INTEGER && first != SEMANTIC_NUMBER && first != SEMANTIC_BOOLEAN && first != SEMANTIC_NIL && first != SEMANTIC_STRING) || (first != second && (first != SEMANTIC_NIL && second != SEMANTIC_NIL)))
             return 6;
+        first = SEMANTIC_BOOLEAN;
         break;
 
     case P_AND:
@@ -282,6 +292,7 @@ int AbstractSemanticTree_BinaryOperator(Node *root)
             if (ret != -1)
                 return ret;
         }
+        first = SEMANTIC_BOOLEAN;
         break;
     // not a binary operator
     default:
@@ -308,6 +319,9 @@ int AbstractSemanticTree_UnaryOperator(Node *root)
     }
 
     SemanticType first = Node_GetSemantic(Vector_GetElement(Node_GetSons(root), 0));
+    
+    if (first == SEMANTIC_NIL)
+        return 8;
 
     switch (Node_GetOperation(root))
     {

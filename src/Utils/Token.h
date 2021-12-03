@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file Token.h
  * @brief This file contains struct Token and enum for the struct
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #ifndef TOKEN_H
 #define TOKEN_H

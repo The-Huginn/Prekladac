@@ -1,8 +1,9 @@
+// IFJ Project 2021
 /**
  * @file LLTable.h
  * @brief This file contains interface for working with LLTable and LLTable itself
  * @note Rules are already in reverse order, can be pushed to stack
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #ifndef __LLTABLE_H__
 #define __LLTABLE_H__

@@ -1,3 +1,4 @@
+// IFJ Project 2021
 #include<string.h>
 #include <stdbool.h>
 #include"hashtable.h"

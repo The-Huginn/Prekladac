@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file data.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file implements interface for working with data pointer
  */
 #include "functiondata.h"

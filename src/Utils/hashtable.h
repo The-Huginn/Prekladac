@@ -1,3 +1,4 @@
+// IFJ Project 2021
 #ifndef __HASH_TABLE__
 #define __HASH_TABLE__
 

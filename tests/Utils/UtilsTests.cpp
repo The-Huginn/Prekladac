@@ -1,4 +1,9 @@
-// LexicalAnalyzerTests.cpp      
+// IFJ Project 2021
+/**
+ * @file UtilsTests.cpp
+ * @authors Rastislav Budinsky (xbudin05) Denis Pojezdal (xpojez00)
+ * @brief This file contains tests for Utils
+ */
 
 extern "C" 
 {

@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file vector.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file implements the vector class and all it's interface functions
  */
 #include "vector.h"

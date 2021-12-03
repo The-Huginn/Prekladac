@@ -1,7 +1,7 @@
 require "ifj21"
 
 function fibo(param1: integer, param2: integer): number
-    return param1/1 + param2/1
+    return param1*1.0 + param2//1
 end
 
 function main(param1: integer)

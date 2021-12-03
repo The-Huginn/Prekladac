@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file SyntaxAnalyzer.c
  * @brief This file implements interface of SyntaxAnalyzer.h, contains custom functions
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #include "SyntaxAnalyzer.h"
 #include "Terminal.h"
@@ -10,18 +11,20 @@
 #include "BottomToTop.h"
 #include "SemanticActions.h"
 #include "SyntaxFunctions.h"
+#include "GenerateASS.h"
 
 #include "../Utils/stack.h"
 #include "../Utils/list.h"
 #include "../Utils/vector.h"
 #include "../Utils/symtable.h"
+#include "../Utils/Buffers.h"
 
 #include "../LexicalAnalyzer/LexicalAnalyzer.h"
 
 
 #include <stdlib.h>
 
-typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS}FSM_STATE;
+typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS, FSM_IF, FSM_ELSEIF, FSM_ELSE, FSM_WHILE}FSM_STATE;
 
 // #define DEBUG_SYNTAX
 
@@ -58,12 +61,17 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
             if (buffer->position != Vector_Size(buffer->variables))
                 *return_value = 2;
             *state = FSM_VAR_ASSIGN;
+            if (*return_value == -1)
+                ASS_DeclareVariables(buffer);
         }
         else if (Syntax_IsDatatype(token))
             *return_value = Syntax_Variable_SetSemantic(buffer, token);
         else if (Token_getType(token) != T_COMMA)
-            // no need to clear vector, gets cleared when in state = FSM_START
+        {
             *state = FSM_START;
+            ASS_DeclareVariables(buffer);
+            // no need to clear vector, gets cleared when in state = FSM_START
+        }
         break;
 
     case FSM_VAR_ASSIGN: // unless we get another terminal to pop other than ',' we assign expressions, we should not get into this state when in expression
@@ -93,7 +101,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
             *state = FSM_FUN_PARAMS;
         else if (Token_getType(token) == T_ASS)
             *state = FSM_VAR_ASSIGN;
-        else if (Token_getType(token) != T_COMMA)
+        else if (Token_getType(token) != T_COMMA)   // should be detected as syntax error
             *state = FSM_START;
         break;
 
@@ -159,7 +167,10 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         if (Syntax_IsDatatype(token))
             Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
         else if (Token_getType(token) != T_COMMA)
+        {
             *state = FSM_START;
+            Syntax_Return_Assign(buffer);
+        }
         break;
 
     case FSM_FUN_DEF:
@@ -214,10 +225,7 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
         if (Token_getType(token) == T_DEF)
             *state = FSM_FUN_DEF_RETURNS;
         else
-        {
-            Symtable_AddScope(symtable);
-            *state = FSM_START;
-        }
+            *return_value = Syntax_FunctionDefined(buffer, symtable);
         break;
 
     case FSM_FUN_DEF_RETURNS:
@@ -229,17 +237,71 @@ int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtabl
                 Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
         }
         else if (Token_getType(token) != T_COMMA)
+            *state = FSM_START;
+        break;
+
+    case FSM_RETURNS:
+
+        // ignore 'return'
+        if (Token_getType(token) == K_RETURN)
+            break;
+        if (Token_getType(token) != T_COMMA)
         {
-            // Most likely this is a wrong part as this is done in TopToBottom parser when switching states!
-            // Symtable_AddScope(symtable);
+            *return_value = Syntax_Return_Assign(buffer);
             *state = FSM_START;
         }
         break;
 
+    case FSM_IF:
+        if (!Vector_IsEmpty(buffer->expressions))
+        {
+            ASS_AddCondition(buffer, Vector_Back(buffer->expressions), symtable);
+            *state = FSM_START;
+        }
+        break;
+    
+    case FSM_ELSEIF:
+        if (!Vector_IsEmpty(buffer->expressions))
+        {
+            ASS_AddElseif(buffer, Vector_Back(buffer->expressions), symtable);
+            *state = FSM_START;
+        }
+        break;
+
+    case FSM_WHILE:
+        if (!Vector_IsEmpty(buffer->expressions))
+        {
+            ASS_AddWhile(buffer, Vector_Back(buffer->expressions), symtable);
+            *state = FSM_START;
+        }
+        break;
 
     default:
         break;
     }
+
+    switch (Token_getType(token))
+    {
+    case K_IF:
+        *state = FSM_IF;
+        break;
+    case K_ELSEIF:
+        *state = FSM_ELSEIF;
+        break;
+    case K_ELSE:
+        ASS_AddElse(buffer, symtable);
+        break;
+    case K_WHILE:
+        *state = FSM_WHILE;
+        break;
+    case K_END:
+        ASS_PopEnd(buffer, symtable);
+        break;
+    
+    default:
+        break;
+    }
+    
 }
 
 /**
@@ -319,6 +381,8 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 
     if (clear)
     {
+        ASS_AddFooter(buffer);
+        
         int return_value = 0;
 
         Stack_Destroy(topToBottomStack);
@@ -351,7 +415,9 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     // token and stack are NULLs
     if (topToBottomStack == NULL)
     {
-        buffer = Buffers_Init();
+        buffer = Buffers_Init(output);
+        if (buffer == NULL)
+            return 99;
 
         symtable = Symtable_Init();
         if (symtable == NULL)
@@ -386,8 +452,8 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             Symtable_Destroy(symtable);
             return 99;
         }
-        // for first non existing global_statement so we can allways pop scope
-        Symtable_AddScope(symtable);
+
+        ASS_AddHeader(buffer);
     }
     
     Symbol *top = (Symbol *) Stack_Top(topToBottomStack);
@@ -440,7 +506,6 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
     }
     else
     {
-        bool popScope = false;
         FSM_STATE previous_state = state;
 
         switch (Symbol_GetValue(top))
@@ -467,17 +532,15 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             state = FSM_START;
             break;
 
-        // we must pop after all changes from previous scope are done
         case NT_GLOBAL_STATEMENT:
             state = FSM_START;
-            popScope = true;
             break;
             
-        // do nothing
         default:
             break;
         }
 
+        // new statement
         if (previous_state != state)
         {
             switch (previous_state)
@@ -486,51 +549,32 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
                 return_value = Syntax_Variable_Assign(buffer);
                 break;
             case FSM_RETURNS:
-                return_value = Syntax_Return_Assign(buffer);
+                if (buffer->current_function != NULL)
+                    return_value = Syntax_Return_Assign(buffer);
+                break;
+            case FSM_VAR_DATATYPES:
+                ASS_DeclareVariables(buffer);
                 break;
 
             // add scope for current function
             case FSM_FUN_DEF_WAIT:
             case FSM_FUN_DEF_RETURNS:
-                Symtable_AddScope(symtable);
 
-                // add all parameters from current function to TS
-                for (int i = 0; i < Element_FunctionParameters_Size(buffer->current_function); i++)
-                {
-                    Element *previous_parameter = Symtable_GetElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i));
-                    Element* parameter = Symtable_CreateElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i),VARIABLE);
-                    if (parameter == NULL)
-                    {
-                        return_value = 99;
-                        break;
-                    }
+                if (buffer->current_function != NULL)
+                    return_value = Syntax_FunctionDefined(buffer, symtable);
 
-                    // parameters with same name
-                    if (previous_parameter != NULL)
-                        if (Element_GetID(parameter) == Element_GetID(previous_parameter))
-                            return_value = 3;
-                    
-                    Element_SetSemantic(parameter, Element_FunctionParameter_GetSemantic(buffer->current_function, i));
-                    Element_Define(parameter);
-                }
                 break;
             
             default:
                 break;
             }
+
             // clear Vectors
             Vector_Clear(buffer->variables);
             Vector_Clear(buffer->expressions);
             buffer->position = 0;
             buffer->declared = false;
         }
-
-        if (popScope == true)
-            if (buffer->current_function != NULL)
-            {
-                buffer->current_function = NULL;
-                Symtable_PopScope(symtable);
-            }
 
         if (Symbol_GetValue(top) == NT_EXPRESSION)
         {
@@ -594,6 +638,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
 int parseAndGenerate(FILE *input, FILE *output, FILE *error_output)
 {
     int return_value = 0;
+
     while (true)
     {
         int a = TopToBottom(input, output, error_output, false);

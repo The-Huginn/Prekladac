@@ -1,8 +1,9 @@
+// IFJ Project 2021
 /**
  * @file stack.h
  * @brief This file defines struct for Stack and interface for working with it.
  * 	Stack was implemented via list
- * @author Denis Pojezdal
+ * @author Denis Pojezdal (xpojez00)
  */
 #ifndef __STACK__
 #define __STACK__

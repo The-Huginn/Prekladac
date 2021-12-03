@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file stack.c
  * @brief This file contains implementetaion stack.h
- * @author Denis Pojezdal
+ * @author Denis Pojezdal (xpojez00)
  */
 #include"stack.h"
 #include"logger.h"

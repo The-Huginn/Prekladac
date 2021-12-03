@@ -1,10 +1,11 @@
-#ifndef __SYNTAX_ANALYZER_H__
-#define __SYNTAX_ANALYZER_H__
+// IFJ Project 2021
 /**
  * @file SyntaxAnalyzer.h
  * @brief This file declares interface for syntax analyzer to parse through the source code and generate assembly code
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
+#ifndef __SYNTAX_ANALYZER_H__
+#define __SYNTAX_ANALYZER_H__
 
 #include <stdio.h>
 

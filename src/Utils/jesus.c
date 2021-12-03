@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file jesus.c
  * @brief This file cointains implementation of struct and interface from jesus.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #include <stdlib.h>
 #include <string.h>
