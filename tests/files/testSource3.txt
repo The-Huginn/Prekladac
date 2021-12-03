@@ -5,5 +5,6 @@ function main()
     local x : string
     local ret: integer
     x, ret = concat("ahoj", "svete")
+    write(x, ret)
 end
 main()

@@ -19,10 +19,20 @@ function main()
         write("1 a 1 sa nerovnaju :(")
     end
 
-    if foo() then
+    if bar(1) then
+        write("bar je nil :(")
+    elseif foo() ~= true then
+        write("zle")
+    elseif foo() then
         write("foo je nil!")
-    elseif bar(1) then
-        write("foo nie je nil :(")
+    end
+
+    if bar(1) then
+        write("bar je nil :(")
+    elseif foo() ~= true then
+        write("zle")
+    else
+        write("foo je nil!")
     end
 end
 

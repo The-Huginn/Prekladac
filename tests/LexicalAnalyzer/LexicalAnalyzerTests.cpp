@@ -77,7 +77,7 @@ TEST_F(LexicalTests, 3_ExpectCorrect) {
 TEST_F(LexicalTests, 4_ExpectCorrect) {
     input = fopen("../../../../tests/files/testSource3.txt", "r");
 
-    std::vector<Terminal> lexemes = {K_REQUIRE, T_STRING, K_FUNCTION, T_ID, T_LEFT, T_ID, T_DEF, K_STRING, T_COMMA, T_ID, T_DEF, K_STRING, T_RIGHT, T_DEF, K_STRING, T_COMMA, K_INTEGER, K_RETURN, T_ID, T_CONCAT, T_ID, T_COMMA, T_INTEGER, K_END, K_FUNCTION, T_ID, T_LEFT, T_RIGHT, K_LOCAL, T_ID, T_DEF, K_STRING, K_LOCAL, T_ID, T_DEF, K_INTEGER, T_ID, T_COMMA, T_ID, T_ASS, T_ID, T_LEFT, T_STRING, T_COMMA, T_STRING, T_RIGHT, K_END, T_ID, T_LEFT, T_RIGHT};
+    std::vector<Terminal> lexemes = {K_REQUIRE, T_STRING, K_FUNCTION, T_ID, T_LEFT, T_ID, T_DEF, K_STRING, T_COMMA, T_ID, T_DEF, K_STRING, T_RIGHT, T_DEF, K_STRING, T_COMMA, K_INTEGER, K_RETURN, T_ID, T_CONCAT, T_ID, T_COMMA, T_INTEGER, K_END, K_FUNCTION, T_ID, T_LEFT, T_RIGHT, K_LOCAL, T_ID, T_DEF, K_STRING, K_LOCAL, T_ID, T_DEF, K_INTEGER, T_ID, T_COMMA, T_ID, T_ASS, T_ID, T_LEFT, T_STRING, T_COMMA, T_STRING, T_RIGHT, T_ID, T_LEFT, T_ID, T_COMMA, T_ID, T_RIGHT, K_END, T_ID, T_LEFT, T_RIGHT};
 
     for (auto lexeme : lexemes)
         TestToken(lexeme);
