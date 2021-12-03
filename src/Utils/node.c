@@ -501,6 +501,20 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
                     break;
                 }
             }
+            else
+            {
+                switch (Node_GetOperation(node))
+                {
+                case P_GEQ:
+                case P_LEQ:
+                case P_NEQ:
+                    compare_with_not = true;
+                    break;
+                
+                default:
+                    break;
+                }
+            }
             
 
             // DEF_TMP is above
@@ -516,7 +530,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
                     
                 if (type != ONLY_DEF)
                 {
-                    fprintf(buffer->output, "NOT LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset + 1), TMP(buffer->tmp_offset));
+                    fprintf(buffer->output, "NOT LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset), TMP(buffer->tmp_offset - 1));
                     buffer->tmp_offset++;
                 }
             }
@@ -585,7 +599,6 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
             switch (Node_GetSemantic(node))
             {
             case SEMANTIC_BOOLEAN:
-                    buffer->tmp_offset++;
                 fprintf(buffer->output, "bool@%s\n", (const char*)Node_GetData(node));
                 break;
 
@@ -598,8 +611,15 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
                 char* a = (char*)Node_GetData(node);
                 while (*a != '\0')
                 {
-                    if ((int)(*a) <= 32 || (int)(*a) == 35 || (int)(*a) == 92)
+                    if ((int)(*a) <= 32 || (int)(*a) == 35)
                         fprintf(buffer->output, "\\0%d", (int)(*a));
+                    else if ((int)*a == 92)
+                    {
+                        if ((int)*(a+1) >= '0' && (int)*(a+1) <= '2')
+                            fprintf(buffer->output, "\\");
+                        else
+                            fprintf(buffer->output, "\\092");
+                    }
                     else
                         fprintf(buffer->output, "%c", (*a));
 
@@ -609,7 +629,7 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
                 break;
             
             case SEMANTIC_NUMBER:
-                fprintf(buffer->output, "number@%a\n", strtod((const char*)Node_GetData(node), NULL));
+                fprintf(buffer->output, "float@%a\n", strtod((const char*)Node_GetData(node), NULL));
                 break;
 
             default:

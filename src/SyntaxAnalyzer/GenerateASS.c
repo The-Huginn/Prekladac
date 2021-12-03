@@ -49,8 +49,11 @@ void ASS_AddHeader(Buffers *buffer)
 void ASS_AddFooter(Buffers *buffer)
 {
     fprintf(buffer->output, "LABEL %s\n", JUMP);
+    fprintf(buffer->output, "CREATEFRAME\n");
+    fprintf(buffer->output, "PUSHFRAME\n");
     for (int i = 0; i < Vector_Size(buffer->function_calls); i++)
         Vector_Destroy(Node_PostOrder(Vector_GetElement(buffer->function_calls, i), true, buffer, 0, ALL));
+    fprintf(buffer->output, "POPFRAME\n");
 }
 
 int ASS_AddCondition(Buffers *buffer, Node *expression, Symtable *symtable)
