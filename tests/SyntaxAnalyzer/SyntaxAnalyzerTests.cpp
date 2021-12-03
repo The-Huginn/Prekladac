@@ -1,4 +1,9 @@
-// LexicalAnalyzerTests.cpp      
+// IFJ Project 2021
+/**
+ * @file SyntaxAnalyzerTests.cpp
+ * @author Rastislav Budinsky (xbudin05)
+ * @brief This file contains tests for Syntax Analyzer
+ */
 
 extern "C" 
 {

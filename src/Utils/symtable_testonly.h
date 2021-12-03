@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file symtable_testonly.h
  * @brief This file expands interface of symtable, this file should be included for test purposes only
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #ifndef __SYMTABLE_TESTONLY_H__
 #define __SYMTABLE_H__

@@ -1,3 +1,4 @@
+// IFJ Project 2021
 #ifndef __LOGGER__
 #define __LOGGER__
 

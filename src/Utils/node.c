@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file node.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file implements struct Node and it's interface
  */
 #include "node.h"

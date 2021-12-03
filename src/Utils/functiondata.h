@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file functiondata.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains interface for working with data of ID / FUNCTION
  */
 #ifndef __FUNCTION_DATA_H__

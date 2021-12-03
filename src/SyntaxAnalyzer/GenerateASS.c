@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file GenerateASS.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file implements functions generating code
  */
 #include "GenerateASS.h"

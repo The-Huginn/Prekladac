@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file jesus.h
  * @brief This file defines interface of struct for holding char* and data
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 // If jesus doesn't save this shit, then noone can
 #ifndef __JESUS_H__

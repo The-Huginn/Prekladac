@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file Token.c
  * @brief This file implements interface for Token struct
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #include "Token.h"
 

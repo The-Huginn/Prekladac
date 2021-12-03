@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file Buffers.c
- * @author
- * @brief 
+ * @author Rastislav Budinsky (xbudin05)
+ * @brief This file implements Init and Destroy function for Buffers struct
  */
 #include "Buffers.h"
 

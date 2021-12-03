@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file SemanticActions.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief Contains implementation of semantic functions and supportive functions 
  */
 #include "SemanticActions.h"

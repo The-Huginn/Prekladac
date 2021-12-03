@@ -1,9 +1,10 @@
+// IFJ Project 2021
 /**
  * @file LexicalFSM.h
  * @brief This file contains struct LexicalOutput and enum for every state of the FSM
  * contains one function for finding one valid lexeme and one for getting Lexeme length
  * @note LexicalType final state enums must preserve ordered structure to correspond with Syntactic Analyzer
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #ifndef LEXICAL_FSM_H
 #define LEXICAL_FSM_H

@@ -1,3 +1,9 @@
+// IFJ Project 2021
+/**
+ * @file symtable.c
+ * @author Rastislav Budinsky (xbudin05)
+ * @brief This file contains implementation of interface for Symtable
+ */
 #include <stdlib.h>
 #include <string.h>
 #include "symtable.h"

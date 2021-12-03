@@ -1,9 +1,10 @@
+// IFJ Project 2021
 /**
  * @file LexicalFSM.c
  * @brief Implements LexicalFSM.h for finding one valid lexeme, contains functions
  * for initialization of the struct from Lexical_FSM.h, adding char to this struct
  * and getting last char and others
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 
 #include <stdlib.h>

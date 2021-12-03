@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file PrecedenceTable.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file implements the PrecedenceTable @note upon changes should change macros in PrecedenceTable.h
  */
 #include "PrecedenceTable.h"

@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file SemanticActions.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains function for semantic actions and supportive functions
  */
 #ifndef __SEMANTIC_ACTIONS_H__

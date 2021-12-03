@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file Buffers.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains struct needed for semantic actions and code generation, interface missing currently
  */
 #ifndef __BUFFERS_H__

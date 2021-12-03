@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file BottomToTop.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains interface for calling BottomToTop parser
  */
 #ifndef __BOTTOM_TO_TOP_H__

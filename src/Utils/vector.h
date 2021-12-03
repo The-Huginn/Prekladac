@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file vector.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains declaration of class vector and interface for using this class
  *      Vector is considered an self-expanding and self-shrinking array saved on heap
  *      @note functions do not check for NULL ptr being passed

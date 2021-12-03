@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file node.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains struct Node and interface for working with this structure
  */
 #ifndef __NODE_H__

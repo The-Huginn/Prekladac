@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file SyntaxAnalyzer.c
  * @brief This file implements interface of SyntaxAnalyzer.h, contains custom functions
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #include "SyntaxAnalyzer.h"
 #include "Terminal.h"
@@ -567,7 +568,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             default:
                 break;
             }
-            
+
             // clear Vectors
             Vector_Clear(buffer->variables);
             Vector_Clear(buffer->expressions);

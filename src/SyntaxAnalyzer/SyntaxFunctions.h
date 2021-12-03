@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file SyntaxFunctions.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains supportive functions for Syntax analyzer and for code generation
  */
 #ifndef __SYNTAX_FUNCTIONS_H__

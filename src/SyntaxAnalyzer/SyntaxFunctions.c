@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file SyntaxFunctions.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file implements SyntaxFunctions interface for SyntaxAnalyzer and code generation
  */
 #include "SyntaxFunctions.h"

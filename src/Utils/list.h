@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file list.h
  * @brief This file contains Interface for working with list
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #ifndef __LIST__
 #define __LIST__

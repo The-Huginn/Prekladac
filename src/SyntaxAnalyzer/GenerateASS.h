@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file GenerateASS.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains Abstract-Syntax-Tree functions @note function do not return anything so unmalloced memory can't be forwarded
  */
 #ifndef __GENERATE_ASS_H__

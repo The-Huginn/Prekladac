@@ -1,10 +1,11 @@
+// IFJ Project 2021
 /**
  * @file LexicalAnalyzer.c
  * @brief This file implements interface for communication with lexical analyzer
  * @note keywords and terminal enum should be ordered
  * magic constants: K_AND should be the first keyword terminal
  *                  F_ASS should be the first final state
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #include <string.h>
 #include <stdlib.h>
