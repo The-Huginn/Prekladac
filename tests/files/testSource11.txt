@@ -6,7 +6,7 @@ end
 
 function main()
     local a, b: integer, number = numbers()
-    write(a, b)
+    write(a, " a ", b)
 end
 
 main()

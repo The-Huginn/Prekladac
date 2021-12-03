@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file symtable.h
  * @brief This file contains interface for working with the Symbol Table
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #ifndef __SYMTABLE_H__
 #define __SYMTABLE_H__

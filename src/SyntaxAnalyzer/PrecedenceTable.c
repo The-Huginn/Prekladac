@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file PrecedenceTable.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file implements the PrecedenceTable @note upon changes should change macros in PrecedenceTable.h
  */
 #include "PrecedenceTable.h"
@@ -28,7 +29,7 @@ char precedenceTable[PRECEDENCE_TABLE_HEIGHT][PRECEDENCE_TABLE_WIDTH] = {
 {'<' , '>' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '>' , '<' , 'X' , '>'},
 {'a' , '>' , 'X' , 'X' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , '>' , 'X' , 'X' , '>'},
 {'X' , '>' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , 'X' , '>' , 'X'},
-{'b' , '=' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , '<' , 'X'},
+{'b' , '=' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'b' , 'c' , 'X'},
 {'<' , 'X' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , '<' , 'X' , 'X' }};
 
 Precedence_Rule precedence_rules[PRECEDENCE_RULE_ARRAY_SIZE] = {

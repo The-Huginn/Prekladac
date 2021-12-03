@@ -1,9 +1,10 @@
+// IFJ Project 2021
 /**
  * @file LexicalFSM.c
  * @brief Implements LexicalFSM.h for finding one valid lexeme, contains functions
  * for initialization of the struct from Lexical_FSM.h, adding char to this struct
  * and getting last char and others
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 
 #include <stdlib.h>
@@ -17,6 +18,7 @@ void LexicalOutput_Init(LexicalOutput *output)
 {
     output->state = START;
     output->pos = -1;
+    output->esc_seq = false;
 }
 
 /**
@@ -30,6 +32,24 @@ int LexicalOutput_IsFinal(LexicalOutput *output)
 }
 
 /**
+ * @brief Sets LexicalOutput to read esp sequence
+ * @param output LexicalOutput
+ */
+void LexicalOutput_ESC(LexicalOutput *output)
+{
+    output->esc_seq = true;
+}
+
+/**
+ * @brief Ends escape sequence of LexicalOutput 
+ * @param output LexicalOutput
+ */
+void LexicalOutput_EndESC(LexicalOutput *output)
+{
+    output->esc_seq = false;
+}
+
+/**
  * @brief Adds char to the end of read lexeme
  * @param output struct holding currently read lexeme
  * @param data int value to be converted to char and appended
@@ -38,7 +58,8 @@ void LexicalOutput_AddChar(LexicalOutput *output, int data)
 {
     if (output->pos == MAX_LEXEME_LEN - 2)
         return;
-    output->lexeme[++(output->pos)] = (char) data;
+    if (!(output->esc_seq == true && data == 92) && output->state != STRING_FINALIZE && !(output->state == LOAD_STRING && data == (int)'"'))
+        output->lexeme[++(output->pos)] = (char) data;
 }
 
 /**
@@ -173,7 +194,10 @@ LexicalOutput *getLexeme(FILE *file)
             else if (c == '"')
                 output->state = STRING_FINALIZE;
             else if (c == 92)
+            {
+                LexicalOutput_ESC(output);
                 output->state = ESC_SEQ;
+            }
             else
                 output->state = ERROR_STATE;
             break;
@@ -181,12 +205,44 @@ LexicalOutput *getLexeme(FILE *file)
             output->state = F_STRING;
             break;
         case ESC_SEQ:
+            LexicalOutput_EndESC(output);
             if (c == 92 || c == 'n' || c == 't' || c == '"')
+            {
+                switch (c)
+                {
+                case 92:
+                    c = '\\';
+                    break;
+                    
+                case 'n':
+                    c = '\n';
+                    break;
+                case 't':
+                    c = '\t';
+                    break;
+                case '"':
+                {
+                    // we need to add it here as later it would get canceled because of the next state
+                    c = '\"';
+                    LexicalOutput_AddChar(output, c);
+                }
+                    break;
+                
+                default:
+                    break;
+                }
                 output->state = LOAD_STRING;
+            }
             else if (c == '2')
+            {
+                LexicalOutput_AddChar(output, (int)'\\');
                 output->state = LIMIT_2;
+            }
             else if (c == '0' || c == '1')
+            {
+                LexicalOutput_AddChar(output, (int)'\\');
                 output->state = NORMAL_1;
+            }
             else
                 output->state = ERROR_STATE;
             break;

@@ -1,10 +1,11 @@
+// IFJ Project 2021
 /**
  * @file LexicalAnalyzer.c
  * @brief This file implements interface for communication with lexical analyzer
  * @note keywords and terminal enum should be ordered
  * magic constants: K_AND should be the first keyword terminal
  *                  F_ASS should be the first final state
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #include <string.h>
 #include <stdlib.h>
@@ -45,7 +46,7 @@ Token *getToken(FILE *input)
 
     if (!Stack_IsEmpty(stack))
     {
-        Token *token = Stack_Top(stack);
+        Token *token = (Token*)Stack_Top(stack);
         Stack_Pop(stack);
         return token;
     }
@@ -71,16 +72,17 @@ Token *getToken(FILE *input)
         int keyword = IsKeyWord(lexeme);
         if (keyword != -1)
         {
-            token->type = K_AND + keyword;
+            token->type = (Terminal) (K_AND + keyword);
         }
         else
         {
             // needs to be redone, one enum has to be renamed
-            token->type = T_ASS + getFinalState(lexeme) - F_ASS;
+            token->type = (Terminal)(T_ASS + getFinalState(lexeme) - F_ASS);
         }
     }
 
     token->attribute = strdup(getString(lexeme));
+    // fprintf(stderr, "%s\n", Token_getData(token));
     freeLexeme(lexeme);
 
     return token;
@@ -101,7 +103,7 @@ void LexicalDestroy()
 
     while (!Stack_IsEmpty(stack))
     {
-        Token *token = Stack_Top(stack);
+        Token *token = (Token*)Stack_Top(stack);
         // token free function
         Token_Destroy(token);
         Stack_Pop(stack);

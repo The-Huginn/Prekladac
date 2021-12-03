@@ -1,57 +1,14 @@
+// IFJ Project 2021
 /**
  * @file SyntaxFunctions.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file implements SyntaxFunctions interface for SyntaxAnalyzer and code generation
  */
 #include "SyntaxFunctions.h"
 #include "SemanticActions.h"
+#include "GenerateASS.h"
 
 #include <stdlib.h>
-
-Buffers *Buffers_Init()
-{
-    Buffers *buffer = (Buffers*)malloc(sizeof(Buffers));
-    if (buffer == NULL)
-        return NULL;
-
-    buffer->variables = Vector_Init((void (*)(void*)) NULL);
-    if (buffer->variables == NULL)
-    {
-        free(buffer);
-        return NULL;
-    }
-
-    buffer->expressions = Vector_Init((void (*)(void*)) NULL);
-    if (buffer->expressions == NULL)
-    {
-        Vector_Destroy(buffer->variables);
-        free(buffer);
-        return NULL;
-    }
-
-    buffer->only_declared = Vector_Init((void (*)(void *))NULL);
-    if (buffer->only_declared == NULL)
-    {
-        Vector_Destroy(buffer->variables);
-        Vector_Destroy(buffer->expressions);
-        free(buffer);
-        return NULL;
-    }
-
-    buffer->position = 0;
-    buffer->declared = false;
-    buffer->current_function = NULL;
-
-    return buffer;
-}
-
-void Buffers_Destroy(Buffers *buffer)
-{
-    Vector_Destroy(buffer->variables);
-    Vector_Destroy(buffer->expressions);
-    Vector_Destroy(buffer->only_declared);
-    free(buffer);
-}
 
 SemanticType Syntax_GetSemantic(Token *token)
 {
@@ -115,7 +72,10 @@ int Syntax_Variable_Assign(Buffers *buffer)
 {
     // we should get rid of extra expressions
     while (Vector_Size(buffer->expressions) > Vector_Size(buffer->variables))
+    {
+        Node_Destroy((Node*)Vector_Back(buffer->expressions), true);
         Vector_PopBack(buffer->expressions);
+    }
 
     // we should fill with nils if we dont have enough
     // first we must check if last parameter is not an function
@@ -133,51 +93,47 @@ int Syntax_Variable_Assign(Buffers *buffer)
     if (Vector_Size(buffer->expressions) + function_returns < Vector_Size(buffer->variables))
         return 7;
 
-    while (!Vector_IsEmpty(buffer->expressions))
+    int current_variable = Vector_Size(buffer->variables) - 1;
+    for (int i = Vector_Size(buffer->expressions) - 1; i >= 0; i--)
     {
         if (function_returns != 0)
         {
-            int current_variable = Vector_Size(buffer->variables) - 1;
-            // TODO generate code for function call
             while (function_returns >= 0)
             {
-                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_Back(buffer->expressions)), function_returns);
+                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_GetElement(buffer->expressions, i)), function_returns);
                 if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) != type)
                 {
                     if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) == SEMANTIC_BOOLEAN)
                         // compare with nil for boolean value with specific return value
-                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(Node_GetReturns((Node*)Vector_Back(buffer->expressions)), function_returns));
+                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(Node_GetReturns((Node*)Vector_GetElement(buffer->expressions, i)), function_returns));
                     else
                         return 4;
                 }
 
                 function_returns--;
                 current_variable--;
-
-                Vector_PopBack(buffer->variables);
             }
-            Vector_PopBack(buffer->expressions);
 
             function_returns = 0;
-            // TODO generate code
         }
         else
         {
-            SemanticType type = Node_GetSemantic((Node*)Vector_Back(buffer->expressions));
-            if (Element_GetSemantic((Element*)Vector_Back(buffer->variables)) != type)
+            SemanticType type = Node_GetSemantic((Node*)Vector_GetElement(buffer->expressions, i));
+            if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) != type)
             {
-                if (Element_GetSemantic((Element*)Vector_Back(buffer->variables)) == SEMANTIC_BOOLEAN)
+                if (Element_GetSemantic((Element*)Vector_GetElement(buffer->variables, current_variable)) == SEMANTIC_BOOLEAN)
                     // compare with nil for boolean value
-                    AbstractSemanticTree_CompareWithNil((Node*)Vector_Back(buffer->expressions));
+                    AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(buffer->expressions, i));
                 else
                     return 4;
             }
 
-            // TODO generate code
-            Vector_PopBack(buffer->variables);
-            Vector_PopBack(buffer->expressions);
+            current_variable--;
         }
     }
+
+    ASS_GenerateAssign(buffer);
+
     return -1;
 }
 
@@ -185,9 +141,11 @@ int Syntax_Return_Assign(Buffers *buffer)
 {
     // we should get rid of extra expressions
     while (Vector_Size(buffer->expressions) > Element_FunctionReturns_Size(buffer->current_function))
+    {
+        Node_Destroy((Node*)Vector_Back(buffer->expressions), true);
         Vector_PopBack(buffer->expressions);
+    }
 
-    // we should fill with nils if we dont have enough
     // first we must check if last parameter is not an function
     int function_returns = 0;
     if (Vector_Size(buffer->expressions) > 0)
@@ -202,25 +160,24 @@ int Syntax_Return_Assign(Buffers *buffer)
                             ? Element_FunctionReturns_Size(buffer->current_function) - Vector_Size(buffer->expressions)
                             : function_returns;
 
-    // we fill last with nils
     int current_variable = Element_FunctionReturns_Size(buffer->current_function) - 1;
 
-    if (Vector_Size(buffer->expressions) + function_returns < current_variable)
-        return 7;
+    if (Vector_Size(buffer->expressions) + function_returns <= current_variable)
+        return 5;
 
-    while (!Vector_IsEmpty(buffer->expressions))
+    for (int i = Vector_Size(buffer->expressions) - 1; i >= 0; i--)
     {
         if (function_returns != 0)
         {
             // TODO generate code for function call
             while (function_returns >= 0)
             {
-                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_Back(buffer->expressions)), function_returns);
+                SemanticType type = Element_FunctionReturn_GetSemantic((Element*)Node_GetData((Node*)Vector_GetElement(buffer->expressions, i)), function_returns);
                 if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) != type)
                 {
                     if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) == SEMANTIC_BOOLEAN)
                         // compare with nil for boolean value with specific return value
-                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement((Vector*)Node_GetReturns((Node*)Vector_Back(buffer->expressions)), function_returns));
+                        AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement((Vector*)Node_GetReturns((Node*)Vector_GetElement(buffer->expressions, i)), function_returns));
                     else
                         return 5;
                 }
@@ -228,28 +185,27 @@ int Syntax_Return_Assign(Buffers *buffer)
                 function_returns--;
                 current_variable--;
             }
-            Vector_PopBack(buffer->expressions);
 
             function_returns = 0;
-            // TODO generate code
         }
         else
         {
-            SemanticType type = Node_GetSemantic((Node*)Vector_Back(buffer->expressions));
+            SemanticType type = Node_GetSemantic((Node*)Vector_GetElement(buffer->expressions, i));
             if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) != type)
             {
                 if (Element_FunctionReturn_GetSemantic(buffer->current_function, current_variable) == SEMANTIC_BOOLEAN)
                     // compare with nil for boolean value
-                    AbstractSemanticTree_CompareWithNil((Node*)Vector_Back(buffer->expressions));
+                    AbstractSemanticTree_CompareWithNil((Node*)Vector_GetElement(buffer->expressions, i));
                 else
                     return 5;
             }
 
-            // TODO generate code
             current_variable--;
-            Vector_PopBack(buffer->expressions);
         }
     }
+
+    ASS_GenerateFunctionReturn(buffer);
+
     return -1;
 }
 
@@ -264,11 +220,52 @@ int Syntax_FunctionCall(Symtable *symtable, Buffers *buffer)
     Node *function_call = Node_Init(NODE_FUNCTION, Vector_Back(buffer->variables), SEMANTIC_VOID, NULL, P_FUNCTION);
 
     // create a function call node with all expressions as parameters, they are normalized no need for AST_UpdateFunctionCalls
-    while (!Vector_IsEmpty(buffer->expressions))
+    for (int i = 0; i < Vector_Size(buffer->expressions); i++)
+        Node_AppendSon(function_call, (Node*)Vector_GetElement(buffer->expressions, i));
+
+    int ret = AbstractSemanticTree_VerifyFunctionCall(function_call);
+    if (ret != -1)
+        return ret;
+
+    ASS_GenerateFunctionCall(buffer, function_call);
+
+    return -1;
+}
+
+int Syntax_FunctionDefined(Buffers *buffer, Symtable *symtable)
+{
+    Symtable_AddScope(symtable);
+
+    // clear variables
+    Vector_Clear(buffer->variables);
+
+    int return_value = -1;
+    // add all parameters from current function to TS
+    for (int i = 0; i < Element_FunctionParameters_Size(buffer->current_function); i++)
     {
-        Node_AppendSon(function_call, (Node*)Vector_GetElement(buffer->expressions, 0));
-        Vector_RemoveElement(buffer->expressions, 0);
+        Element *previous_parameter = Symtable_GetElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i));
+        Element* parameter = Symtable_CreateElement(symtable, Element_FunctionParameter_GetName(buffer->current_function, i),VARIABLE);
+        if (parameter == NULL)
+        {
+            return_value = 99;
+            break;
+        }
+
+        // parameters with same name
+        if (previous_parameter != NULL)
+            if (Element_GetID(parameter) == Element_GetID(previous_parameter))
+                return_value = 3;
+                    
+        Element_SetSemantic(parameter, Element_FunctionParameter_GetSemantic(buffer->current_function, i));
+        Element_Define(parameter);
+
+        // for code generation
+        Vector_PushBack(buffer->variables, parameter);
     }
 
-    return AbstractSemanticTree_VerifyFunctionCall(function_call);
+    // generate code for function label
+    if (return_value == -1)
+        ASS_AddFunction(buffer);
+
+    return return_value;
 }

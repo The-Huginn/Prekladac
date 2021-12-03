@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file semantictype.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * 
  * @brief This file contains enum for Semantic Analyzer
  */

@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file PrecedenceTable.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains the declaration of precedence table
  */
 #ifndef __PRECEDENCE_TABLE_H__

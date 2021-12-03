@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file symbolelement.c
  * @brief This file implements whole interface of symbolelement.h
- * @authors Denis Pojezdal, Rastislav Budinsky
+ * @authors Denis Pojezdal, Rastislav Budinsky (xbudin05)
  */
 #include "symbolelement.h"
 #include "logger.h"

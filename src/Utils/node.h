@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file node.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains struct Node and interface for working with this structure
  */
 #ifndef __NODE_H__
@@ -8,11 +9,25 @@
 
 #include "vector.h"
 #include "semantictype.h"
+#include "Buffers.h"
 #include "../SyntaxAnalyzer/PrecedenceTable.h"
 
 #include <stdbool.h>
+#include <stdio.h>
 
-typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP}NodeType;
+typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP, NODE_IF,
+    NODE_ELSEIF, NODE_ELSE, NODE_WHILE, NODE_FUNCTION_DEF, NODE_FUNCTION_POP, NODE_DECLARE, NODE_ASSIGN,
+    NODE_LVALUES, NODE_RVALUES, NODE_RETURN}NodeType;
+
+typedef enum {ALL, ONLY_DEF, EXCEPT_DEF}RecurcionType;
+
+#define TMP(a) "$tmp", (a)
+#define ELEMENT(a) Element_GetKey((Element*)Node_GetData(a)), Element_GetID((Element*)Node_GetData(a))
+#define JUMP "$function_calls"  // each variable/functions has added id so no overlapps
+#define IF_LABEL "$if"
+#define IF_END_LABEL "$endif"
+#define WHILE_LABEL "$while"
+#define DEF_TMP(a) fprintf(buffer->output, "DEFVAR LF@$tmp%d\n", (a))
 
 typedef struct Node_t Node;
 
@@ -29,7 +44,7 @@ Node *Node_Init(NodeType NodeType, void *data, SemanticType semanticType, void (
  * @brief New node is created (pointer is preserved) and this node compares previous old Node with nil
  *      @note Pointer is preserved and original Node is being pointed to by the same pointer
  * @param old Node
- * @return new node
+ * @return true upon success otherwise false
  */
 bool Node_CompareWithNil(Node *old);
 
@@ -122,8 +137,24 @@ bool Node_IsOperation(Node *node);
  * @brief Iterates in post-order for code-generation
  * @param node Node
  * @param destroy Set to true to call destructor upon all Nodes
+ * @param buffer Buffers for changing offset @note function changes content of buffer->tmp_offset
+ * @param expected_amount The expected amount of returned variables
+ * @param type RecursionType used for generating defvars before loops
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
-Vector* Node_PostOrder(Node* node, bool destroy);
+Vector* Node_PostOrder(Node* node, bool destroy, Buffers *buffer, int expected_amount, RecurcionType type);
+
+/**
+ * @brief Malloc int
+ * @param number Int value
+ * @return Pointer to int
+ */
+void *Number_Init(int number);
+
+/**
+ * @brief Destroys Number
+ * @param data Int value on heap
+ */
+void Number_Destroy(void *data);
 
 #endif //!__NODE_H__

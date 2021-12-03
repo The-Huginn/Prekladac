@@ -1,6 +1,7 @@
+// IFJ Project 2021
 /**
  * @file BottomToTop.c
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  * @brief This file contains implementation of interface of BottomToTop parser
  */
 #include "BottomToTop.h"
@@ -95,6 +96,10 @@ int ApplyPrecedenceRule(LList* list, Vector* expressions, Identifier *last_eleme
 
                 Node *node = NULL;
                 NodeType nodeType = last_element->inTS == true ? NODE_ID : NODE_VALUE;  // This should be in case 0 but doesnt work idk why
+
+                if (strcmp(last_element->element, "nil\0") == 0)
+                    nodeType = NODE_NIL;
+                    
                 switch (i)
                 {
                     case 0: // E->I
@@ -222,6 +227,12 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
     PrecedenceItem* top = (PrecedenceItem*)List_GetData(bottomToTopList, NULL);
     while ((Token_ToPrecedenceItemType(token) != P_$ || PrecedenceItem_GetType(top) != P_$) && ret == -1)
     {
+        if (Token_getType(token) == ERROR)
+        {
+            ret = 1;
+            break;
+        }
+
         PrecedenceItemType token_type = Token_ToPrecedenceItemType(token);
 
                                                                             // P_FUNCTION is not valid token, so we want to skip this as it is in the order the table
@@ -286,10 +297,8 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
                     }
                 }
             }
-
-            // pushing comma on stack is done in beta
-            if (token_type != P_COMMA)
-                List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
+            
+            List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
 
             Token_Destroy(token);
             token = getToken(input);
@@ -331,6 +340,14 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
 
             token = getToken(input);
             break;
+
+        case 'c':
+            top->character = '<';
+
+            Token_Destroy(token);
+            token = getToken(input);
+            break;
+            
         case 'X':
 
             while (!List_IsEmpty(bottomToTopList))

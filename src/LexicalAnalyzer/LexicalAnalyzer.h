@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file LexicalAnalyzer.h
  * @brief This file implements interface for communication with the Lexical analyzer
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #ifndef LEXICAL_ANALYZER_H
 #define LEXICAL_ANALYZER_H

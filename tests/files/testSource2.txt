@@ -1,11 +1,11 @@
 require "ifj21"
 
-global foo : function(string) : string
+global foo : function(string) : string, integer
 
 function bar(param : string) : string
     return foo (param)
 end
 
-function foo(param:string) :string
-    return bar(param)
+function foo(param:string) :string, integer
+    return bar(param), 1
 end

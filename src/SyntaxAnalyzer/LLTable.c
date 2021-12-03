@@ -1,7 +1,8 @@
+// IFJ Project 2021
 /**
  * @file LLTable.c
  * @brief This file implements interface of LLTable.h
- * @author Rastislav Budinsky
+ * @author Rastislav Budinsky (xbudin05)
  */
 #include "LLTable.h"
 #include <stdlib.h>

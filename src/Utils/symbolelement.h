@@ -1,8 +1,9 @@
+// IFJ Project 2021
 /**
  * @file symbolelement.h
  * @brief This file contains struct for element from Symbol Table and
  * 	interface for working with this struct
- * @authors Denis Pojezdal, Rastislav Budinsky
+ * @authors Denis Pojezdal, Rastislav Budinsky (xbudin05)
  */
 #ifndef __SYMBOL_ELEMENT__
 #define __SYMBOL_ELEMENT__

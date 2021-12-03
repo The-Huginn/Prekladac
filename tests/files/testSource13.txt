@@ -12,7 +12,7 @@ function main()
     local b, d, e : integer, integer, number = 1, 2, 1.6
     local result:integer = a(b+d) + a(tointeger(c(1.5)+e))
 
-    write(result)
+    write("Vysledok ma byt 7\nVysledok je:",result)
 end
 
 main()
