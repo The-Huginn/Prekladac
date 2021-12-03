@@ -531,16 +531,15 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             state = FSM_START;
             break;
 
-        // we must pop after all changes from previous scope are done
         case NT_GLOBAL_STATEMENT:
             state = FSM_START;
             break;
             
-        // do nothing
         default:
             break;
         }
 
+        // new statement
         if (previous_state != state)
         {
             switch (previous_state)
@@ -568,6 +567,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             default:
                 break;
             }
+            
             // clear Vectors
             Vector_Clear(buffer->variables);
             Vector_Clear(buffer->expressions);
