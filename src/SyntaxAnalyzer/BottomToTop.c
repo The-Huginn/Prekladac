@@ -296,10 +296,8 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
                     }
                 }
             }
-
-            // pushing comma on stack is done in beta
-            if (token_type != P_COMMA)
-                List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
+            
+            List_AddFirst(bottomToTopList, PrecedenceItem_Init(token_type, '\0'));
 
             Token_Destroy(token);
             token = getToken(input);
@@ -341,6 +339,14 @@ int BottomToTop(FILE* input, FILE* output, FILE* error_output, Node** expression
 
             token = getToken(input);
             break;
+
+        case 'c':
+            top->character = '<';
+
+            Token_Destroy(token);
+            token = getToken(input);
+            break;
+            
         case 'X':
 
             while (!List_IsEmpty(bottomToTopList))
