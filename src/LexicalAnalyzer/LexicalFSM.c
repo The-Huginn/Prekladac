@@ -204,11 +204,12 @@ LexicalOutput *getLexeme(FILE *file)
             output->state = F_STRING;
             break;
         case ESC_SEQ:
+            LexicalOutput_EndESC(output);
             if (c == 92 || c == 'n' || c == 't' || c == '"')
             {
                 switch (c)
                 {
-                case 99:
+                case 92:
                     c = '\\';
                     break;
                     
@@ -219,19 +220,28 @@ LexicalOutput *getLexeme(FILE *file)
                     c = '\t';
                     break;
                 case '"':
+                {
+                    // we need to add it here as later it would get canceled because of the next state
                     c = '\"';
+                    LexicalOutput_AddChar(output, c);
+                }
                     break;
                 
                 default:
                     break;
                 }
-                LexicalOutput_EndESC(output);
                 output->state = LOAD_STRING;
             }
             else if (c == '2')
+            {
+                LexicalOutput_AddChar(output, (int)'\\');
                 output->state = LIMIT_2;
+            }
             else if (c == '0' || c == '1')
+            {
+                LexicalOutput_AddChar(output, (int)'\\');
                 output->state = NORMAL_1;
+            }
             else
                 output->state = ERROR_STATE;
             break;
