@@ -24,7 +24,9 @@
 
 #include <stdlib.h>
 
-typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS, FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS, FSM_IF, FSM_ELSEIF, FSM_ELSE, FSM_WHILE}FSM_STATE;
+typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID, FSM_FUN_CALL, FSM_FUN_PARAMS, FSM_FUN_DEF, FSM_FUN_DEF_PARAMS,
+    FSM_FUN_DEF_WAIT, FSM_FUN_DEF_RETURNS, FSM_FUN_DEC, FSM_FUN_DEC_PARAMS, FSM_FUN_DEC_WAIT, FSM_FUN_DEC_RETURNS, FSM_RETURNS, FSM_IF, FSM_ELSEIF,
+    FSM_ELSE, FSM_WHILE, FSM_FOR, FSM_REPEAT, FSM_UNTIL}FSM_STATE;
 
 // #define DEBUG_SYNTAX
 
@@ -269,11 +271,8 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         break;
 
     case FSM_WHILE:
-        if (!Vector_IsEmpty(buffer->expressions))
-        {
-            ASS_AddWhile(buffer, Vector_Back(buffer->expressions), symtable);
-            *state = FSM_START;
-        }
+        *return_value = ASS_AddWhile(buffer, symtable);
+        *state = FSM_START;
         break;
 
     default:

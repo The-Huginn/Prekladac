@@ -13,9 +13,9 @@
 #include "LexicalFSM.h"
 #include "../Utils/stack.h"
 
-char *keywords[] = {"and", "boolean", "do", "else", "elseif", "end", "false", "function", "global", "if", "integer", "local", "nil", "not", "number", "or", "require", "return", "string", "then", "true", "while"};
+char *keywords[] = {"and", "boolean", "break", "do", "else", "elseif", "end", "false", "function", "for", "global", "if", "integer", "local", "nil", "not", "number", "or", "repeat", "require", "return", "string", "then", "true", "until", "while"};
 
-#define KEYWORDS_SUM 22
+#define KEYWORDS_SUM 26
 
 static Stack *stack = NULL;
 

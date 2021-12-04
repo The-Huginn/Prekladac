@@ -10,16 +10,17 @@
 
 #include <stdlib.h>
 
-typedef enum {IF, WHILE, FUNCTION_DEF}ScopeItem;
+typedef enum {IF, WHILE, FUNCTION_DEF, FOR, REPEAT}ScopeItem;
 
 typedef struct
 {
     ScopeItem type;
     bool last_else;
     Node *node;
+    int id;         // to know the id of loop scope we are currently in
 }Scope;
 
-Scope *Scope_Init( ScopeItem type)
+Scope *Scope_Init(ScopeItem type, int id)
 {
     Scope *scope = (Scope*)malloc(sizeof(Scope));
     
@@ -29,6 +30,7 @@ Scope *Scope_Init( ScopeItem type)
     scope->type = type;
     scope->last_else = false;
     scope->node = NULL;
+    scope->id = id;
 
     return scope;
 }
@@ -62,7 +64,9 @@ int ASS_AddCondition(Buffers *buffer, Node *expression, Symtable *symtable)
     if (expression == NULL)
         return 99;
 
-    Scope *top = Scope_Init(IF);
+    Scope *top = Stack_Top(buffer->scopes);
+    
+    top = Scope_Init(IF, top->id);
     if (top == NULL)
         return 99;
 
@@ -131,14 +135,16 @@ int ASS_AddElse(Buffers *buffer, Symtable *symtable)
     return -1;
 }
 
-int ASS_AddWhile(Buffers *buffer, Node *expression, Symtable *symtable)
+int ASS_AddWhile(Buffers *buffer, Symtable *symtable)
 {
-    Scope *top = Scope_Init(WHILE);
+    Scope *top = Scope_Init(WHILE, buffer->top_id);
     if (top == NULL)
         return 99;
 
-    if (expression == NULL)
+    if (Vector_Size(buffer->expressions) != 1)
         return 99;
+
+    Node *expression = Vector_Back(buffer->expressions);
 
     Stack_Push(buffer->scopes, top);
 
@@ -162,10 +168,80 @@ int ASS_AddWhile(Buffers *buffer, Node *expression, Symtable *symtable)
     return -1;
 }
 
+int ASS_AddFor(Buffers *buffer, Symtable *symtable)
+{
+    Scope *top = Scope_Init(FOR, buffer->top_id);
+    if (top == NULL)
+        return 99;
+
+    if (Vector_Size(buffer->expressions) != 3 || Vector_Size(buffer->variables) != 1)
+        return 99;
+
+    Stack_Push(buffer->scopes, top);
+
+    // data is variable Element
+    Node *node = Node_Init(NODE_FOR, Vector_Back(buffer->variables), SEMANTIC_VOID, (void (*)(void *))NULL, P_VOID);
+
+    if (node == NULL)
+        return 99;
+
+    top->node = node;
+    Node_SetParamCount(top->node, buffer->top_id++);
+
+    // expressions of for loop
+    for (int i = 0; i < Vector_Size(buffer->expressions); i++)
+        Node_AppendSon(node, Vector_GetElement(buffer->expressions, i));
+
+
+    Symtable_AddScope(symtable);
+
+    return -1;
+}
+
+int ASS_AddRepeat(Buffers *buffer, Symtable *symtable)
+{
+    Scope *top = Scope_Init(REPEAT, buffer->top_id);
+    if (top == NULL)
+        return 99;
+
+    Stack_Push(buffer->scopes, top);
+
+    // we add data as expression later
+    Node *node = Node_Init(NODE_REPEAT, NULL, SEMANTIC_VOID, (void (*)(void *))NULL, P_VOID);
+
+    if (node == NULL)
+        return 99;
+
+    top->node = node;
+    Node_SetParamCount(top->node, buffer->top_id++);
+
+    Symtable_AddScope(symtable);
+
+    return -1;
+}
+
+int ASS_AddBreak(Buffers *buffer)
+{
+    Scope *top = (Scope*)Stack_Top(buffer->scopes);
+
+    // break is not in loop
+    if (top->id == -1)
+        return 7;
+
+    Node *node = Node_Init(NODE_BREAK, NULL, SEMANTIC_VOID, (void (*)(void *))NULL, P_VOID);
+
+    if (node == NULL)
+        return 99;
+
+    Node_AppendSon(top->node, node);
+
+    return -1;
+}
+
 int ASS_AddFunction(Buffers *buffer)
 {
-    // id not important for function
-    Scope *function_scope = Scope_Init(FUNCTION_DEF);
+    // -1 so we can detect if we get break outside loops
+    Scope *function_scope = Scope_Init(FUNCTION_DEF, -1);
     if (function_scope == NULL)
         return 99;
 
@@ -294,7 +370,7 @@ void ASS_GenerateFunctionCall(Buffers *buffer, Node *function_call)
     return;
 }
 
-void ASS_PopEnd(Buffers *buffer, Symtable *symtable)
+int ASS_PopEnd(Buffers *buffer, Symtable *symtable)
 {
     Scope *top = (Scope*)Stack_Top(buffer->scopes);
     Node *node = top->node;
@@ -308,8 +384,27 @@ void ASS_PopEnd(Buffers *buffer, Symtable *symtable)
         if (top->last_else == false)
             Node_AppendSon(top->node, Node_Init(NODE_ELSE, NULL, SEMANTIC_VOID, (void (*)(void *))NULL, P_VOID));
         break;
+
     case WHILE:
         break;
+
+    case FOR:
+        break;
+
+    case REPEAT:
+        if (Vector_Size(buffer->expressions) != 1)
+            return 99;
+        
+        // we need to generate expression code after label as it needs to be executed every time
+        if (Node_GetSemantic(Vector_Back(buffer->expressions)) != SEMANTIC_BOOLEAN)
+        {
+            if (AbstractSemanticTree_CompareWithNil(Vector_Back(buffer->expressions)) == false)
+                return 7;
+        }
+
+        Node_SetData(node, Vector_Back(buffer->expressions));
+        break;
+    
     case FUNCTION_DEF:
         node_above = false;
 
@@ -338,4 +433,6 @@ void ASS_PopEnd(Buffers *buffer, Symtable *symtable)
         Symtable_PopScope(symtable);
         Symtable_ClearBuffer(symtable);
     }
+
+    return -1;
 }

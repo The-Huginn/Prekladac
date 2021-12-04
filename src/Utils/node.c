@@ -156,6 +156,11 @@ void *Node_GetData(Node *node)
     return node->data;
 }
 
+void Node_SetData(Node *node, void *data)
+{
+    node->data = data;
+}
+
 void Node_SetParamCount(Node *node, int count)
 {
     node->count = count;
@@ -222,7 +227,7 @@ bool Node_IsBinaryOperator(PrecedenceItemType type)
  *      @note important to know if last expression is function call and we need to know how much more we need
  * @return Vector of int*
  */
-Vector *Node_GetRValues(Node *node, Buffers *buffer, bool destroy, int lvalues, RecurcionType type)
+Vector *Node_GetRValues(Node *node, Buffers *buffer, bool destroy, int lvalues, RecursionType type)
 {    
     Vector *returns = Vector_Init(Number_Destroy);
 
@@ -261,7 +266,7 @@ Vector *Node_GetRValues(Node *node, Buffers *buffer, bool destroy, int lvalues, 
     return returns;
 }
 
-void Node_GenerateAssign(Node *node, Buffers *buffer, bool destroy, RecurcionType type)
+void Node_GenerateAssign(Node *node, Buffers *buffer, bool destroy, RecursionType type)
 {
     Vector *sons = Node_GetSons(node);
 
@@ -282,7 +287,7 @@ void Node_GenerateAssign(Node *node, Buffers *buffer, bool destroy, RecurcionTyp
     Vector_Destroy(assignments);
 }
 
-void Node_GenerateReturn(Node *node, Buffers *buffer, bool destroy, RecurcionType type)
+void Node_GenerateReturn(Node *node, Buffers *buffer, bool destroy, RecursionType type)
 {
     Vector *returns = Node_GetRValues(node, buffer, destroy, Element_FunctionReturns_Size(buffer->current_function), type);
     if (returns == NULL)
@@ -301,7 +306,7 @@ void Node_GenerateReturn(Node *node, Buffers *buffer, bool destroy, RecurcionTyp
     }
 }
 
-void Node_GenerateConditionLabel(Buffers *buffer, Node *expression, bool destroy, int id, int label_count, char *label, RecurcionType type)
+void Node_GenerateConditionLabel(Buffers *buffer, Node *expression, bool destroy, int id, int label_count, char *label, RecursionType type)
 {
     // should be already bool
     Vector *condition = Node_PostOrder(expression, destroy, buffer, 1, type);
@@ -315,7 +320,7 @@ void Node_GenerateConditionLabel(Buffers *buffer, Node *expression, bool destroy
     Vector_Destroy(condition);
 }
 
-void Node_GenerateIf(Node *node, Buffers *buffer, bool destroy, RecurcionType type)
+void Node_GenerateIf(Node *node, Buffers *buffer, bool destroy, RecursionType type)
 {
     Vector *sons = Node_GetSons(node);
     int id = Node_GetParamCount(node);
@@ -359,16 +364,15 @@ void Node_GenerateIf(Node *node, Buffers *buffer, bool destroy, RecurcionType ty
         fprintf(buffer->output, "LABEL %s%d\n", IF_END_LABEL, id);
 }
 
-void Node_GenerateWhile(Node *node, Buffers *buffer, bool destroy, RecurcionType type)
+void Node_GenerateWhile(Node *node, Buffers *buffer, bool destroy, RecursionType type)
 {
     Vector *sons = Node_GetSons(node);
     int id = Node_GetParamCount(node);
-    int label_count = 0;
 
     if (type != ONLY_DEF)
-        fprintf(buffer->output, "LABEL %s%d_%d\n", WHILE_LABEL, id, label_count);
+        fprintf(buffer->output, "LABEL %s%d_%d\n", WHILE_LABEL, id, 0);
 
-    Node_GenerateConditionLabel(buffer, (Node*)Node_GetData(node), destroy, id, label_count + 1, WHILE_LABEL, type);  // +1 as we want to jump to end and first label is while
+    Node_GenerateConditionLabel(buffer, (Node*)Node_GetData(node), destroy, id, 0, END_LOOP, type);  // +1 as we want to jump to end and first label is while
 
     for (int i = 0; i < Vector_Size(sons); i++)
     {
@@ -378,12 +382,92 @@ void Node_GenerateWhile(Node *node, Buffers *buffer, bool destroy, RecurcionType
 
     if (type != ONLY_DEF)
     {
-        fprintf(buffer->output, "JUMP %s%d_%d\n", WHILE_LABEL, id, label_count);
-        fprintf(buffer->output, "LABEL %s%d_%d\n", WHILE_LABEL, id, label_count + 1);
+        fprintf(buffer->output, "JUMP %s%d_%d\n", WHILE_LABEL, id, 0);
+        fprintf(buffer->output, "LABEL %s%d_%d\n", END_LOOP, id, 0);
     }
 }
 
-Vector *Node_GenerateSons(Node *node, Buffers *buffer, bool destroy, RecurcionType type)
+void Node_GenerateFor(Node *node, Buffers *buffer, bool destroy, RecursionType type)
+{
+    Vector *sons = Node_GetSons(node);
+    int id = Node_GetParamCount(node);
+
+    // Initialize for loop variable
+    if (type != EXCEPT_DEF)
+        fprintf(buffer->output, "DEFVAR %s%d\n", ELEMENT(node));
+    
+    Vector *initialize = Node_PostOrder(Vector_GetElement(sons, 0), destroy, buffer, 1, type);
+
+    if (type != ONLY_DEF)
+    {
+        // Assign initial value for for loop variable
+        fprintf(buffer->output, "MOVE %s%d %s%d\n", ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
+        fprintf(buffer->output, "LABEL %s%d_%d\n", FOR_LABEL, id, 0);
+
+    }
+
+    Vector_Clear(initialize);
+    initialize = Node_PostOrder(Vector_GetElement(sons, 1), destroy, buffer, 1, type);
+    
+    if (type == ONLY_DEF)
+        DEF_TMP(buffer->tmp_offset++);
+    else if (type == ALL)
+        DEF_TMP(buffer->tmp_offset);
+
+    if (type != ONLY_DEF)
+    {
+        // compare for loop variable with statement
+        fprintf(buffer->output, "EQ %s%d %s%d %s%d\n", TMP(buffer->tmp_offset), ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
+        fprintf(buffer->output, "JUMPIFEQ %s%d_%d LF@%s%d bool@true\n", END_LOOP, id, 0, TMP(buffer->tmp_offset++));
+    }
+
+    Vector_Clear(initialize);
+
+    for (int i = 3; i < Vector_Size(sons); i++)
+    {
+        Node *current = (Node*)Vector_GetElement(sons, i);
+        Vector_Destroy(Node_PostOrder(current, destroy, buffer, 0, type));
+    }
+
+    initialize = Node_PostOrder(Vector_GetElement(sons, 2), destroy, buffer, 1, type);
+
+    // increment for loop variable
+    if (type != ONLY_DEF)
+    {
+        fprintf(buffer->output, "ADD %s%d %s%d %s%d\n", ELEMENT(node), ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
+        fprintf(buffer->output, "JUMP %s%d_%d\n", FOR_LABEL, id, 0);
+        fprintf(buffer->output, "LABEL %s%d_%d\n", END_LOOP, id, 0);
+    }
+
+    Vector_Destroy(initialize);
+}
+
+void Node_GenerateRepeat(Node *node, Buffers *buffer, bool destroy, RecursionType type)
+{
+    Vector *sons = Node_GetSons(node);
+    int id = Node_GetParamCount(node);
+
+    if (type != ONLY_DEF)
+        fprintf(buffer->output, "LABEL %s%d_%d\n", REPEAT_LABEL, id, 0);
+
+    for (int i = 0; i < Vector_Size(sons); i++)
+    {
+        Node *current = (Node*)Vector_GetElement(sons, i);
+        Vector_Destroy(Node_PostOrder(current, destroy, buffer, 0, type));
+    }
+
+    Vector *condition = Node_PostOrder(Node_GetData(node), destroy, buffer, 1, type);
+
+    if (type != ONLY_DEF)
+    {
+        fprintf(buffer->output, "JUMPIFEQ %s%d_%d %s%d bool@true\n", WHILE_LABEL, id, 0, TMP(*((int*)Vector_GetElement(condition, 0))));
+        fprintf(buffer->output, "LABEL %s%d_%d\n", END_LOOP, id, 0);
+    }
+
+    Vector_Destroy(condition);
+}
+
+Vector *Node_GenerateSons(Node *node, Buffers *buffer, bool destroy, RecursionType type)
 {    
     Vector *sons = Vector_Init(Number_Destroy);
     if (sons == NULL)
@@ -412,7 +496,7 @@ Vector *Node_GenerateSons(Node *node, Buffers *buffer, bool destroy, RecurcionTy
     return sons;
 }
 
-Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_amount, RecurcionType type)
+Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_amount, RecursionType type)
 {
     Vector *return_values = Vector_Init(Number_Destroy);
     if (return_values == NULL)
@@ -728,12 +812,25 @@ Vector* Node_PostOrder(Node *node, bool destroy, Buffers *buffer, int expected_a
 
         break;
 
+    case NODE_BREAK:
+        if (type != ONLY_DEF)
+            fprintf(buffer->output, "JUMP %s%d_%d\n", END_LOOP, Node_GetParamCount(node), 0);
+        break;
+
     case NODE_IF:
         Node_GenerateIf(node, buffer, destroy, type);
         break;
 
     case NODE_WHILE:
         Node_GenerateWhile(node, buffer, destroy, type);
+        break;
+
+    case NODE_FOR:
+        Node_GenerateFor(node, buffer, destroy, type);
+        break;
+
+    case NODE_REPEAT:
+        Node_GenerateRepeat(node, buffer, destroy, type);
         break;
 
     case NODE_FUNCTION_DEF:

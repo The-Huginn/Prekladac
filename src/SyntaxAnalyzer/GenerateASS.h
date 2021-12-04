@@ -53,11 +53,33 @@ int ASS_AddElse(Buffers *buffer, Symtable *symtable);
 /**
  * @brief Adds while code-branch for while loop and creates new scope in symtable
  * @param buffer Buffers
- * @param expression Node
  * @param symtable Symtable
  * @return -1 upon success otherwise error code
  */
-int ASS_AddWhile(Buffers *buffer, Node *expression, Symtable *symtable);
+int ASS_AddWhile(Buffers *buffer, Symtable *symtable);
+
+/**
+ * @brief Adds for code-branch for for loop and creates new scope in symtable
+ * @param buffer Buffers
+ * @param symtable Symtable
+ * @return -1 upon success otherwise error code
+ */
+int ASS_AddFor(Buffers *buffer, Symtable *symtable);
+
+/**
+ * @brief Adds repeat code-branch for repeat-until loop and creates new scope in symtable
+ * @param buffer Buffers
+ * @param symtable Symtable
+ * @return -1 upon success otherwise error code
+ */
+int ASS_AddRepeat(Buffers *buffer, Symtable *symtable);
+
+/**
+ * @brief Adds break code-branch to break out of most-inner loop
+ * @param buffer Buffers
+ * @return -1 upon success otherwise error code
+ */
+int ASS_AddBreak(Buffers *buffer);
 
 /**
  * @brief Adds function definition code-branch generates frame&pops values
@@ -92,10 +114,11 @@ void ASS_GenerateFunctionCall(Buffers *buffer, Node *function_call);
 void ASS_GenerateFunctionReturn(Buffers *buffer);
 
 /**
- * @brief This function should be called upon found 'end' terminal and removes last scope from symtable
+ * @brief This function should be called upon found 'end' terminal or after reading 'until <condition>' and removes last scope from symtable
  * @param buffer Buffers
  * @param symtable Symtable
+ * @return -1 upon success otherwise error code
  */
-void ASS_PopEnd(Buffers *buffer, Symtable *symtable);
+int ASS_PopEnd(Buffers *buffer, Symtable *symtable);
 
 #endif // !__GENERATE_ASS_H__

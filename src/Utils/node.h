@@ -17,9 +17,9 @@
 
 typedef enum {NODE_OPERATION, NODE_ID, NODE_FUNCTION, NODE_VALUE, NODE_VOID, NODE_NIL, NODE_POP, NODE_IF,
     NODE_ELSEIF, NODE_ELSE, NODE_WHILE, NODE_FUNCTION_DEF, NODE_FUNCTION_POP, NODE_DECLARE, NODE_ASSIGN,
-    NODE_LVALUES, NODE_RVALUES, NODE_RETURN}NodeType;
+    NODE_LVALUES, NODE_RVALUES, NODE_RETURN, NODE_FOR, NODE_REPEAT, NODE_BREAK}NodeType;
 
-typedef enum {ALL, ONLY_DEF, EXCEPT_DEF}RecurcionType;
+typedef enum {ALL, ONLY_DEF, EXCEPT_DEF}RecursionType;
 
 #define TMP(a) "$tmp", (a)
 #define ELEMENT(a) Element_GetKey((Element*)Node_GetData(a)), Element_GetID((Element*)Node_GetData(a))
@@ -27,6 +27,9 @@ typedef enum {ALL, ONLY_DEF, EXCEPT_DEF}RecurcionType;
 #define IF_LABEL "$if"
 #define IF_END_LABEL "$endif"
 #define WHILE_LABEL "$while"
+#define REPEAT_LABEL "$repeat"
+#define FOR_LABEL "$for"
+#define END_LOOP "$end_loop"
 #define DEF_TMP(a) fprintf(buffer->output, "DEFVAR LF@$tmp%d\n", (a))
 
 typedef struct Node_t Node;
@@ -76,6 +79,12 @@ bool Node_AppendReturn(Node *parent, SemanticType semanticType);
  * @return data
  */
 void *Node_GetData(Node *node);
+
+/**
+ * @param node Node
+ * @param data New data
+ */
+void Node_SetData(Node *node, void *data);
 
 /**
  * @brief Sets how many times use the last expression @note It is expected this parameter is function call and has enough return values, otherwise unexpected behaviour
@@ -142,7 +151,7 @@ bool Node_IsOperation(Node *node);
  * @param type RecursionType used for generating defvars before loops
  * @return Vector of identifiers for retrieving values of expressions @note Vector is needed for function return
  */
-Vector* Node_PostOrder(Node* node, bool destroy, Buffers *buffer, int expected_amount, RecurcionType type);
+Vector* Node_PostOrder(Node* node, bool destroy, Buffers *buffer, int expected_amount, RecursionType type);
 
 /**
  * @brief Malloc int
