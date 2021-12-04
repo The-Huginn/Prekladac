@@ -36,9 +36,9 @@ typedef enum {FSM_START, FSM_VAR_DEC, FSM_VAR_DATATYPES, FSM_VAR_ASSIGN, FSM_ID,
  * @param return_value return_value int pointer
  * @param symtable Symtable
  * @param buffer Buffers
- * @return -1 upon success otherwise error code
+ * @return -1 upon success otherwise error code in return_value
  */
-int Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtable *symtable, Buffers *buffer)
+void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtable *symtable, Buffers *buffer)
 {
     // state variable actions
     switch (*state)

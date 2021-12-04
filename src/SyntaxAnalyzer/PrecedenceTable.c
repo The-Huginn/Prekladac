@@ -158,7 +158,8 @@ PrecedenceItemType Token_ToPrecedenceItemType(Token *token)
     case K_NIL:
         return P_I;
 
-    
+    default:
+        break;
     }
 
     return P_$;

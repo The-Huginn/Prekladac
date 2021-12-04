@@ -34,7 +34,7 @@ int AbstractSemanticTree_CompareWithNil(Node *node)
     return -1;
 }
 
-//              E
+/*              E
 //            / , \
 //          E      \
 //        / , \     \
@@ -42,7 +42,7 @@ int AbstractSemanticTree_CompareWithNil(Node *node)
 //     / , \    \     \
 //    E    E    E     E
 // Tree of arguments should look like this
-// keep in mind this tree is mirrored as the rules are applied from the end. (Probably, works like this looks like)
+// keep in mind this tree is mirrored as the rules are applied from the end. (Probably, works like this looks like)*/
 bool AbstractSemanticTree_UpdateFunctionCalls(Node *root)
 {
     Vector *new_sons = Vector_Init(NULL);
@@ -115,7 +115,7 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
             return 5;
 
         // last is not function so params missing
-        if (Node_GetType(last_param) != FUNCTION)
+        if (Node_GetType(last_param) != NODE_FUNCTION)
             return 5;
 
 
@@ -148,7 +148,7 @@ int AbstractSemanticTree_VerifyFunctionCall(Node *root)
     if (!Vector_IsEmpty(Node_GetSons(root)))
     {
         // only if last parameter is function call
-        if (Node_GetType(Vector_Back(Node_GetSons(root))) == FUNCTION)
+        if (Node_GetType(Vector_Back(Node_GetSons(root))) == NODE_FUNCTION)
         {
             // vector holding POP-ing expressions of function call
             Vector *last_function = Node_GetReturns(Vector_Back(Node_GetSons(root)));

@@ -395,7 +395,7 @@ Vector *Node_GenerateSons(Node *node, Buffers *buffer, bool destroy, RecurcionTy
 
         // This condition is probably unnecessary and we can just use the first expression as Node_GetParamCount is by default 0
         // we need from last function as parameter maybe more returns
-        if (Node_GetType(node) == FUNCTION && i == Vector_Size(Node_GetSons(node)) - 1)
+        if (Node_GetType(node) == NODE_FUNCTION && i == Vector_Size(Node_GetSons(node)) - 1)
             // 1 + Node_GetParamCount(node) as we want at least always one parameter and maybe more
             returned_values = Node_PostOrder((Node*)Vector_GetElement(Node_GetSons(node), i), destroy, buffer, 1 + Node_GetParamCount(node), type);
         else

@@ -32,8 +32,4 @@ add_custom_target(run
 add_subdirectory(tests/LexicalAnalyzer)
 add_subdirectory(tests/SyntaxAnalyzer)
 add_subdirectory(tests/Utils)
-
-# No time to fix for linux now
-if (MSVC)
-    add_subdirectory(LLTableGenerator)
-endif()
+add_subdirectory(LLTableGenerator)
