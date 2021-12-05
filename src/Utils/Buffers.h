@@ -43,4 +43,10 @@ Buffers *Buffers_Init(FILE *output);
  */
 void Buffers_Destroy(Buffers *buffer);
 
+/**
+ * @brief Clears buffer after statement
+ * @param buffer Buffers
+ */
+void Buffers_Clear(Buffers *buffer);
+
 #endif // !__BUFFERS_H__

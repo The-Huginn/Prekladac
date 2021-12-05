@@ -1,0 +1,14 @@
+require "ifj21"
+
+function main()
+    local a : integer = readi()
+    local sum : integer = 0
+    local current : integer = 1
+    repeat
+        sum = sum * current
+        current = current + 1
+    until a 
+    write("Faktorial ",a," je: ",sum,"\n")
+end
+
+main()

@@ -85,3 +85,11 @@ void Buffers_Destroy(Buffers *buffer)
     Vector_Destroy(buffer->function_calls);
     free(buffer);
 }
+
+void Buffers_Clear(Buffers *buffer)
+{
+    Vector_Clear(buffer->variables);
+    Vector_Clear(buffer->expressions);
+    buffer->position = 0;
+    buffer->declared = false;
+}

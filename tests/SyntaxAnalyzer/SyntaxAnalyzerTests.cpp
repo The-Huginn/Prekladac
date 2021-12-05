@@ -221,6 +221,32 @@ TEST_F(SyntaxTests, 17_SimpleTest)
     fclose(input);
 }
 
+TEST_F(SyntaxTests, 18_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource18.txt", "r");
+    #ifdef DEBUG
+        EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    #else
+        FILE *output = fopen("../../../../../interpret/ic21int_linux64_2021-10-04/program18.code", "w");
+        if (output == NULL) return;
+        EXPECT_EQ(parseAndGenerate(input, output, stderr), 0);
+    #endif
+    fclose(input);
+}
+
+TEST_F(SyntaxTests, 19_SimpleTest)
+{
+    FILE* input = fopen("../../../../tests/files/testSource19.txt", "r");
+    #ifdef DEBUG
+        EXPECT_EQ(parseAndGenerate(input, stdout, stderr), 0);
+    #else
+        FILE *output = fopen("../../../../../interpret/ic21int_linux64_2021-10-04/program19.code", "w");
+        if (output == NULL) return;
+        EXPECT_EQ(parseAndGenerate(input, output, stderr), 0);
+    #endif
+    fclose(input);
+}
+
 TEST_F(SyntaxTests, 1_SimpleWrongTest)
 {
     FILE* input = fopen("../../../../tests/files/testSourceWrong1.txt", "r");
@@ -394,7 +420,7 @@ int main(int argc, char **argv) {
         tests += ":Test1.2*";
         ::testing::GTEST_FLAG(filter) = tests;
     }*/
-    // ::testing::GTEST_FLAG(filter) = "SyntaxTests.4_SimpleTest";
+    ::testing::GTEST_FLAG(filter) = "SyntaxTests.18_SimpleTest";
     return RUN_ALL_TESTS();
 }
 

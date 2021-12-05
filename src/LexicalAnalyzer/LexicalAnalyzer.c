@@ -13,7 +13,7 @@
 #include "LexicalFSM.h"
 #include "../Utils/stack.h"
 
-char *keywords[] = {"and", "boolean", "break", "do", "else", "elseif", "end", "false", "function", "for", "global", "if", "integer", "local", "nil", "not", "number", "or", "repeat", "require", "return", "string", "then", "true", "until", "while"};
+char *keywords[] = {"and", "boolean", "break", "do", "else", "elseif", "end", "false", "for", "function", "global", "if", "integer", "local", "nil", "not", "number", "or", "repeat", "require", "return", "string", "then", "true", "until", "while"};
 
 #define KEYWORDS_SUM 26
 
@@ -82,7 +82,7 @@ Token *getToken(FILE *input)
     }
 
     token->attribute = strdup(getString(lexeme));
-    // fprintf(stderr, "%s\n", Token_getData(token));
+    fprintf(stderr, "%s\n", Token_getData(token));
     freeLexeme(lexeme);
 
     return token;

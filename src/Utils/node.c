@@ -460,7 +460,7 @@ void Node_GenerateRepeat(Node *node, Buffers *buffer, bool destroy, RecursionTyp
 
     if (type != ONLY_DEF)
     {
-        fprintf(buffer->output, "JUMPIFEQ %s%d_%d %s%d bool@true\n", WHILE_LABEL, id, 0, TMP(*((int*)Vector_GetElement(condition, 0))));
+        fprintf(buffer->output, "JUMPIFNEQ %s%d_%d %s%d bool@true\n", WHILE_LABEL, id, 0, TMP(*((int*)Vector_GetElement(condition, 0))));
         fprintf(buffer->output, "LABEL %s%d_%d\n", END_LOOP, id, 0);
     }
 

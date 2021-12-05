@@ -70,9 +70,9 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
             *return_value = Syntax_Variable_SetSemantic(buffer, token);
         else if (Token_getType(token) != T_COMMA)
         {
-            *state = FSM_START;
             ASS_DeclareVariables(buffer);
-            // no need to clear vector, gets cleared when in state = FSM_START
+            *state = FSM_START;
+            Buffers_Clear(buffer);
         }
         break;
 
@@ -81,6 +81,7 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         {
             *return_value = Syntax_Variable_Assign(buffer);
             *state = FSM_START;
+            Buffers_Clear(buffer);
         }
         break;
 
@@ -127,6 +128,7 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         {
             *return_value = Syntax_FunctionCall(symtable, buffer);
             *state = FSM_START;
+            Buffers_Clear(buffer);
         }
         break;
 
@@ -162,7 +164,10 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         if (Token_getType(token) == T_DEF)
             *state = FSM_FUN_DEC_RETURNS;
         else
+        {
             *state = FSM_START;
+            Buffers_Clear(buffer);
+        }
         break;
 
     case FSM_FUN_DEC_RETURNS:
@@ -170,8 +175,9 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
             Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
         else if (Token_getType(token) != T_COMMA)
         {
-            *state = FSM_START;
             Syntax_Return_Assign(buffer);
+            *state = FSM_START;
+            Buffers_Clear(buffer);
         }
         break;
 
@@ -239,7 +245,10 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
                 Element_AddReturn((Element*)Vector_Back(buffer->variables), Syntax_GetSemantic(token));
         }
         else if (Token_getType(token) != T_COMMA)
+        {
             *state = FSM_START;
+            Buffers_Clear(buffer);
+        }
         break;
 
     case FSM_RETURNS:
@@ -251,6 +260,7 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         {
             *return_value = Syntax_Return_Assign(buffer);
             *state = FSM_START;
+            Buffers_Clear(buffer);
         }
         break;
 
@@ -259,6 +269,7 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         {
             ASS_AddCondition(buffer, Vector_Back(buffer->expressions), symtable);
             *state = FSM_START;
+            Buffers_Clear(buffer);
         }
         break;
     
@@ -267,12 +278,31 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         {
             ASS_AddElseif(buffer, Vector_Back(buffer->expressions), symtable);
             *state = FSM_START;
+            Buffers_Clear(buffer);
         }
         break;
 
     case FSM_WHILE:
+        if (Vector_IsEmpty(buffer->expressions))
+            break;
+
         *return_value = ASS_AddWhile(buffer, symtable);
         *state = FSM_START;
+        Buffers_Clear(buffer);
+        break;
+
+    case FSM_UNTIL:
+        // we have to do this upon changed statement
+        break;
+
+    case FSM_FOR:
+        if (Vector_Size(buffer->expressions) != 3)
+            break;
+
+        *return_value = ASS_AddFor(buffer, symtable);
+
+        *state = FSM_START;
+        Buffers_Clear(buffer);
         break;
 
     default:
@@ -288,13 +318,29 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         *state = FSM_ELSEIF;
         break;
     case K_ELSE:
-        ASS_AddElse(buffer, symtable);
+        if (*return_value == -1)
+            *return_value = ASS_AddElse(buffer, symtable);
         break;
     case K_WHILE:
         *state = FSM_WHILE;
         break;
     case K_END:
-        ASS_PopEnd(buffer, symtable);
+        if (*return_value == -1)
+            *return_value = ASS_PopEnd(buffer, symtable);
+        break;
+    case K_FOR:
+        *state = FSM_FOR;
+        break;
+    case K_REPEAT:
+        if (*return_value == -1)
+            *return_value = ASS_AddRepeat(buffer, symtable);
+        break;
+    case K_BREAK:
+        if (*return_value == -1)
+            *return_value = ASS_AddBreak(buffer);
+        break;
+    case K_UNTIL:
+        *state = FSM_UNTIL;
         break;
     
     default:
@@ -555,6 +601,13 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
                 ASS_DeclareVariables(buffer);
                 break;
 
+            case FSM_REPEAT:
+                if (Vector_IsEmpty(buffer->expressions))
+                    return_value = 2;
+                else
+                    return_value = ASS_PopEnd(buffer, symtable);
+                break;        
+
             // add scope for current function
             case FSM_FUN_DEF_WAIT:
             case FSM_FUN_DEF_RETURNS:
@@ -569,10 +622,7 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
             }
 
             // clear Vectors
-            Vector_Clear(buffer->variables);
-            Vector_Clear(buffer->expressions);
-            buffer->position = 0;
-            buffer->declared = false;
+            Buffers_Clear(buffer);
         }
 
         if (Symbol_GetValue(top) == NT_EXPRESSION)
