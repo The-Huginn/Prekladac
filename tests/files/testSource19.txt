@@ -2,12 +2,12 @@ require "ifj21"
 
 function main()
     local a : integer = readi()
-    local sum : integer = 0
+    local sum : integer = 1
     local current : integer = 1
     repeat
         sum = sum * current
         current = current + 1
-    until a 
+    until a == current
     write("Faktorial ",a," je: ",sum,"\n")
 end
 

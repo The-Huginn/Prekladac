@@ -226,6 +226,7 @@ int ASS_AddBreak(Buffers *buffer)
         return 7;
 
     Node *node = Node_Init(NODE_BREAK, NULL, SEMANTIC_VOID, (void (*)(void *))NULL, P_VOID);
+    Node_SetParamCount(node, top->id);
 
     if (node == NULL)
         return 99;

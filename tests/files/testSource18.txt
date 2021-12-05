@@ -2,7 +2,7 @@ require "ifj21"
 
 function main()
     local a : integer = readi()
-    local sum : integer = 0
+    local sum : integer = 1
     for i 1,10,1 do
         sum = sum * i
     end

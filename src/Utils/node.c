@@ -394,14 +394,14 @@ void Node_GenerateFor(Node *node, Buffers *buffer, bool destroy, RecursionType t
 
     // Initialize for loop variable
     if (type != EXCEPT_DEF)
-        fprintf(buffer->output, "DEFVAR %s%d\n", ELEMENT(node));
+        fprintf(buffer->output, "DEFVAR LF@%s%d\n", ELEMENT(node));
     
     Vector *initialize = Node_PostOrder(Vector_GetElement(sons, 0), destroy, buffer, 1, type);
 
     if (type != ONLY_DEF)
     {
         // Assign initial value for for loop variable
-        fprintf(buffer->output, "MOVE %s%d %s%d\n", ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
+        fprintf(buffer->output, "MOVE LF@%s%d LF@%s%d\n", ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
         fprintf(buffer->output, "LABEL %s%d_%d\n", FOR_LABEL, id, 0);
 
     }
@@ -417,7 +417,7 @@ void Node_GenerateFor(Node *node, Buffers *buffer, bool destroy, RecursionType t
     if (type != ONLY_DEF)
     {
         // compare for loop variable with statement
-        fprintf(buffer->output, "EQ %s%d %s%d %s%d\n", TMP(buffer->tmp_offset), ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
+        fprintf(buffer->output, "EQ LF@%s%d LF@%s%d LF@%s%d\n", TMP(buffer->tmp_offset), ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
         fprintf(buffer->output, "JUMPIFEQ %s%d_%d LF@%s%d bool@true\n", END_LOOP, id, 0, TMP(buffer->tmp_offset++));
     }
 
@@ -434,7 +434,7 @@ void Node_GenerateFor(Node *node, Buffers *buffer, bool destroy, RecursionType t
     // increment for loop variable
     if (type != ONLY_DEF)
     {
-        fprintf(buffer->output, "ADD %s%d %s%d %s%d\n", ELEMENT(node), ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
+        fprintf(buffer->output, "ADD LF@%s%d LF@%s%d LF@%s%d\n", ELEMENT(node), ELEMENT(node), TMP(*((int*)Vector_GetElement(initialize, 0))));
         fprintf(buffer->output, "JUMP %s%d_%d\n", FOR_LABEL, id, 0);
         fprintf(buffer->output, "LABEL %s%d_%d\n", END_LOOP, id, 0);
     }
@@ -460,7 +460,7 @@ void Node_GenerateRepeat(Node *node, Buffers *buffer, bool destroy, RecursionTyp
 
     if (type != ONLY_DEF)
     {
-        fprintf(buffer->output, "JUMPIFNEQ %s%d_%d %s%d bool@true\n", WHILE_LABEL, id, 0, TMP(*((int*)Vector_GetElement(condition, 0))));
+        fprintf(buffer->output, "JUMPIFNEQ %s%d_%d LF@%s%d bool@true\n", REPEAT_LABEL, id, 0, TMP(*((int*)Vector_GetElement(condition, 0))));
         fprintf(buffer->output, "LABEL %s%d_%d\n", END_LOOP, id, 0);
     }
 
