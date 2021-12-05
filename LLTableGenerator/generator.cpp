@@ -361,6 +361,8 @@ int main()
 		NonTerminal::Pair("nt_id"),
 		NonTerminal::Pair("nt_if"),
 		NonTerminal::Pair("nt_while"),
+		NonTerminal::Pair("nt_for"),
+		NonTerminal::Pair("nt_repeat"),
 		NonTerminal::Pair("nt_scope_return"),
 		NonTerminal::Pair("nt_return"),
 		NonTerminal::Pair("nt_declare_assign"),
@@ -421,6 +423,10 @@ int main()
 		Terminal::Pair("k_and"),
 		Terminal::Pair("k_or"),
 		Terminal::Pair("k_not"),
+		Terminal::Pair("k_break"),
+		Terminal::Pair("k_for"),
+		Terminal::Pair("k_repeat"),
+		Terminal::Pair("k_until"),
 
 		Terminal::Pair("k_if"),
 		Terminal::Pair("k_then"),
@@ -504,6 +510,7 @@ int main()
 		Rule::SharedPtr("nt_statement", {"nt_declare"}),  
 		Rule::SharedPtr("nt_statement", {"nt_id"}),  
 		Rule::SharedPtr("nt_statement", {"nt_while"}),  
+		Rule::SharedPtr("nt_statement", {"k_break"}),
 		//Rule::SharedPtr("nt_statement", {"epsilon"}),
 		Rule::SharedPtr("nt_global_scope", {"nt_global_statements"}),
 		Rule::SharedPtr("nt_global_scope", {"epsilon"}),
@@ -541,8 +548,9 @@ int main()
 		Rule::SharedPtr("nt_datatypes", {"nt_datatypes", "t_comma", "nt_datatype"}),
 		Rule::SharedPtr("nt_datatypes", {"nt_datatype"}),
 
-		Rule::SharedPtr("nt_while", {"k_while", "nt_expression", "k_do", "nt_scope", "k_end"})
-
+		Rule::SharedPtr("nt_while", {"k_while", "nt_expression", "k_do", "nt_scope", "k_end"}),
+		Rule::SharedPtr("nt_for", { "k_for", "t_id", "nt_expression", "t_comma", "nt_expression", "t_comma", "nt_expression", "k_do", "nt_scope", "k_end" }),
+		Rule::SharedPtr("nt_repeat", { "k_repeat", "nt_scope", "k_until", "nt_expression"})
 		});
 
 
