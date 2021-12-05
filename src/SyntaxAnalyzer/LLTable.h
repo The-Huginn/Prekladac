@@ -12,7 +12,7 @@
 
 #define LLTABLE_WIDTH 50
 #define LLTABLE_HEIGHT 52
-#define RULE_ARRAY_SIZE 106
+#define RULE_ARRAY_SIZE 108
 
 typedef struct
 {
