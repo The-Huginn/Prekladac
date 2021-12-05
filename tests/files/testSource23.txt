@@ -1,0 +1,20 @@
+require "ifj21"
+
+function main()
+    local a : integer = readi()
+    local sum : integer = 0
+    for i 1,10,1 do
+        for j 10,1,0-1 do
+            if j > i then
+                break
+            end
+            write (i, " ", j, " ")
+        end
+        write ("\n")
+        if i == 8 then
+            break
+        end
+    end
+end
+
+main()

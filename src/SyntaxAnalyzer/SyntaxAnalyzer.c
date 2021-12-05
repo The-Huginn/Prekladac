@@ -296,10 +296,18 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         break;
 
     case FSM_FOR:
+        if (Token_getType(token) == T_ID)
+        {
+            Element *element = Symtable_CreateElement(symtable, Token_getData(token), VARIABLE);
+            Element_SetSemantic(element, SEMANTIC_INTEGER);
+            Element_Define(element);
+            Vector_PushBack(buffer->variables, element);
+        }
+
         if (Vector_Size(buffer->expressions) != 3)
             break;
 
-        *return_value = ASS_AddFor(buffer, symtable);
+        *return_value = ASS_AddFor(buffer);
 
         *state = FSM_START;
         Buffers_Clear(buffer);
@@ -330,6 +338,7 @@ void Syntax_FSM_Action(FSM_STATE *state, Token *token, int *return_value, Symtab
         break;
     case K_FOR:
         *state = FSM_FOR;
+        Symtable_AddScope(symtable);
         break;
     case K_REPEAT:
         if (*return_value == -1)
@@ -601,11 +610,17 @@ int TopToBottom(FILE *input, FILE *output, FILE *error_output, bool clear)
                 ASS_DeclareVariables(buffer);
                 break;
 
-            case FSM_REPEAT:
+            case FSM_UNTIL:
                 if (Vector_IsEmpty(buffer->expressions))
                     return_value = 2;
                 else
-                    return_value = ASS_PopEnd(buffer, symtable);
+                {
+                    if (Node_GetSemantic(Vector_Back(buffer->expressions)) != SEMANTIC_BOOLEAN)
+                        return_value = AbstractSemanticTree_CompareWithNil(Vector_Back(buffer->expressions));
+
+                    if (return_value == -1)
+                        return_value = ASS_PopEnd(buffer, symtable);
+                }
                 break;        
 
             // add scope for current function

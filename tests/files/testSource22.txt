@@ -1,0 +1,17 @@
+require "ifj21"
+
+function main()
+    local a : integer = readi()
+    local sum : integer = 0
+    local current : integer = 1
+    while current <= a do
+        sum = sum * current
+        current = current + 1
+        if (sum >= 100) then
+            break
+        end
+    end
+    write("Faktorial ",a," je: ",sum,"\n")
+end
+
+main()

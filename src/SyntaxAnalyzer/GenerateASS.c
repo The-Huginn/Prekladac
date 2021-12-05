@@ -168,7 +168,7 @@ int ASS_AddWhile(Buffers *buffer, Symtable *symtable)
     return -1;
 }
 
-int ASS_AddFor(Buffers *buffer, Symtable *symtable)
+int ASS_AddFor(Buffers *buffer)
 {
     Scope *top = Scope_Init(FOR, buffer->top_id);
     if (top == NULL)
@@ -191,9 +191,6 @@ int ASS_AddFor(Buffers *buffer, Symtable *symtable)
     // expressions of for loop
     for (int i = 0; i < Vector_Size(buffer->expressions); i++)
         Node_AppendSon(node, Vector_GetElement(buffer->expressions, i));
-
-
-    Symtable_AddScope(symtable);
 
     return -1;
 }

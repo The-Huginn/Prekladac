@@ -61,10 +61,9 @@ int ASS_AddWhile(Buffers *buffer, Symtable *symtable);
 /**
  * @brief Adds for code-branch for for loop and creates new scope in symtable
  * @param buffer Buffers
- * @param symtable Symtable
  * @return -1 upon success otherwise error code
  */
-int ASS_AddFor(Buffers *buffer, Symtable *symtable);
+int ASS_AddFor(Buffers *buffer);
 
 /**
  * @brief Adds repeat code-branch for repeat-until loop and creates new scope in symtable
